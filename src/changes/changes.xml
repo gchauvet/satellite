@@ -39,28 +39,7 @@
   </properties>
   <body>
     <release version="1.1.0" date="2016-MM-DD" description="Feature and bug fix release">
-      <action type="update" dev="markt">
-        Increase minimum Java version to Java 5.
-      </action>
-      <action issue="DAEMON-347" type="update" dev="ggregory" due-to="Ganesh Raju">
-        Add AArch64 support to src/native/unix/support/apsupport.m4
-      </action>
-      <action issue="DAEMON-346" type="fix" dev="markt">
-        Compile the Windows binaries with the /DYNAMICBASE and /NXCOMPAT
-        switches.
-      </action>
-      <action issue="DAEMON-333" type="fix" dev="markt">
-        Remove calls to explicit garbage collection during daemon start and
-        stop.
-      </action>
-      <action issue="DAEMON-343" type="fix" dev="markt">
-        Update config.guess and config.sub to add support, amongst others, for
-        64-bit PowerPC Little-Endian architecture. 
-      </action>
-      <action issue="DAEMON-332" type="fix" dev="markt">
-        Ensure that the PID file on Windows, if used, is readable by other
-        processes.
-      </action>
+      <action issue="DAEMON-347" type="update" dev="ggregory" due-to="Ganesh Raju">Add AArch64 support to src/native/unix/support/apsupport.m4</action>
     </release>
   </body>
 </document>
