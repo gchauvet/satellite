@@ -46,6 +46,7 @@
  * SUCH DAMAGE.
  */
 
+#include <wctype.h>
 #include "apxwin.h"
 #include "private.h"
 

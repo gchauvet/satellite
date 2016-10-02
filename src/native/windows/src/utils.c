@@ -173,7 +173,7 @@ LPWSTR ANSIToWide(LPCSTR cs)
     return s;
 }
 
-LPSTR MzWideToAscii(LPCWSTR ws, LPSTR s)
+LPSTR WideToAscii(LPCWSTR ws, LPSTR s)
 {
     LPSTR pszSave = s;
 

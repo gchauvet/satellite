@@ -1438,17 +1438,17 @@ void ShowServiceProperties(HWND hWnd)
         return;
     }
     __initPpage(&psP[0], IDD_PROPPAGE_SGENERAL, IDS_PPGENERAL,
-                __generalProperty);
+                (DLGPROC) __generalProperty);
     __initPpage(&psP[1], IDD_PROPPAGE_LOGON, IDS_PPLOGON,
-                __logonProperty);
+                (DLGPROC) __logonProperty);
     __initPpage(&psP[2], IDD_PROPPAGE_LOGGING, IDS_PPLOGGING,
-                __loggingProperty);
+                (DLGPROC) __loggingProperty);
     __initPpage(&psP[3], IDD_PROPPAGE_JVM, IDS_PPJAVAVM,
-                __jvmProperty);
+                (DLGPROC) __jvmProperty);
     __initPpage(&psP[4], IDD_PROPPAGE_START, IDS_PPSTART,
-                __startProperty);
+                (DLGPROC) __startProperty);
     __initPpage(&psP[5], IDD_PROPPAGE_STOP, IDS_PPSTOP,
-                __stopProperty);
+                (DLGPROC) __stopProperty);
 
     if (_currentEntry && _currentEntry->lpConfig)
         lstrlcpyW(szT, SIZ_DESMAX, _currentEntry->lpConfig->lpDisplayName);
@@ -1685,7 +1685,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     {
         CHAR szApp[MAX_PATH];
         _gui_store = apxGuiInitialize(MainWndProc,
-                                  WideToAscii(lpCmdline->szApplication, szApp));
+                            (LPCTSTR) WideToAscii(lpCmdline->szApplication, szApp));
     }
 #endif
     if (!_gui_store) {

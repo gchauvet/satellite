@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <setjmp.h>
 #include "apxwin.h"
 #include "private.h"
 
@@ -269,6 +270,7 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
     DWORD dwStartTime = GetTickCount();
     /* Use the 30-second time-out */
     DWORD dwTimeout   = 30000;
+    BOOL result = TRUE;
 
     /* Pass a zero-length buffer to get the required buffer size.
      */
@@ -288,70 +290,75 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
 
         /* Allocate a buffer for the dependencies.
          */
-        lpDependencies = (LPENUM_SERVICE_STATUS) HeapAlloc(GetProcessHeap(),
+        lpDependencies = (LPENUM_SERVICE_STATUSW) HeapAlloc(GetProcessHeap(),
                                                            HEAP_ZERO_MEMORY,
                                                            dwBytesNeeded);
         if (!lpDependencies)
             return FALSE;
 
-        __try {
-            /* Enumerate the dependencies. */
-            if (!EnumDependentServicesW(lpService->hService,
-                                        SERVICE_ACTIVE,
-                                        lpDependencies,
-                                        dwBytesNeeded,
-                                        &dwBytesNeeded,
-                                        &dwCount))
-            return FALSE;
+        /* Enumerate the dependencies. */
+        if (!EnumDependentServicesW(lpService->hService,
+                                    SERVICE_ACTIVE,
+                                    lpDependencies,
+                                    dwBytesNeeded,
+                                    &dwBytesNeeded,
+                                    &dwCount)) {
+            result = FALSE;
+            goto free_enum_buffer;
+        }
 
-            for (i = 0; i < dwCount; i++)  {
-                ess = *(lpDependencies + i);
-                /* Open the service. */
-                hDepService = OpenServiceW(lpService->hManager,
-                                           ess.lpServiceName,
-                                           SERVICE_STOP | SERVICE_QUERY_STATUS);
+        for (i = 0; i < dwCount; i++)  {
+            ess = *(((ENUM_SERVICE_STATUS *) lpDependencies) + i);
+            /* Open the service. */
+            hDepService = OpenServiceW(lpService->hManager,
+                                       (LPCWSTR) ess.lpServiceName,
+                                       SERVICE_STOP | SERVICE_QUERY_STATUS);
 
-                if (!hDepService)
-                   continue;
-                if (lstrcmpiW(ess.lpServiceName, L"Tcpip") == 0 ||
-                    lstrcmpiW(ess.lpServiceName, L"Afd") == 0)
-                    continue;
-                __try {
-                    /* Send a stop code. */
-                    if (!ControlService(hDepService,
-                                        SERVICE_CONTROL_STOP,
-                                        (LPSERVICE_STATUS) &ssp))
-                    return FALSE;
+            if (!hDepService)
+               continue;
+            if (lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Tcpip") == 0 ||
+                lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Afd") == 0)
+                continue;
 
-                    /* Wait for the service to stop. */
-                    while (ssp.dwCurrentState != SERVICE_STOPPED) {
-                        Sleep(ssp.dwWaitHint);
-                        if (!QueryServiceStatusEx(hDepService,
-                                                  SC_STATUS_PROCESS_INFO,
-                                                 (LPBYTE)&ssp,
-                                                  sizeof(SERVICE_STATUS_PROCESS),
-                                                 &dwBytesNeeded))
-                        return FALSE;
-
-                        if (ssp.dwCurrentState == SERVICE_STOPPED)
-                            break;
-
-                        if (GetTickCount() - dwStartTime > dwTimeout)
-                            return FALSE;
-                    }
+                /* Send a stop code. */
+                if (!ControlService(hDepService,
+                                    SERVICE_CONTROL_STOP,
+                                    (LPSERVICE_STATUS) &ssp)) {
+                    result = FALSE;
+                    goto free_service_handler;
                 }
-                __finally {
-                    /* Always release the service handle. */
-                    CloseServiceHandle(hDepService);
+
+                /* Wait for the service to stop. */
+                while (ssp.dwCurrentState != SERVICE_STOPPED) {
+                    Sleep(ssp.dwWaitHint);
+                    if (!QueryServiceStatusEx(hDepService,
+                                              SC_STATUS_PROCESS_INFO,
+                                             (LPBYTE)&ssp,
+                                              sizeof(SERVICE_STATUS_PROCESS),
+                                             &dwBytesNeeded)) {
+                        result = FALSE;
+                        goto free_service_handler;
+                    }
+
+                    if (ssp.dwCurrentState == SERVICE_STOPPED) {
+                        CloseServiceHandle(hDepService);
+                        break;
+                    }
+
+                    if (GetTickCount() - dwStartTime > dwTimeout) {
+                        result = FALSE;
+                        goto free_service_handler;
+                    }
                 }
             }
         }
-        __finally {
-            /* Always free the enumeration buffer. */
-            HeapFree(GetProcessHeap(), 0, lpDependencies);
-        }
-    }
-    return TRUE;
+    goto free_enum_buffer;
+free_service_handler:
+    /* Always release the service handle. */
+    CloseServiceHandle(hDepService);  
+free_enum_buffer:
+    HeapFree(GetProcessHeap(), 0, lpDependencies);
+    return result;
 }
 
 BOOL

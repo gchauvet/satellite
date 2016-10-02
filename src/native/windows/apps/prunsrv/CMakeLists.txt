@@ -1,2 +1,3 @@
-ADD_EXECUTABLE (prunsrv prunsrv.c)
+SET_SOURCE_FILES_PROPERTIES(prunsrv.rc PROPERTIES LANGUAGE RC)
+ADD_EXECUTABLE (prunsrv prunsrv.c prunsrv.rc)
 TARGET_LINK_LIBRARIES (prunsrv daemon)
