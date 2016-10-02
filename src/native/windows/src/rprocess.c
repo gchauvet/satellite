@@ -481,9 +481,9 @@ apxCreateProcessW(APXHANDLE hPool, DWORD dwOptions,
     /* CreateProcessAsUser is supported only on NT */
     if (szUsername && (APX_GET_OSLEVEL() >= APX_WINVER_NT_4)) {
         HANDLE hUser;
-        if (!LogonUserW(szUsername,
+        if (!LogonUserW((LPWSTR) szUsername,
                         NULL,
-                        szPassword,
+                        (LPWSTR) szPassword,
                         bLogonAsService ? LOGON32_LOGON_SERVICE : LOGON32_LOGON_NETWORK,
                         LOGON32_PROVIDER_DEFAULT,
                         &hUser)) {

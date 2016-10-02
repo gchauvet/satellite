@@ -25,6 +25,8 @@
 #define _WIN32_WINNT 0x0501
 #endif
 
+#define _WIN32_IE 0x0900
+
 #include <windows.h>
 #include <windowsx.h>
 #include <commdlg.h>
@@ -36,15 +38,8 @@
 #include <zmouse.h>
 #include <richedit.h>
 #include <lm.h>
-
-#ifndef _INTPTR_T_DEFINED
-#ifdef  _WIN64
-typedef __int64             intptr_t;
-#else
-typedef _W64 int            intptr_t;
-#endif
-#define _INTPTR_T_DEFINED
-#endif
+#include <stdint.h>
+#include <zmouse.h>
 
 #define APXMACRO_BEGIN                  do {
 #define APXMACRO_END                    } while(0)
@@ -57,11 +52,31 @@ typedef _W64 int            intptr_t;
 #define __APXEND_DECLS
 #endif
 
+#ifndef MOUSEZ_CLASSNAME
+#define MOUSEZ_CLASSNAME "MouseZ"
+#endif
+
+#ifndef MSH_WHEELMODULE_CLASS
+#define MSH_WHEELMODULE_CLASS (MOUSEZ_CLASSNAME)
+#endif
+
+#ifndef MOUSEZ_TITLE
+#define MOUSEZ_TITLE ("A MSWHEEL")
+#endif
+
+#ifndef MSH_WHEELMODULE_TITLE
+#define MSH_WHEELMODULE_TITLE (MOUSEZ_TITLE)
+#endif
+
+#ifndef MSH_SCROLL_LINES
+#define MSH_SCROLL_LINES    ("MSH_SCROLL_LINES_MSG")
+#endif
+
 #define SET_BIT_FLAG(x, b) ((x) |= (1 << b))
 #define CLR_BIT_FLAG(x, b) ((x) &= ~(1 << b))
 #define TST_BIT_FLAG(x, b) ((x) & (1 << b))
 
-#define IS_INVALID_HANDLE(h) (((h) == NULL || (h) == INVALID_HANDLE_VALUE))
+#define IS_INVALID_HANDLE(h) ((((void *)h) == (void *)NULL || ((void *)h) == INVALID_HANDLE_VALUE))
 #define IS_VALID_STRING(s)   ((s) != NULL && *(s) != 0)
 #define IS_EMPTY_STRING(s)   ((s) == NULL || *(s) == 0)
 
@@ -145,7 +160,7 @@ typedef enum {
 
 APX_OSLEVEL apxGetOsLevel();
 LPWSTR      AsciiToWide(LPCSTR s, LPWSTR ws);
-LPSTR       MzWideToAscii(LPCWSTR ws, LPSTR s);
+LPSTR       WideToAscii(LPCWSTR ws, LPSTR s);
 LPSTR       WideToANSI(LPCWSTR ws);
 LPSTR       MzWideToANSI(LPCWSTR ws);
 
@@ -213,7 +228,7 @@ LPWSTR  lstrlocaseW(LPWSTR str);
 PSECURITY_ATTRIBUTES GetNullACL();
 void CleanNullACL(void *sa);
 
-__APXEND_DECLS
+__APXEND_DECLS  
 
 #endif /* _APXWIN_H_INCLUDED_ */
 
