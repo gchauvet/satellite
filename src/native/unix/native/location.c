@@ -63,8 +63,6 @@ char *location_home[] = {
 char *location_jvm_cfg[] = {
     "$JAVA_HOME/jre/lib/jvm.cfg",           /* JDK */
     "$JAVA_HOME/lib/jvm.cfg",               /* JRE */
-    "$JAVA_HOME/jre/lib/" CPU "/jvm.cfg",   /* JDK */
-    "$JAVA_HOME/lib/" CPU "/jvm.cfg",       /* JRE */
     NULL,
 };
 
