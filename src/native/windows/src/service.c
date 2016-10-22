@@ -274,17 +274,11 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
 
     /* Pass a zero-length buffer to get the required buffer size.
      */
-    if (EnumDependentServicesW(lpService->hService,
+    if (!EnumDependentServicesW(lpService->hService,
                                SERVICE_ACTIVE,
                                lpDependencies, 0,
                                &dwBytesNeeded,
                                &dwCount)) {
-         /* If the Enum call succeeds, then there are no dependent
-          * services, so do nothing.
-          */
-         return TRUE;
-    }
-    else  {
         if (GetLastError() != ERROR_MORE_DATA)
             return FALSE; // Unexpected error
 
@@ -304,60 +298,55 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
                                     &dwBytesNeeded,
                                     &dwCount)) {
             result = FALSE;
-            goto free_enum_buffer;
-        }
+        } else {
+            BOOL exit = FALSE;
+            for (i = 0; i < dwCount && exit == FALSE; i++) {
+                ess = *(((ENUM_SERVICE_STATUS *) lpDependencies) + i);
+                /* Open the service. */
+                hDepService = OpenServiceW(lpService->hManager,
+                                           (LPCWSTR) ess.lpServiceName,
+                                           SERVICE_STOP | SERVICE_QUERY_STATUS);
 
-        for (i = 0; i < dwCount; i++)  {
-            ess = *(((ENUM_SERVICE_STATUS *) lpDependencies) + i);
-            /* Open the service. */
-            hDepService = OpenServiceW(lpService->hManager,
-                                       (LPCWSTR) ess.lpServiceName,
-                                       SERVICE_STOP | SERVICE_QUERY_STATUS);
-
-            if (!hDepService)
-               continue;
-            if (lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Tcpip") == 0 ||
-                lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Afd") == 0)
-                continue;
+                if (!hDepService)
+                   continue;
+                if (lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Tcpip") == 0 ||
+                    lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Afd") == 0)
+                    continue;
 
                 /* Send a stop code. */
                 if (!ControlService(hDepService,
                                     SERVICE_CONTROL_STOP,
                                     (LPSERVICE_STATUS) &ssp)) {
                     result = FALSE;
-                    goto free_service_handler;
-                }
-
-                /* Wait for the service to stop. */
-                while (ssp.dwCurrentState != SERVICE_STOPPED) {
-                    Sleep(ssp.dwWaitHint);
-                    if (!QueryServiceStatusEx(hDepService,
-                                              SC_STATUS_PROCESS_INFO,
-                                             (LPBYTE)&ssp,
-                                              sizeof(SERVICE_STATUS_PROCESS),
-                                             &dwBytesNeeded)) {
-                        result = FALSE;
-                        goto free_service_handler;
-                    }
-
-                    if (ssp.dwCurrentState == SERVICE_STOPPED) {
-                        CloseServiceHandle(hDepService);
-                        break;
-                    }
-
-                    if (GetTickCount() - dwStartTime > dwTimeout) {
-                        result = FALSE;
-                        goto free_service_handler;
+                    exit = TRUE;
+                } else {
+                    /* Wait for the service to stop. */
+                    while (ssp.dwCurrentState != SERVICE_STOPPED) {
+                        Sleep(ssp.dwWaitHint);
+                        if (!QueryServiceStatusEx(hDepService,
+                                                  SC_STATUS_PROCESS_INFO,
+                                                 (LPBYTE)&ssp,
+                                                  sizeof(SERVICE_STATUS_PROCESS),
+                                                 &dwBytesNeeded)) {
+                            result = FALSE;
+                            exit = TRUE;
+                            break;
+                        } else if (ssp.dwCurrentState == SERVICE_STOPPED) {
+                             break;
+                        }  else if (GetTickCount() - dwStartTime > dwTimeout) {
+                            result = FALSE;
+                            exit = TRUE;
+                            break;
+                        }
                     }
                 }
+                /* Always release the service handle. */
+                CloseServiceHandle(hDepService);
             }
         }
-    goto free_enum_buffer;
-free_service_handler:
-    /* Always release the service handle. */
-    CloseServiceHandle(hDepService);  
-free_enum_buffer:
-    HeapFree(GetProcessHeap(), 0, lpDependencies);
+        /* Always free the enumeration buffer. */
+        HeapFree(GetProcessHeap(), 0, lpDependencies);
+    }
     return result;
 }
 
