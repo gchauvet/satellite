@@ -25,8 +25,6 @@
 #define _WIN32_WINNT 0x0501
 #endif
 
-#define _WIN32_IE 0x0900
-
 #include <windows.h>
 #include <windowsx.h>
 #include <commdlg.h>
@@ -39,7 +37,6 @@
 #include <richedit.h>
 #include <lm.h>
 #include <stdint.h>
-#include <zmouse.h>
 
 #define APXMACRO_BEGIN                  do {
 #define APXMACRO_END                    } while(0)
@@ -50,26 +47,6 @@
 #else
 #define __APXBEGIN_DECLS
 #define __APXEND_DECLS
-#endif
-
-#ifndef MOUSEZ_CLASSNAME
-#define MOUSEZ_CLASSNAME "MouseZ"
-#endif
-
-#ifndef MSH_WHEELMODULE_CLASS
-#define MSH_WHEELMODULE_CLASS (MOUSEZ_CLASSNAME)
-#endif
-
-#ifndef MOUSEZ_TITLE
-#define MOUSEZ_TITLE ("A MSWHEEL")
-#endif
-
-#ifndef MSH_WHEELMODULE_TITLE
-#define MSH_WHEELMODULE_TITLE (MOUSEZ_TITLE)
-#endif
-
-#ifndef MSH_SCROLL_LINES
-#define MSH_SCROLL_LINES    ("MSH_SCROLL_LINES_MSG")
 #endif
 
 #define SET_BIT_FLAG(x, b) ((x) |= (1 << b))
