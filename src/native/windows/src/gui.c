@@ -213,6 +213,7 @@ LPSTR apxLoadResourceA(UINT wID, UINT nBuf)
 }
 
 LPWSTR apxLoadResourceW(UINT wID, UINT nBuf)
+
 {
     static WCHAR szBuf[4][SIZ_BUFLEN];
     if (nBuf > 4)
@@ -660,7 +661,7 @@ LPWSTR apxGetFileNameW(HWND hWnd, LPCWSTR szTitle, LPCWSTR szFilter,
         return NULL;
 }
 
-static void __apxSelectUserDlgResize(HWND hDlg, INT nWidth, INT nHeight)
+static __apxSelectUserDlgResize(HWND hDlg, INT nWidth, INT nHeight)
 {
     /* Combo box */
     MoveWindow(GetDlgItem(hDlg, IDSU_COMBO),
@@ -804,7 +805,7 @@ static void __apxSelectUserPopulate(HWND hDlg, LPCWSTR szComputer)
 
     do { 
         res = NetQueryDisplayInformation(szComputer, 1, i, 1000, MAX_PREFERRED_LENGTH,
-                                         &dwRec, (void *)&pBuff);
+                                         &dwRec, &pBuff);
         if ((res == ERROR_SUCCESS) || (res == ERROR_MORE_DATA)) {
             p = pBuff;
             for (;dwRec > 0; dwRec--) {

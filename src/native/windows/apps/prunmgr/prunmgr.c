@@ -1685,7 +1685,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     {
         CHAR szApp[MAX_PATH];
         _gui_store = apxGuiInitialize(MainWndProc,
-                            WideToAscii(lpCmdline->szApplication, szApp));
+                                  WideToAscii(lpCmdline->szApplication, szApp));
     }
 #endif
     if (!_gui_store) {
