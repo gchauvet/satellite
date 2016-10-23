@@ -21,11 +21,14 @@ import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Enumeration;
+import java.util.Vector;
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonController;
+import org.apache.commons.daemon.DaemonContext;
 
 /**
- *  @version $Id$
+ *  @version $Id$ 
  */
 public class SimpleDaemon implements Daemon, Runnable, DaemonUserSignal {
 
@@ -34,17 +37,16 @@ public class SimpleDaemon implements Daemon, Runnable, DaemonUserSignal {
     private DaemonController controller=null;
     private volatile boolean stopping=false;
     private String directory=null;
-    private List<Handler> handlers=null;
+    private Vector handlers=null;
     private boolean softReloadSignalled;
 
     public SimpleDaemon() {
         super();
         System.err.println("SimpleDaemon: instance "+this.hashCode()+
                            " created");
-        this.handlers = new LinkedList<Handler>();
+        this.handlers=new Vector();
     }
 
-    @Override
     protected void finalize() {
         System.err.println("SimpleDaemon: instance "+this.hashCode()+
                            " garbage collected");
@@ -124,7 +126,9 @@ public class SimpleDaemon implements Daemon, Runnable, DaemonUserSignal {
         }
 
         /* Terminate all handlers that at this point are still open */
-        for (Handler handler : this.handlers) {
+        Enumeration openhandlers=this.handlers.elements();
+        while (openhandlers.hasMoreElements()) {
+            Handler handler=(Handler)openhandlers.nextElement();
             System.err.println("SimpleDaemon: dropping connection "+
                                handler.getConnectionNumber());
             handler.close();

@@ -283,7 +283,7 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
 
         /* Allocate a buffer for the dependencies.
          */
-        lpDependencies = (LPENUM_SERVICE_STATUS) HeapAlloc(GetProcessHeap(),
+        lpDependencies = (LPENUM_SERVICE_STATUSW) HeapAlloc(GetProcessHeap(),
                                                            HEAP_ZERO_MEMORY,
                                                            dwBytesNeeded);
         if (!lpDependencies)
@@ -300,16 +300,16 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
         } else {
             BOOL exit = FALSE;
             for (i = 0; i < dwCount && exit == FALSE; i++) {
-                ess = *(lpDependencies + i);
+                ess = *(((ENUM_SERVICE_STATUS *) lpDependencies) + i);
                 /* Open the service. */
                 hDepService = OpenServiceW(lpService->hManager,
-                                           ess.lpServiceName,
+                                           (LPCWSTR) ess.lpServiceName,
                                            SERVICE_STOP | SERVICE_QUERY_STATUS);
 
                 if (!hDepService)
                    continue;
-                if (lstrcmpiW(ess.lpServiceName, L"Tcpip") == 0 ||
-                    lstrcmpiW(ess.lpServiceName, L"Afd") == 0)
+                if (lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Tcpip") == 0 ||
+                    lstrcmpiW((LPCWSTR) ess.lpServiceName, L"Afd") == 0)
                     continue;
 
                 /* Send a stop code. */

@@ -419,9 +419,9 @@ apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource)
         return NULL;
 }
 
-LPWSTR apxWStrdupA(LPCSTR szSource)
+LPWSTR apxWStrdupA(LPCTSTR szSource)
 {
-    return apxPoolWStrdupA(_st_sys_pool, szSource);
+    return apxPoolWStrdup(_st_sys_pool, szSource);
 }
 
 LPSTR
