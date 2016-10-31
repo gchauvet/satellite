@@ -213,7 +213,6 @@ LPSTR apxLoadResourceA(UINT wID, UINT nBuf)
 }
 
 LPWSTR apxLoadResourceW(UINT wID, UINT nBuf)
-
 {
     static WCHAR szBuf[4][SIZ_BUFLEN];
     if (nBuf > 4)

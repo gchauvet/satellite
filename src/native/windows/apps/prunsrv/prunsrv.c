@@ -27,7 +27,6 @@
 #include "prunsrv.h"
 
 #include <stdio.h>
-#include <wctype.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <fcntl.h>
@@ -211,7 +210,7 @@ static APXCMDLINEOPT _options[] = {
 #define SO_LOGROTATE        GET_OPT_I(39)
 
 static SERVICE_STATUS        _service_status;
-static SERVICE_STATUS_HANDLE _service_status_handle = (SERVICE_STATUS_HANDLE) NULL;
+static SERVICE_STATUS_HANDLE _service_status_handle = NULL;
 /* Set if launched by SCM   */
 static BOOL                  _service_mode = FALSE;
 /* JVM used as worker       */
@@ -996,7 +995,7 @@ static DWORD WINAPI serviceStop(LPVOID lpParameter)
 
         /* Pass the argv to child process */
         if (!apxProcessSetCommandArgsW(hWorker, SO_STOPIMAGE,
-                                       nArgs, (const WCHAR **) pArgs)) {
+                                       nArgs, (const WCHAR **) &pArgs)) {
             rv = 3;
             apxLogWrite(APXLOG_MARK_ERROR "Failed setting process arguments (argc=%d)",
                         nArgs);
@@ -1731,8 +1730,8 @@ cleanup:
     if (lpCmdline)
         apxCmdlineFree(lpCmdline);
     if (_service_status_handle)
-        CloseHandle((HANDLE) _service_status_handle);
-    _service_status_handle = (SERVICE_STATUS_HANDLE) NULL;
+        CloseHandle(_service_status_handle);
+    _service_status_handle = NULL;
     _service_mode = FALSE;
     _flushall();
     apxLogClose(NULL);
