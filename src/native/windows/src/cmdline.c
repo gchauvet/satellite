@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <wctype.h>
 #include "apxwin.h"
 #include "private.h"
 

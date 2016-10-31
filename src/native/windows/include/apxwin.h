@@ -17,7 +17,6 @@
 #ifndef _APXWIN_H_INCLUDED_
 #define _APXWIN_H_INCLUDED_
 
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 
 #endif
