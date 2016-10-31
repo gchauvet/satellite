@@ -23,8 +23,6 @@
 #ifndef _PRUNMGR_H
 #define _PRUNMGR_H
 
-#undef  PRG_VERSION
-#define PRG_VERSION    "1.0.16.0"
 #define PRG_REGROOT   L"Apache Software Foundation\\Procrun 2.0"
 
 #define IDM_TM_EXIT                     2000

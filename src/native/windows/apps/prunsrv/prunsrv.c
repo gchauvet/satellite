@@ -380,8 +380,8 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
 
 static void printVersion(void)
 {
-    fwprintf(stderr, L"Commons Daemon Service Runner version %S/Win%d (%S)\n",
-            PRG_VERSION, PRG_BITS, __DATE__);
+    fwprintf(stderr, L"Commons Daemon Service Runner version %u.%u.%u/Win%d (%S)\n",
+            PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
     fwprintf(stderr, L"Copyright (c) 2000-2012 The Apache Software Foundation.\n\n"
                      L"For bug reporting instructions, please see:\n"
                      L"<URL:https://issues.apache.org/jira/browse/DAEMON>.");
@@ -1645,8 +1645,8 @@ void __cdecl main(int argc, char **argv)
     if (SO_LOGROTATE)
         apxLogWrite(APXLOG_MARK_DEBUG "Log will rotate each %d seconds.", SO_LOGROTATE);
 
-    apxLogWrite(APXLOG_MARK_INFO "Commons Daemon procrun (%s %d-bit) started",
-                PRG_VERSION, PRG_BITS);
+    apxLogWrite(APXLOG_MARK_INFO "Commons Daemon procrun (%u.%u.%u %d-bit) started",
+                PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
 
     AplZeroMemory(&gStdwrap, sizeof(APX_STDWRAP));
     gStartPath = lpCmdline->szExePath;
