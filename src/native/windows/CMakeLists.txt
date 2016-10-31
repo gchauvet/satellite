@@ -1,3 +1,6 @@
+# cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_INSTALL_PREFIX=.. .
+# mingw32-make install/strip
+
 CMAKE_MINIMUM_REQUIRED(VERSION 3.4)
 PROJECT(procrun C)
 
