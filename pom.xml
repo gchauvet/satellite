@@ -119,6 +119,23 @@
                     <timestampFormat>EpochMillis</timestampFormat>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/DaemonClassLoader.*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -137,18 +154,34 @@
                         <version>1.5.0</version>
                         <executions>
                             <execution>
-                                <id>cmake-compile</id>
+                                <id>embedding-kernel</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
                                     <executable>xxd</executable>
-                                    <workingDirectory>${project.basedir}/src/native/unix/native</workingDirectory>
+                                    <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
                                         <argument>-i</argument>
-                                        <argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
-                                        <argument>commons-daemon.h</argument>
+                                        <argument>${project.artifactId}-${project.version}.jar</argument>
+                                        <argument>${project.basedir}/src/native/unix/native/kernel.h</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>embedding-loader</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>xxd</executable>
+                                    <workingDirectory>${project.build.directory}</workingDirectory>
+                                    <arguments>
+                                        <argument>-i</argument>
+                                        <argument>target/classes/org/apache/commons/daemon/support</argument>
+                                        <argument>${project.basedir}/src/native/unix/native/classloader.h</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

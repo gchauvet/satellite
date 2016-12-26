@@ -23,7 +23,8 @@
 #define RSTR_PRUNSRV "Commons Daemon Service Runner"
 
 IDI_MAINICON         ICON                   "../../resources/procrunw.ico"
-IDI_DAEMON_JAR       RCDATA                 STR(COMMONS_DAEMON_JAR_PATH)
+IDD_DAEMON_CL        RCDARA                 "../../../../../target/classes/org/apache/commons/daemon/support/DaemonClassLoader.class"
+IDD_DAEMON_JAR       RCDATA                 STR(COMMONS_DAEMON_JAR_PATH)
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "prunsrv.manifest"
 
 1 VERSIONINFO
