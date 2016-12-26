@@ -5,4 +5,3 @@
 **/install_manifest.txt
 **/*.exe
 **/*.a
-/src/native/resources/commons-daemon.jar
