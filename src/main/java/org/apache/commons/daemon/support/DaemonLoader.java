@@ -77,7 +77,7 @@ public final class DaemonLoader
             }
 
             /* Find the required class */
-            Class c = cl.loadClass(cn);
+            Class<?> c = cl.loadClass(cn);
 
             /* This should _never_ happen, but doublechecking doesn't harm */
             if (c == null) {
@@ -117,10 +117,7 @@ public final class DaemonLoader
     public static boolean load(String className, String args[])
     {
         try {
-            /* Make sure any previous instance is garbage collected */
-            System.gc();
-
-            /* Check if the underlying libray supplied a valid list of
+            /* Check if the underlying library supplied a valid list of
                arguments */
             if (args == null) {
                 args = new String[0];
@@ -137,9 +134,9 @@ public final class DaemonLoader
                 System.err.println("Cannot retrieve ClassLoader instance");
                 return false;
             }
-            Class c;
+            Class<?> c;
             if (className.charAt(0) == '@') {
-                /* Wrapp the class with DaemonWrapper
+                /* Wrap the class with DaemonWrapper
                  * and modify arguments to include the real class name.
                  */
                 c = DaemonWrapper.class;
@@ -152,7 +149,7 @@ public final class DaemonLoader
             else {
                 c = cl.loadClass(className);
             }
-            /* This should _never_ happen, but doublechecking doesn't harm */
+            /* This should _never_ happen, but double-checking doesn't harm */
             if (c == null) {
                 throw new ClassNotFoundException(className);
             }
@@ -160,8 +157,7 @@ public final class DaemonLoader
             boolean isdaemon = false;
 
             try {
-                Class dclass =
-                    cl.loadClass("org.apache.commons.daemon.Daemon");
+                Class<?> dclass = cl.loadClass("org.apache.commons.daemon.Daemon");
                 isdaemon = dclass.isAssignableFrom(c);
             }
             catch (Exception cnfex) {
@@ -169,7 +165,7 @@ public final class DaemonLoader
             }
 
             /* Check methods */
-            Class[] myclass = new Class[1];
+            Class<?>[] myclass = new Class[1];
             if (isdaemon) {
                 myclass[0] = DaemonContext.class;
             }
@@ -187,7 +183,7 @@ public final class DaemonLoader
             try {
                 signal = c.getMethod("signal", myclass);
             } catch (NoSuchMethodException e) {
-                // Signaling will be disabled.
+                // Signalling will be disabled.
             }
 
             /* Create a new instance of the daemon */
@@ -272,10 +268,6 @@ public final class DaemonLoader
             /* Attempt to stop the daemon */
             Object arg[] = null;
             stop.invoke(daemon, arg);
-
-            /* Run garbage collector */
-            System.gc();
-
         }
         catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
@@ -294,11 +286,8 @@ public final class DaemonLoader
             Object arg[] = null;
             destroy.invoke(daemon, arg);
 
-            /* Run garbage collector */
             daemon = null;
             controller = null;
-            System.gc();
-
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, start and stop won't be called).
