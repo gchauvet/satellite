@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  */
 public final class DaemonLoader
 {
-
+    
     // N.B. These static mutable variables need to be accessed using synch.
     private static Controller controller = null; //@GuardedBy("this")
     private static Object daemon    = null; //@GuardedBy("this")
@@ -41,7 +41,7 @@ public final class DaemonLoader
     private static Method stop      = null; //@GuardedBy("this")
     private static Method destroy   = null; //@GuardedBy("this")
     private static Method signal    = null; //@GuardedBy("this")
-
+    
     public static void version()
     {
         System.err.println("java version \"" +

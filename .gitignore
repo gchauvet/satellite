@@ -6,4 +6,5 @@
 **/*.exe
 **/*.a
 target/
-src/native/unix/native/commons-daemon.h
+src/native/unix/native/kernel.h
+src/native/unix/native/classloader.h
