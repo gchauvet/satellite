@@ -4,5 +4,5 @@ install:
   - mvn install -DskipTests=true -DskipPkg=true
 
 script:
-  - mvn clean test jacoco:report coveralls:report
+  - mvn clean test
   - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL && make
