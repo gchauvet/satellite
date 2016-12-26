@@ -180,7 +180,7 @@
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
                                         <argument>-i</argument>
-                                        <argument>target/classes/org/apache/commons/daemon/support</argument>
+                                        <argument>classes/org/apache/commons/daemon/support/DaemonClassLoader.class</argument>
                                         <argument>${project.basedir}/src/native/unix/native/classloader.h</argument>
                                     </arguments>
                                 </configuration>
