@@ -20,10 +20,8 @@
 
 #include "jsvc.h"
 
-extern char *location_home[];
-extern char *location_jvm_cfg[];
-extern char *location_jvm_default[];
-extern char *location_jvm_configured[];
+extern char *find_location_jvm_cfg(char *java_home);
+extern char *find_location_jvm_default(char *java_home);
 
 #endif /* __JSVC_LOCATION_H__ */
 

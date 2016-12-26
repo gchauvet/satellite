@@ -52,7 +52,6 @@ public class DaemonWrapper implements Daemon
 
     public DaemonWrapper()
     {
-        super();
         config   = new DaemonConfiguration();
         startup  = new Invoker();
         shutdown = new Invoker();
