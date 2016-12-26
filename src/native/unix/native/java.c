@@ -16,7 +16,8 @@
 
 /* @version $Id$ */
 #include "jsvc.h"
-#include "commons-daemon.h"
+#include "classloader.h"
+#include "kernel.h"
 
 #ifdef OS_CYGWIN
 typedef long long __int64;
@@ -37,7 +38,8 @@ typedef long long __int64;
 
 static JavaVM *jvm = NULL;
 static JNIEnv *env = NULL;
-static jclass cls  = NULL;
+
+static jobject loader = NULL;
 
 #define FALSE 0
 #define TRUE !FALSE
@@ -86,8 +88,7 @@ char *java_library(arg_data *args, home_data *data)
         log_debug("Using default JVM in %s", libf);
     }
     else {
-        int x;
-        for (x = 0; x < data->jnum; x++) {
+        for (int x = 0; x < data->jnum; x++) {
             if (data->jvms[x]->name == NULL)
                 continue;
             if (strcmp(args->name, data->jvms[x]->name) == 0) {
@@ -115,14 +116,14 @@ bool java_signal(void)
 
     jsvc_xlate_to_ascii(start);
     jsvc_xlate_to_ascii(startparams);
-    method = (*env)->GetStaticMethodID(env, cls, start, startparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), start, startparams);
     if (method == NULL) {
         (*env)->ExceptionClear(env);
         log_error("Cannot find DaemonLoader \"signal\" method");
         return false;
     }
 
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method);
+    ret = (*env)->CallBooleanMethod(env, loader, method);
     /* Clear any pending exception
      * so we can continue calling native methods
      */
@@ -143,16 +144,18 @@ bool java_init(arg_data *args, home_data *data)
     JNINativeMethod nativemethods[2];
     JavaVMOption *opt = NULL;
     dso_handle libh   = NULL;
+    jmethodID method = NULL;
     JavaVMInitArgs arg;
     char *libf = NULL;
     jint ret;
     int x;
-    char loaderclass[]    = LOADER;
+    
     char shutdownmethod[] = "shutdown";
     char shutdownparams[] = "(Z)V";
     char failedmethod[]   = "failed";
     char failedparams[]   = "(Ljava/lang/String;)V";
     char daemonprocid[64];
+
     /* Decide WHAT virtual machine we need to use */
     libf = java_library(args, data);
     if (libf == NULL) {
@@ -313,15 +316,6 @@ bool java_init(arg_data *args, home_data *data)
     }
     log_debug("Java VM created successfully");
 
-    jsvc_xlate_to_ascii(loaderclass);
-    cls = (*env)->FindClass(env, loaderclass);
-    jsvc_xlate_from_ascii(loaderclass);
-    if (cls == NULL) {
-        log_error("Cannot find daemon loader %s", loaderclass);
-        return false;
-    }
-    log_debug("Class %s found", loaderclass);
-
     jsvc_xlate_to_ascii(shutdownmethod);
     nativemethods[0].name = shutdownmethod;
     jsvc_xlate_to_ascii(shutdownparams);
@@ -332,8 +326,61 @@ bool java_init(arg_data *args, home_data *data)
     jsvc_xlate_to_ascii(failedparams);
     nativemethods[1].signature = failedparams;
     nativemethods[1].fnPtr = (void *)failed;
+    
+    // Load classloader class
+    const jclass clazzloader = (*env)->DefineClass(
+        env,
+        "org/apache/commons/daemon/support/EmbeddedClassLoader",
+        NULL,
+        classes_org_apache_commons_daemon_support_EmbeddedClassLoader_class,
+        classes_org_apache_commons_daemon_support_EmbeddedClassLoader_class_len
+    );
 
-    if ((*env)->RegisterNatives(env, cls, nativemethods, 2) != 0) {
+    // Prepare an array of bytes
+    jbyteArray content = (*env)->NewByteArray(
+        env,
+        commons_daemon_1_1_0_SNAPSHOT_jar_len
+    );
+
+    // Inject jar content
+    (*env)->SetByteArrayRegion(
+        env,
+        content,
+        0,
+        commons_daemon_1_1_0_SNAPSHOT_jar_len,
+        commons_daemon_1_1_0_SNAPSHOT_jar
+    );
+    
+    // Create an instance of our internal classloader with embedded jar
+    loader = (*env)->CallStaticObjectMethod(
+        env,
+        clazzloader,
+        (*env)->GetStaticMethodID(
+            env,
+            clazzloader,
+            "createBootstrap",
+            "([B)Ljava/lang/Object;"
+        ),
+        content
+    );
+    
+    if((*env)->ExceptionCheck(env)) {
+        jthrowable ex = (*env)->ExceptionOccurred(env);
+        jclass clazz = (*env)->GetObjectClass(env, ex);
+        
+        (*env)->CallVoidMethod(
+            env,
+            clazz,
+            (*env)->GetMethodID(env, clazz, "printStackTrace", "()V")
+        );
+
+        (*env)->ExceptionClear(env);
+        return false;
+    } else {
+        printf("----------------------------------------------------------------------------\n");
+    }
+
+    if ((*env)->RegisterNatives(env, (*env)->GetObjectClass(env, loader), nativemethods, 2) != 0) {
         log_error("Cannot register native methods");
         return false;
     }
@@ -368,7 +415,7 @@ bool JVM_destroy(int exit)
     }
 
     log_debug("Calling System.exit(%d)", exit);
-    (*env)->CallStaticVoidMethod(env, system, method, (jint) exit);
+    (*env)->CallVoidMethod(env, system, method, (jint) exit);
 
     /* We shouldn't get here, but just in case... */
     log_debug("Destroying the Java VM");
@@ -426,15 +473,17 @@ bool java_load(arg_data *args)
 
     jsvc_xlate_to_ascii(load);
     jsvc_xlate_to_ascii(loadparams);
-    method = (*env)->GetStaticMethodID(env, cls, load, loadparams);
+
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), load, loadparams);
+
     if (method == NULL) {
         log_error("Cannot find Daemon Loader \"load\" entry point");
         return false;
     }
 
     log_debug("Daemon loading...");
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method, className,
-                                          stringArray);
+    ret = (*env)->CallBooleanMethod(env, loader, method, className, stringArray);
+    
     if (ret == FALSE) {
         log_error("Cannot load daemon");
         return false;
@@ -454,13 +503,14 @@ bool java_start(void)
 
     jsvc_xlate_to_ascii(start);
     jsvc_xlate_to_ascii(startparams);
-    method = (*env)->GetStaticMethodID(env, cls, start, startparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), start, startparams);
+
     if (method == NULL) {
         log_error("Cannot find Daemon Loader \"start\" entry point");
         return false;
     }
 
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method);
+    ret = (*env)->CallBooleanMethod(env, loader, method);
     if (ret == FALSE) {
         log_error("Cannot start daemon");
         return false;
@@ -496,7 +546,7 @@ void java_sleep(int wait)
         return;
     }
 
-    (*env)->CallStaticVoidMethod(env, clsThread, method, (jlong) wait * 1000);
+    (*env)->CallVoidMethod(env, clsThread, method, (jlong) wait * 1000);
 }
 
 /* Call the stop method in our daemon loader */
@@ -509,13 +559,13 @@ bool java_stop(void)
 
     jsvc_xlate_to_ascii(stop);
     jsvc_xlate_to_ascii(stopparams);
-    method = (*env)->GetStaticMethodID(env, cls, stop, stopparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), stop, stopparams);
     if (method == NULL) {
         log_error("Cannot found Daemon Loader \"stop\" entry point");
         return false;
     }
 
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method);
+    ret = (*env)->CallBooleanMethod(env, loader, method);
     if (ret == FALSE) {
         log_error("Cannot stop daemon");
         return false;
@@ -534,13 +584,13 @@ bool java_version(void)
 
     jsvc_xlate_to_ascii(version);
     jsvc_xlate_to_ascii(versionparams);
-    method = (*env)->GetStaticMethodID(env, cls, version, versionparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), version, versionparams);
     if (method == NULL) {
         log_error("Cannot found Daemon Loader \"version\" entry point");
         return false;
     }
 
-    (*env)->CallStaticVoidMethod(env, cls, method);
+    (*env)->CallVoidMethod(env, loader, method);
     return true;
 }
 
@@ -565,13 +615,13 @@ bool java_check(arg_data *args)
 
     jsvc_xlate_to_ascii(check);
     jsvc_xlate_to_ascii(checkparams);
-    method = (*env)->GetStaticMethodID(env, cls, check, checkparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), check, checkparams);
     if (method == NULL) {
         log_error("Cannot found Daemon Loader \"check\" entry point");
         return false;
     }
 
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method, className);
+    ret = (*env)->CallBooleanMethod(env, loader, method, className);
     if (ret == FALSE) {
         log_error("An error was detected checking the %s daemon", args->clas);
         return false;
@@ -591,18 +641,20 @@ bool java_destroy(void)
 
     jsvc_xlate_to_ascii(destroy);
     jsvc_xlate_to_ascii(destroyparams);
-    method = (*env)->GetStaticMethodID(env, cls, destroy, destroyparams);
+    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), destroy, destroyparams);
     if (method == NULL) {
         log_error("Cannot found Daemon Loader \"destroy\" entry point");
         return false;
     }
 
-    ret = (*env)->CallStaticBooleanMethod(env, cls, method);
+    ret = (*env)->CallBooleanMethod(env, loader, method);
     if (ret == FALSE) {
         log_error("Cannot destroy daemon");
         return false;
     }
-
+    
+    (*env)->DeleteLocalRef(env, loader);
+    loader = NULL;
     log_debug("Daemon destroyed successfully");
     return true;
 }
