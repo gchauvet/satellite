@@ -5,3 +5,5 @@
 **/install_manifest.txt
 **/*.exe
 **/*.a
+target/
+src/native/unix/native/commons-daemon.h

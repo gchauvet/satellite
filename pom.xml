@@ -137,8 +137,10 @@
             <build>
                 <plugins>
                     <plugin>
+			<groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <executions>
+			<version>1.5.0</version>
+                       <executions>
                             <execution>
                                 <id>cmake-compile</id>
                                 <phase>package</phase>

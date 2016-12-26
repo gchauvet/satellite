@@ -16,6 +16,7 @@
 
 /* @version $Id$ */
 #include "jsvc.h"
+#include "commons-daemon.h"
 
 #ifdef OS_CYGWIN
 typedef long long __int64;
