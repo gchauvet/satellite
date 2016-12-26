@@ -1,0 +1,8 @@
+language: java
+
+install:
+  - mvn install -DskipTests=true -DskipPkg=true
+
+script:
+  - mvn clean test jacoco:report coveralls:report
+  - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL
