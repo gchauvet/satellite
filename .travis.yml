@@ -5,4 +5,4 @@ install:
 
 script:
   - mvn clean test
-  - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL && make
+  - cd ./src/native/unix && "CFLAGS=-std=c99" cmake -DCMAKE_BUILD_TYPE=MINSIZEREL && make
