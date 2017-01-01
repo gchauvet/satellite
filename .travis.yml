@@ -1,8 +1,16 @@
 language: java
 
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+    packages:
+      - cmake
+      - cmake-data
+
 install:
   - mvn install -DskipTests=true -DskipPkg=true
 
 script:
   - mvn clean test
-  - cd ./src/native/unix && "CFLAGS=-std=c99" cmake -DCMAKE_BUILD_TYPE=MINSIZEREL && make
+  - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL && make
