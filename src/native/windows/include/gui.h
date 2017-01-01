@@ -132,17 +132,19 @@ void        apxManageTryIconA(HWND hWnd, DWORD dwMessage, LPCSTR szInfoTitle,
                               LPCSTR szInfo, HICON hIcon);
 void        apxManageTryIconW(HWND hWnd, DWORD dwMessage, LPCWSTR szInfoTitle,
                               LPCWSTR szInfo, HICON hIcon);
-#ifdef _UNICODE
-#define apxLoadResource apxLoadResourceW
-#else
-#define apxLoadResource apxLoadResourceA
-#endif
-
 void        apxAboutBox(HWND hWnd);
-int         apxProgressBox(HWND hWnd, LPCTSTR szHeader,
+
+int         apxProgressBoxA(HWND hWnd, LPCTSTR szHeader,
                            LPCWSTR szText,
                            LPAPXFNCALLBACK fnProgressCallback,
                            LPVOID cbData);
+
+int         apxProgressBoxW(HWND hWnd, LPCWSTR szHeader,
+                           LPCWSTR szText,
+                           LPAPXFNCALLBACK fnProgressCallback,
+                           LPVOID cbData);
+BOOL        apxYesNoMessage(LPCTSTR szTitle, LPCTSTR szMessage, BOOL bStop);
+
 BOOL        apxYesNoMessage(LPCTSTR szTitle, LPCTSTR szMessage, BOOL bStop);
 
 BOOL        apxCalcStringEllipsis(HDC hDC, LPTSTR  szString, 
@@ -150,20 +152,8 @@ BOOL        apxCalcStringEllipsis(HDC hDC, LPTSTR  szString,
 LPWSTR      apxGetDlgTextW(APXHANDLE hPool, HWND hDlg, int nIDDlgItem);
 LPSTR       apxGetDlgTextA(APXHANDLE hPool, HWND hDlg, int nIDDlgItem);
 
-#ifdef _UNICODE
-#define apxGetDlgText  apxGetDlgTextW
-#else
-#define apxGetDlgText  apxGetDlgTextA
-#endif
-
 LPSTR       apxBrowseForFolderA(HWND hWnd, LPCSTR szTitle, LPCSTR szName);
 LPWSTR      apxBrowseForFolderW(HWND hWnd, LPCWSTR szTitle, LPCWSTR szName);
-
-#ifdef _UNICODE
-#define apxBrowseForFolder  apxBrowseForFolderW
-#else
-#define apxBrowseForFolder  apxBrowseForFolderA
-#endif
 
 LPSTR       apxGetFileNameA(HWND hWnd, LPCSTR szTitle, LPCSTR szFilter,
                             LPCSTR szDefExt, LPCSTR szDefPath, BOOL bOpenOrSave,
@@ -173,13 +163,21 @@ LPWSTR      apxGetFileNameW(HWND hWnd, LPCWSTR szTitle, LPCWSTR szFilter,
                             LPCWSTR szDefExt, LPCWSTR szDefPath, BOOL bOpenOrSave,
                             LPDWORD lpdwFindex);
 
-#ifdef _UNICODE
-#define apxGetFileName  apxGetFileNameW
-#else
-#define apxGetFileName  apxGetFileNameA
-#endif
-
 LPCWSTR     apxDlgSelectUser(HWND hWnd, LPWSTR szUser);
+
+#ifdef _UNICODE
+#define apxLoadResource apxLoadResourceW
+#define apxProgressBox apxProgressBoxW
+#define apxGetDlgText apxGetDlgTextW
+#define apxBrowseForFolder apxBrowseForFolderW
+#define apxGetFileName apxGetFileNameW
+#else
+#define apxGetDlgText apxGetDlgTextA
+#define apxProgressBox apxProgressBoxA
+#define apxLoadResource apxLoadResourceA
+#define apxBrowseForFolder apxBrowseForFolderA
+#define apxGetFileName apxGetFileNameA
+#endif
 
 __APXEND_DECLS
 

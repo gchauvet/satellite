@@ -1,2 +1,10 @@
-/src/native/windows/apps/prunmgr/*/*
-/src/native/windows/apps/prunsrv/*/*
+**/CMakeCache.txt
+**/CMakeFiles/
+**/Makefile
+**/cmake_install.cmake
+**/install_manifest.txt
+**/*.exe
+**/*.a
+target/
+src/native/unix/native/kernel.h
+src/native/unix/native/classloader.h

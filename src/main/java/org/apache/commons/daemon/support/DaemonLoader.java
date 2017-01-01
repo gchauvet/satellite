@@ -14,7 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.commons.daemon.support;
 
 import org.apache.commons.daemon.DaemonContext;
@@ -29,55 +28,54 @@ import java.lang.reflect.Method;
  *
  * @version $Id$
  */
-public final class DaemonLoader
-{
+public final class DaemonLoader {
 
     // N.B. These static mutable variables need to be accessed using synch.
-    private static Controller controller = null; //@GuardedBy("this")
-    private static Object daemon    = null; //@GuardedBy("this")
+    private Controller controller = null; //@GuardedBy("this")
+    private Object daemon = null; //@GuardedBy("this")
     /* Methods to call */
-    private static Method init      = null; //@GuardedBy("this")
-    private static Method start     = null; //@GuardedBy("this")
-    private static Method stop      = null; //@GuardedBy("this")
-    private static Method destroy   = null; //@GuardedBy("this")
-    private static Method signal    = null; //@GuardedBy("this")
+    private Method init = null; //@GuardedBy("this")
+    private Method start = null; //@GuardedBy("this")
+    private Method stop = null; //@GuardedBy("this")
+    private Method destroy = null; //@GuardedBy("this")
+    private Method signal = null; //@GuardedBy("this")
 
-    public static void version()
-    {
-        System.err.println("java version \"" +
-                           System.getProperty("java.version") + "\"");
-        System.err.println(System.getProperty("java.runtime.name") +
-                           " (build " +
-                           System.getProperty("java.runtime.version") + ")");
-        System.err.println(System.getProperty("java.vm.name") +
-                           " (build " +
-                           System.getProperty("java.vm.version") +
-                           ", " + System.getProperty("java.vm.info") + ")");
-        System.err.println("commons daemon version \"" +
-                System.getProperty("commons.daemon.version") + "\"");
-        System.err.println("commons daemon process (id: " +
-                           System.getProperty("commons.daemon.process.id") +
-                           ", parent: " +
-                           System.getProperty("commons.daemon.process.parent") + ")");
+    private final ClassLoader loader;
+
+    public DaemonLoader(ClassLoader loader) {
+        if (loader == null) {
+            throw new IllegalArgumentException("No embedded classloader provided");
+        }
+        this.loader = loader;
     }
 
-    public static boolean check(String cn)
-    {
+    public void version() {
+        System.err.println("java version \""
+                + System.getProperty("java.version") + "\"");
+        System.err.println(System.getProperty("java.runtime.name")
+                + " (build "
+                + System.getProperty("java.runtime.version") + ")");
+        System.err.println(System.getProperty("java.vm.name")
+                + " (build "
+                + System.getProperty("java.vm.version")
+                + ", " + System.getProperty("java.vm.info") + ")");
+        System.err.println("commons daemon version \""
+                + System.getProperty("commons.daemon.version") + "\"");
+        System.err.println("commons daemon process (id: "
+                + System.getProperty("commons.daemon.process.id")
+                + ", parent: "
+                + System.getProperty("commons.daemon.process.parent") + ")");
+    }
+
+    public boolean check(String cn) {
         try {
             /* Check the class name */
             if (cn == null) {
                 throw new NullPointerException("Null class name specified");
             }
 
-            /* Get the ClassLoader loading this class */
-            ClassLoader cl = DaemonLoader.class.getClassLoader();
-            if (cl == null) {
-                System.err.println("Cannot retrieve ClassLoader instance");
-                return false;
-            }
-
             /* Find the required class */
-            Class c = cl.loadClass(cn);
+            Class<?> c = Class.forName(cn, true, loader);
 
             /* This should _never_ happen, but doublechecking doesn't harm */
             if (c == null) {
@@ -99,8 +97,7 @@ public final class DaemonLoader
         return true;
     }
 
-    public static boolean signal()
-    {
+    public boolean signal() {
         try {
             if (signal != null) {
                 signal.invoke(daemon, new Object[0]);
@@ -114,13 +111,9 @@ public final class DaemonLoader
         return false;
     }
 
-    public static boolean load(String className, String args[])
-    {
+    public boolean load(String className, String args[]) {
         try {
-            /* Make sure any previous instance is garbage collected */
-            System.gc();
-
-            /* Check if the underlying libray supplied a valid list of
+            /* Check if the underlying library supplied a valid list of
                arguments */
             if (args == null) {
                 args = new String[0];
@@ -131,15 +124,9 @@ public final class DaemonLoader
                 throw new NullPointerException("Null class name specified");
             }
 
-            /* Get the ClassLoader loading this class */
-            ClassLoader cl = DaemonLoader.class.getClassLoader();
-            if (cl == null) {
-                System.err.println("Cannot retrieve ClassLoader instance");
-                return false;
-            }
-            Class c;
+            Class<?> c;
             if (className.charAt(0) == '@') {
-                /* Wrapp the class with DaemonWrapper
+                /* Wrap the class with DaemonWrapper
                  * and modify arguments to include the real class name.
                  */
                 c = DaemonWrapper.class;
@@ -148,46 +135,31 @@ public final class DaemonLoader
                 a[1] = className.substring(1);
                 System.arraycopy(args, 0, a, 2, args.length);
                 args = a;
+            } else {
+                c = Class.forName(className, true, loader);
             }
-            else {
-                c = cl.loadClass(className);
-            }
-            /* This should _never_ happen, but doublechecking doesn't harm */
-            if (c == null) {
-                throw new ClassNotFoundException(className);
-            }
+
             /* Check interfaces */
-            boolean isdaemon = false;
-
-            try {
-                Class dclass =
-                    cl.loadClass("org.apache.commons.daemon.Daemon");
-                isdaemon = dclass.isAssignableFrom(c);
-            }
-            catch (Exception cnfex) {
-                // Swallow if Daemon not found.
-            }
-
+            final boolean isdaemon = Class.forName("org.apache.commons.daemon.Daemon", true, loader).isAssignableFrom(c);
             /* Check methods */
-            Class[] myclass = new Class[1];
+            Class<?>[] myclass = new Class[1];
             if (isdaemon) {
                 myclass[0] = DaemonContext.class;
-            }
-            else {
+            } else {
                 myclass[0] = args.getClass();
             }
 
-            init    = c.getMethod("init", myclass);
+            init = c.getMethod("init", myclass);
 
             myclass = null;
-            start   = c.getMethod("start", myclass);
-            stop    = c.getMethod("stop", myclass);
+            start = c.getMethod("start", myclass);
+            stop = c.getMethod("stop", myclass);
             destroy = c.getMethod("destroy", myclass);
 
             try {
                 signal = c.getMethod("signal", myclass);
             } catch (NoSuchMethodException e) {
-                // Signaling will be disabled.
+                // Signalling will be disabled.
             }
 
             /* Create a new instance of the daemon */
@@ -209,26 +181,22 @@ public final class DaemonLoader
                 Object arg[] = new Object[1];
                 arg[0] = context;
                 init.invoke(daemon, arg);
-            }
-            else {
+            } else {
                 Object arg[] = new Object[1];
                 arg[0] = args;
                 init.invoke(daemon, arg);
             }
 
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
             /* DaemonInitExceptions can fail with a nicer message */
             if (thrown instanceof DaemonInitException) {
                 failed(((DaemonInitException) thrown).getMessageWithCause());
-            }
-            else {
+            } else {
                 thrown.printStackTrace(System.err);
             }
             return false;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, start and stop won't be called).
              */
@@ -239,8 +207,7 @@ public final class DaemonLoader
         return true;
     }
 
-    public static boolean start()
-    {
+    public boolean start() {
         try {
             /* Attempt to start the daemon */
             Object arg[] = null;
@@ -261,8 +228,7 @@ public final class DaemonLoader
         return true;
     }
 
-    public static boolean stop()
-    {
+    public boolean stop() {
         try {
             /* Set the availability flag in the controller */
             if (controller != null) {
@@ -272,33 +238,6 @@ public final class DaemonLoader
             /* Attempt to stop the daemon */
             Object arg[] = null;
             stop.invoke(daemon, arg);
-
-            /* Run garbage collector */
-            System.gc();
-
-        }
-        catch (Throwable t) {
-            /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
-             */
-            t.printStackTrace(System.err);
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean destroy()
-    {
-        try {
-            /* Attempt to stop the daemon */
-            Object arg[] = null;
-            destroy.invoke(daemon, arg);
-
-            /* Run garbage collector */
-            daemon = null;
-            controller = null;
-            System.gc();
-
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, start and stop won't be called).
@@ -309,118 +248,121 @@ public final class DaemonLoader
         return true;
     }
 
-    private static native void shutdown(boolean reload);
-    private static native void failed(String message);
+    public boolean destroy() {
+        try {
+            /* Attempt to stop the daemon */
+            Object arg[] = null;
+            destroy.invoke(daemon, arg);
 
-    public static class Controller
-        implements DaemonController
-    {
+            daemon = null;
+            controller = null;
+        } catch (Throwable t) {
+            /* In case we encounter ANY error, we dump the stack trace and
+             * return false (load, start and stop won't be called).
+             */
+            t.printStackTrace(System.err);
+            return false;
+        }
+        return true;
+    }
+
+    private native void shutdown(boolean reload);
+
+    private native void failed(String message);
+
+    private class Controller
+            implements DaemonController {
 
         private boolean available = false;
 
-        private Controller()
-        {
+        private Controller() {
             super();
             this.setAvailable(false);
         }
 
-        private boolean isAvailable()
-        {
+        private boolean isAvailable() {
             synchronized (this) {
                 return this.available;
             }
         }
 
-        private void setAvailable(boolean available)
-        {
+        private void setAvailable(boolean available) {
             synchronized (this) {
                 this.available = available;
             }
         }
 
         public void shutdown()
-            throws IllegalStateException
-        {
+                throws IllegalStateException {
             synchronized (this) {
                 if (!this.isAvailable()) {
                     throw new IllegalStateException();
                 }
                 this.setAvailable(false);
-                DaemonLoader.shutdown(false);
+                DaemonLoader.this.shutdown(false);
             }
         }
 
         public void reload()
-            throws IllegalStateException
-        {
+                throws IllegalStateException {
             synchronized (this) {
                 if (!this.isAvailable()) {
                     throw new IllegalStateException();
                 }
                 this.setAvailable(false);
-                DaemonLoader.shutdown(true);
+                DaemonLoader.this.shutdown(true);
             }
         }
 
-        public void fail()
-        {
+        public void fail() {
             fail(null, null);
         }
 
-        public void fail(String message)
-        {
+        public void fail(String message) {
             fail(message, null);
         }
 
-        public void fail(Exception exception)
-        {
+        public void fail(Exception exception) {
             fail(null, exception);
         }
 
-        public void fail(String message, Exception exception)
-        {
+        public void fail(String message, Exception exception) {
             synchronized (this) {
                 this.setAvailable(false);
                 String msg = message;
                 if (exception != null) {
                     if (msg != null) {
                         msg = msg + ": " + exception.toString();
-                    }
-                    else {
+                    } else {
                         msg = exception.toString();
                     }
                 }
-                DaemonLoader.failed(msg);
+                DaemonLoader.this.failed(msg);
             }
         }
 
     }
 
-    public static class Context
-        implements DaemonContext
-    {
+    private class Context
+            implements DaemonContext {
 
         private DaemonController daemonController = null;
 
         private String[] args = null;
 
-        public DaemonController getController()
-        {
+        public DaemonController getController() {
             return daemonController;
         }
 
-        public void setController(DaemonController controller)
-        {
+        public void setController(DaemonController controller) {
             this.daemonController = controller;
         }
 
-        public String[] getArguments()
-        {
+        public String[] getArguments() {
             return args;
         }
 
-        public void setArguments(String[]args)
-        {
+        public void setArguments(String[] args) {
             this.args = args;
         }
 

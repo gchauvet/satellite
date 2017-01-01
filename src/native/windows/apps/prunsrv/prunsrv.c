@@ -380,8 +380,8 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
 
 static void printVersion(void)
 {
-    fwprintf(stderr, L"Commons Daemon Service Runner version %S/Win%d (%S)\n",
-            PRG_VERSION, PRG_BITS, __DATE__);
+    fwprintf(stderr, L"Commons Daemon Service Runner version %u.%u.%u/Win%d (%S)\n",
+            PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
     fwprintf(stderr, L"Copyright (c) 2000-2012 The Apache Software Foundation.\n\n"
                      L"For bug reporting instructions, please see:\n"
                      L"<URL:https://issues.apache.org/jira/browse/DAEMON>.");
@@ -995,7 +995,7 @@ static DWORD WINAPI serviceStop(LPVOID lpParameter)
 
         /* Pass the argv to child process */
         if (!apxProcessSetCommandArgsW(hWorker, SO_STOPIMAGE,
-                                       nArgs, pArgs)) {
+                                       nArgs, (const WCHAR **) &pArgs)) {
             rv = 3;
             apxLogWrite(APXLOG_MARK_ERROR "Failed setting process arguments (argc=%d)",
                         nArgs);
@@ -1188,7 +1188,7 @@ static DWORD serviceStart()
 
         /* Pass the argv to child process */
         if (!apxProcessSetCommandArgsW(gWorker, SO_STARTIMAGE,
-                                       nArgs, pArgs)) {
+                                       nArgs, (const WCHAR **) pArgs)) {
             rv = 3;
             apxLogWrite(APXLOG_MARK_ERROR "Failed setting process arguments (argc=%d)",
                         nArgs);
@@ -1221,8 +1221,7 @@ static DWORD serviceStart()
                                          FILE_SHARE_READ,
                                          NULL,
                                          CREATE_NEW,
-                                         FILE_ATTRIBUTE_NORMAL |
-                                         FILE_FLAG_DELETE_ON_CLOSE,
+                                         FILE_ATTRIBUTE_NORMAL,
                                          NULL);
 
             if (gPidfileHandle != INVALID_HANDLE_VALUE) {
@@ -1509,7 +1508,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
         /* Ensure that shutdown thread exits before us */
         apxLogWrite(APXLOG_MARK_DEBUG "Waiting for ShutdownEvent");
         WaitForSingleObject(gShutdownEvent, ONE_MINUTE);
-        apxLogWrite(APXLOG_MARK_DEBUG "ShutdownEvent signaled");
+        apxLogWrite(APXLOG_MARK_DEBUG "ShutdownEvent signalled");
         CloseHandle(gShutdownEvent);
         /* This will cause to wait for all threads to exit
          */
@@ -1546,6 +1545,9 @@ BOOL docmdDebugService(LPAPXCMDLINE lpCmdline)
     serviceMain(0, NULL);
     apxLogWrite(APXLOG_MARK_INFO "Debug service finished with exit code %d", gExitval);
     SAFE_CLOSE_HANDLE(gPidfileHandle);
+    if (gPidfileName) {
+   	    DeleteFileW(gPidfileName);
+    }
     return gExitval == 0 ? TRUE : FALSE;
 }
 
@@ -1569,6 +1571,9 @@ BOOL docmdRunService(LPAPXCMDLINE lpCmdline)
         rv = FALSE;
     }
     SAFE_CLOSE_HANDLE(gPidfileHandle);
+    if (gPidfileName) {
+   	    DeleteFileW(gPidfileName);
+    }
     return rv;
 }
 
@@ -1645,8 +1650,8 @@ void __cdecl main(int argc, char **argv)
     if (SO_LOGROTATE)
         apxLogWrite(APXLOG_MARK_DEBUG "Log will rotate each %d seconds.", SO_LOGROTATE);
 
-    apxLogWrite(APXLOG_MARK_INFO "Commons Daemon procrun (%s %d-bit) started",
-                PRG_VERSION, PRG_BITS);
+    apxLogWrite(APXLOG_MARK_INFO "Commons Daemon procrun (%u.%u.%u %d-bit) started",
+                PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
 
     AplZeroMemory(&gStdwrap, sizeof(APX_STDWRAP));
     gStartPath = lpCmdline->szExePath;

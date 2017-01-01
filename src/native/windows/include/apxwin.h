@@ -17,7 +17,6 @@
 #ifndef _APXWIN_H_INCLUDED_
 #define _APXWIN_H_INCLUDED_
 
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 
 #endif
@@ -36,15 +35,7 @@
 #include <zmouse.h>
 #include <richedit.h>
 #include <lm.h>
-
-#ifndef _INTPTR_T_DEFINED
-#ifdef  _WIN64
-typedef __int64             intptr_t;
-#else
-typedef _W64 int            intptr_t;
-#endif
-#define _INTPTR_T_DEFINED
-#endif
+#include <stdint.h>
 
 #define APXMACRO_BEGIN                  do {
 #define APXMACRO_END                    } while(0)
@@ -61,7 +52,7 @@ typedef _W64 int            intptr_t;
 #define CLR_BIT_FLAG(x, b) ((x) &= ~(1 << b))
 #define TST_BIT_FLAG(x, b) ((x) & (1 << b))
 
-#define IS_INVALID_HANDLE(h) (((h) == NULL || (h) == INVALID_HANDLE_VALUE))
+#define IS_INVALID_HANDLE(h) ((((void *)h) == (void *)NULL || ((void *)h) == INVALID_HANDLE_VALUE))
 #define IS_VALID_STRING(s)   ((s) != NULL && *(s) != 0)
 #define IS_EMPTY_STRING(s)   ((s) == NULL || *(s) == 0)
 
@@ -145,7 +136,7 @@ typedef enum {
 
 APX_OSLEVEL apxGetOsLevel();
 LPWSTR      AsciiToWide(LPCSTR s, LPWSTR ws);
-LPSTR       MzWideToAscii(LPCWSTR ws, LPSTR s);
+LPSTR       WideToAscii(LPCWSTR ws, LPSTR s);
 LPSTR       WideToANSI(LPCWSTR ws);
 LPSTR       MzWideToANSI(LPCWSTR ws);
 
@@ -213,7 +204,7 @@ LPWSTR  lstrlocaseW(LPWSTR str);
 PSECURITY_ATTRIBUTES GetNullACL();
 void CleanNullACL(void *sa);
 
-__APXEND_DECLS
+__APXEND_DECLS  
 
 #endif /* _APXWIN_H_INCLUDED_ */
 
