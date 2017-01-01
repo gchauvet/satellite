@@ -20,6 +20,9 @@
 #define RSTR_PSM        "Commons Daemon Service Manager"
 #define RSTR_SCMATS     "Service Manager is attempting to "
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 IDI_MAINICON         ICON                   "../../resources/procrunw.ico"
 IDI_ICONSTOP         ICON                   "../../resources/procruns.ico"
 IDI_ICONRUN          ICON                   "../../resources/procrunr.ico"
@@ -228,8 +231,8 @@ END
 STRINGTABLE
 BEGIN
     IDS_APPLICATION     RSTR_PSM
-    IDS_APPVERSION      "Version 1.0.8"
-    IDS_APPFULLNAME     RSTR_PSM " Version " PRG_VERSION
+    IDS_APPVERSION      "Version " STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
+    IDS_APPFULLNAME     RSTR_PSM " Version " STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
     IDS_APPCOPYRIGHT    "Copyright (c) 2000-2012 The Apache Software Foundation"
     IDS_APPDESCRIPTION  "Apache Commons Daemon Service Management Tool"
     IDS_ALREAY_RUNING   "An instance of '%S' application is already running"
@@ -259,8 +262,8 @@ BEGIN
 END
 
 1 VERSIONINFO
- FILEVERSION 1,0,8,0
- PRODUCTVERSION 1,0,8,0
+ FILEVERSION PRG_VERSION_MAJOR,PRG_VERSION_MINOR,PRG_VERSION_PATCH
+ PRODUCTVERSION PRG_VERSION_MAJOR,PRG_VERSION_MINOR,PRG_VERSION_PATCH
  FILEFLAGSMASK 0x3fL
 #if defined(_DEBUG)
  FILEFLAGS 0x03L
@@ -278,12 +281,12 @@ BEGIN
       VALUE "Comments", "Commons Daemon Service Management Tool\0"
       VALUE "CompanyName", "Apache Software Foundation\0"
       VALUE "FileDescription", RSTR_PSM "\0"
-      VALUE "FileVersion", PRG_VERSION
+      VALUE "FileVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
       VALUE "InternalName", RSTR_PSM "\0"
       VALUE "LegalCopyright", "Copyright (c) 2000-2012 The Apache Software Foundation.\0"
       VALUE "OriginalFilename", "prunmgr.exe\0"
       VALUE "ProductName", RSTR_PSM "\0"
-      VALUE "ProductVersion", PRG_VERSION
+      VALUE "ProductVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
     END
   END
   BLOCK "VarFileInfo"

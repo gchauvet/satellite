@@ -18,8 +18,6 @@
 #ifndef __JSVC_JAVA_H__
 #define __JSVC_JAVA_H__
 
-#define LOADER "org/apache/commons/daemon/support/DaemonLoader"
-
 char *java_library(arg_data *args, home_data *data);
 bool java_init(arg_data *args, home_data *data);
 bool java_destroy(void);
