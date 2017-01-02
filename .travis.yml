@@ -1,7 +1,7 @@
 language: java
 
 before_script:
-  - sudo add-apt-repository --yes ppa:tobydox/mingw
+  - sudo apt-get install mingw-w64 libc6-dev-i386 -y
 
 addons:
   apt:
@@ -11,8 +11,6 @@ addons:
     packages:
       - cmake
       - cmake-data
-      - mingw-w64
-      - libc6-dev-i386
 
 install:
   - mvn install -DskipTests=true -DskipPkg=true
