@@ -1,6 +1,7 @@
 language: java
 
 before_script:
+  - sudo apt-get -qq update
   - sudo apt-get install mingw-w64 libc6-dev-i386 -y
 
 addons:
