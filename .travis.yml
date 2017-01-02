@@ -7,6 +7,8 @@ addons:
     packages:
       - cmake
       - cmake-data
+      - gcc-mingw-w64-i686
+      - libc6-dev-i386
 
 install:
   - mvn install -DskipTests=true -DskipPkg=true
