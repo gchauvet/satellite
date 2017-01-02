@@ -18,13 +18,13 @@ install:
   - mvn install -DskipTests=true -DskipPkg=true
   
 env:
-  - TOOLCHAIN_DIR=$TRAVIS_BUILD_DIR/src/native/toolchains
-  - BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives
-  - SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/unix/x86_32 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux64.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/unix/x86_64 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows32.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/windows/x86_32 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/windows/x86_64 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
+
+before_script:
+  - mvn clean test
 
 script:
-  - mvn clean test
-  - export WORK_DIR="$BUILD_DIR/linux/x86_32" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/unix" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Linux32.cmake && make
-  - WORK_DIR="$BUILD_DIR/linux/x86_64" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/unix" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Linux64.cmake && make
-  - WORK_DIR="$BUILD_DIR/windows/x86_32" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/windows" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Windows32.cmake && make
-  - WORK_DIR="$BUILD_DIR/windows/x86_64" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/windows" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Windows64.cmake && make
+  - mkdir -p $BUILD_DIR && cd $BUILD_DIR && cmake "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN && make
