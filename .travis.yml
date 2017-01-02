@@ -16,10 +16,15 @@ addons:
 
 install:
   - mvn install -DskipTests=true -DskipPkg=true
+  
+env:
+  - TOOLCHAIN_DIR=$TRAVIS_BUILD_DIR/src/native/toolchains
+  - BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives
+  - SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native
 
 script:
   - mvn clean test
-  - cmake src/native/unix -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=src/native/toolchains/Linux32.cmake && make
-  - cmake src/native/unix -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=src/native/toolchains/Linux64.cmake && make
-  - cmake src/native/windows -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=src/native/toolchains/Windows32.cmake && make
-  - cmake src/native/windows -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=src/native/toolchains/Windows32.cmake && make
+  - export WORK_DIR="$BUILD_DIR/linux/x86_32" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/unix" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Linux32.cmake && make
+  - WORK_DIR="$BUILD_DIR/linux/x86_64" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/unix" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Linux64.cmake && make
+  - WORK_DIR="$BUILD_DIR/windows/x86_32" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/windows" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Windows32.cmake && make
+  - WORK_DIR="$BUILD_DIR/windows/x86_64" && mkdir -p $WORK_DIR && cd $WORK_DIR && cmake "$SOURCE_DIR/windows" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_DIR/Windows64.cmake && make
