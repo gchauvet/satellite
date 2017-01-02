@@ -21,5 +21,5 @@ script:
   - mvn clean test
   - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Linux32.cmake && make
   - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Linux64.cmake && make
-  - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Windows32.cmake && make
-  - cd ./src/native/unix && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Windows32.cmake && make
+  - cd ./src/native/windows && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Windows32.cmake && make
+  - cd ./src/native/windows && cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=../toolchains/Windows32.cmake && make
