@@ -1,5 +1,8 @@
 language: java
 
+before_script:
+  - sudo add-apt-repository --yes ppa:tobydox/mingw
+
 addons:
   apt:
     sources:
