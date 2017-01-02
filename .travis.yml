@@ -3,7 +3,8 @@ language: java
 addons:
   apt:
     sources:
-      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+      - george-edison55-precise-backports
+      - apt-fast/stable
     packages:
       - cmake
       - cmake-data
