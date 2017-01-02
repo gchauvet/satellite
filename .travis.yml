@@ -14,6 +14,8 @@ addons:
       - gcc-mingw-w64
       - libc6-dev-i386
 
+jdk:
+  - openjdk7
 install:
   - mvn install -DskipTests=true -DskipPkg=true
   
