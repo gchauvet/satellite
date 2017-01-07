@@ -51,14 +51,15 @@ public final class EmbeddedClassLoader extends ClassLoader {
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         Class<?> result = null;
         try {
-            result = super.loadClass(name, resolve);
-        } catch (Throwable ex) {
             result = findClass(name);
             if (result != null) {
                 if (resolve) {
                     resolveClass(result);
                 }
             }
+            
+        } catch (Throwable ex) {
+            result = super.loadClass(name, resolve);
         }
         return result;
     }
