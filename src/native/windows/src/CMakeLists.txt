@@ -2,9 +2,12 @@ FIND_PACKAGE(JNI)
 IF(JNI_FOUND)
   INCLUDE_DIRECTORIES(SYSTEM ${JNI_INCLUDE_DIRS})
 ELSE()
+  IF(NOT JAVA_HOME)
+    SET(JAVA_HOME /usr/lib/jvm/default-java)
+  ENDIF()
   INCLUDE_DIRECTORIES(SYSTEM
-    /usr/lib/jvm/default-java/include
-    /usr/lib/jvm/default-java/include/linux
+    ${JAVA_HOME}/include
+    ${JAVA_HOME}/include/linux
   )
 ENDIF()
 
