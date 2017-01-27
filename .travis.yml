@@ -20,13 +20,13 @@ install:
   - mvn install -DskipTests=true -DskipPkg=true
   
 env:
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/unix/x86_32 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux64.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/unix/x86_64 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows32.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/windows/x86_32 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake BUILD_DIR=$TRAVIS_BUILD_DIR/target/natives/windows/x86_64 SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
 
 before_script:
   - mvn clean test
 
 script:
-  - mkdir -p $BUILD_DIR && cd $BUILD_DIR && cmake "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN && make
+  - cd target && cmake "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN && make
