@@ -4,8 +4,8 @@ IF(JNI_FOUND)
   INCLUDE_DIRECTORIES(SYSTEM ${JNI_INCLUDE_DIRS})
 ELSE()
   INCLUDE_DIRECTORIES(SYSTEM
-    ${JAVA_HOME}/include
-    ${JAVA_HOME}/include/linux
+    $ENV{JAVA_HOME}/include
+    $ENV{JAVA_HOME}/include/linux
   )
 ENDIF()
 
