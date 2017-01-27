@@ -15,7 +15,7 @@ addons:
       - libc6-dev-i386
 
 jdk:
-  - openjdk8
+  - openjdk7
 install:
   - mvn install -DskipTests=true -DskipPkg=true
   
