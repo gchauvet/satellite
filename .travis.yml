@@ -21,10 +21,10 @@ install:
   - mvn install -DskipTests=true -DskipPkg=true
   
 env:
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix _JAVA_HOME=$JAVA_HOME
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix _JAVA_HOME=$JAVA_HOME
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows _JAVA_HOME=$JAVA_HOME
-  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows _JAVA_HOME=$JAVA_HOME
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
+  - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
 
 before_script:
   - mvn clean test
