@@ -16,6 +16,7 @@ addons:
 
 jdk:
   - openjdk7
+
 install:
   - mvn install -DskipTests=true -DskipPkg=true
   
@@ -26,7 +27,6 @@ env:
   - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
 
 before_script:
-  - echo $JDK_HOME
   - mvn clean test
 
 script:
