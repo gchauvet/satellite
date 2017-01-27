@@ -15,8 +15,7 @@
  *  limitations under the License.
  */
 
-/* @version $Id: SimpleApplication.java 937350 2010-04-23 16:03:39Z sebb $ */
-
+ /* @version $Id: SimpleApplication.java 937350 2010-04-23 16:03:39Z sebb $ */
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,52 +32,51 @@ import java.util.Vector;
 
 public class SimpleApplication implements Runnable {
 
-    private ServerSocket server=null;
-    private Thread thread=null;
-    private volatile boolean stopping=false;
-    private String directory=null;
+    private ServerSocket server = null;
+    private Thread thread = null;
+    private volatile boolean stopping = false;
+    private String directory = null;
     private final Vector handlers;
 
     public static native void toto();
 
-    public SimpleApplication()
-    {
+    public SimpleApplication() {
         super();
-        System.err.println("SimpleApplication: instance "+this.hashCode()+
-                           " created");
-        this.handlers=new Vector();
+        System.err.println("SimpleApplication: instance " + this.hashCode()
+                + " created");
+        this.handlers = new Vector();
     }
 
     protected void finalize() {
-        System.err.println("SimpleApplication: instance "+this.hashCode()+
-                           " garbage collected");
+        System.err.println("SimpleApplication: instance " + this.hashCode()
+                + " garbage collected");
     }
 
     /**
      * Main methos
      */
     public static void main(String[] args)
-        throws Exception
-    {
+            throws Exception {
         SimpleApplication app = new SimpleApplication();
-        System.err.println("SimpleApplication: instance " + app.hashCode()+
-                           " init " + args.length);
-        int port=1200;
+        System.err.println("SimpleApplication: instance " + app.hashCode()
+                + " init " + args.length);
+        int port = 1200;
         for (int i = 0; i < args.length; i++) {
-            System.err.println("SimpleApplication: arg " + i +
-                    " = " + args[i]);
-
+            System.err.println("SimpleApplication: arg " + i
+                    + " = " + args[i]);
 
         }
-        if (args.length > 0 && args[0].length() > 0)
-            port=Integer.parseInt(args[0]);
-        if (args.length > 1)
+        if (args.length > 0 && args[0].length() > 0) {
+            port = Integer.parseInt(args[0]);
+        }
+        if (args.length > 1) {
             app.directory = args[1];
-        else
-            app.directory="/tmp";
+        } else {
+            app.directory = "/tmp";
+        }
 
         /* Dump a message */
-        System.err.println("SimpleApplication: loading on port "+port);
+        System.err.println("SimpleApplication: loading on port " + port);
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(app));
         /* Set up this simple daemon */
         app.server = new ServerSocket(port);
@@ -86,8 +84,7 @@ public class SimpleApplication implements Runnable {
         app.start();
     }
 
-    public void start()
-    {
+    public void start() {
         /* Dump a message */
         System.err.println("SimpleApplication: starting");
 
@@ -96,13 +93,12 @@ public class SimpleApplication implements Runnable {
     }
 
     public void stop()
-        throws IOException, InterruptedException
-    {
+            throws IOException, InterruptedException {
         /* Dump a message */
         System.err.println("SimpleApplication: stopping");
 
         /* Close the ServerSocket. This will make our thread to terminate */
-        this.stopping=true;
+        this.stopping = true;
         this.server.close();
 
         /* Wait for the main thread to exit and dump a message */
@@ -110,21 +106,19 @@ public class SimpleApplication implements Runnable {
         System.err.println("SimpleApplication: stopped");
     }
 
-    public void destroy()
-    {
-        System.err.println("SimpleApplication: instance "+this.hashCode()+
-                           " destroy");
+    public void destroy() {
+        System.err.println("SimpleApplication: instance " + this.hashCode()
+                + " destroy");
     }
 
-    public void run()
-    {
-        int number=0;
+    public void run() {
+        int number = 0;
 
         System.err.println("SimpleApplication: started acceptor loop");
         try {
-            while(!this.stopping) {
-                Socket socket=this.server.accept();
-                Handler handler=new Handler(socket,this);
+            while (!this.stopping) {
+                Socket socket = this.server.accept();
+                Handler handler = new Handler(socket, this);
                 handler.setConnectionNumber(number++);
                 handler.setDirectoryName(this.directory);
                 new Thread(handler).start();
@@ -132,15 +126,17 @@ public class SimpleApplication implements Runnable {
         } catch (IOException e) {
             /* Don't dump any error message if we are stopping. A IOException
                is generated when the ServerSocket is closed in stop() */
-            if (!this.stopping) e.printStackTrace(System.err);
+            if (!this.stopping) {
+                e.printStackTrace(System.err);
+            }
         }
 
         /* Terminate all handlers that at this point are still open */
-        Enumeration openhandlers=this.handlers.elements();
+        Enumeration openhandlers = this.handlers.elements();
         while (openhandlers.hasMoreElements()) {
-            Handler handler=(Handler)openhandlers.nextElement();
-            System.err.println("SimpleApplication: dropping connection "+
-                               handler.getConnectionNumber());
+            Handler handler = (Handler) openhandlers.nextElement();
+            System.err.println("SimpleApplication: dropping connection "
+                    + handler.getConnectionNumber());
             handler.close();
         }
 
@@ -159,21 +155,19 @@ public class SimpleApplication implements Runnable {
         }
     }
 
-    public static class ShutdownHook extends Thread
-    {
+    public static class ShutdownHook extends Thread {
+
         private final SimpleApplication instance;
 
-        public ShutdownHook(SimpleApplication instance)
-        {
+        public ShutdownHook(SimpleApplication instance) {
             this.instance = instance;
         }
-        public void run()
-        {
+
+        public void run() {
             System.out.println("Shutting down");
             try {
                 instance.stop();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace(System.err);
             }
         }
@@ -182,30 +176,30 @@ public class SimpleApplication implements Runnable {
     public static class Handler implements Runnable {
 
         private final SimpleApplication parent;
-        private String directory=null; // Only set before thread is started
+        private String directory = null; // Only set before thread is started
         private final Socket socket;
-        private int number=0; // Only set before thread is started
+        private int number = 0; // Only set before thread is started
 
         public Handler(Socket s, SimpleApplication p) {
             super();
-            this.socket=s;
-            this.parent=p;
+            this.socket = s;
+            this.parent = p;
         }
 
         public void run() {
             this.parent.addHandler(this);
-            System.err.println("SimpleApplication: connection "+this.number+
-                               " opened from "+this.socket.getInetAddress());
+            System.err.println("SimpleApplication: connection " + this.number
+                    + " opened from " + this.socket.getInetAddress());
             try {
-                InputStream in=this.socket.getInputStream();
-                OutputStream out=this.socket.getOutputStream();
-                handle(in,out);
+                InputStream in = this.socket.getInputStream();
+                OutputStream out = this.socket.getOutputStream();
+                handle(in, out);
                 this.socket.close();
             } catch (IOException e) {
                 e.printStackTrace(System.err);
             }
-            System.err.println("SimpleApplication: connection "+this.number+
-                               " closed");
+            System.err.println("SimpleApplication: connection " + this.number
+                    + " closed");
             this.parent.removeHandler(this);
         }
 
@@ -218,26 +212,26 @@ public class SimpleApplication implements Runnable {
         }
 
         public void setConnectionNumber(int number) {
-            this.number=number;
+            this.number = number;
         }
 
         public int getConnectionNumber() {
-            return(this.number);
+            return (this.number);
         }
 
         public void setDirectoryName(String directory) {
-            this.directory=directory;
+            this.directory = directory;
         }
 
         public String getDirectoryName() {
-            return(this.directory);
+            return (this.directory);
         }
 
         public void createFile(String name)
-        throws IOException {
-            OutputStream file=new FileOutputStream(name,true);
-            PrintStream out=new PrintStream(file);
-            SimpleDateFormat fmt=new SimpleDateFormat();
+                throws IOException {
+            OutputStream file = new FileOutputStream(name, true);
+            PrintStream out = new PrintStream(file);
+            SimpleDateFormat fmt = new SimpleDateFormat();
 
             out.println(fmt.format(new Date()));
             out.close();
@@ -245,27 +239,28 @@ public class SimpleApplication implements Runnable {
         }
 
         public void createDir(String name)
-        throws IOException {
+                throws IOException {
             File file = new File(name);
             boolean ok = file.mkdirs();
-            if(! ok)
-                throw new IOException("mkdirs for "+name+" failed");
+            if (!ok) {
+                throw new IOException("mkdirs for " + name + " failed");
+            }
             createFile(name);
         }
 
         public void handle(InputStream in, OutputStream os) {
-            PrintStream out=null;
+            PrintStream out = null;
 //            try {
 //                out=new PrintStream(os, true, "US-ASCII"); // Java 1.4+
 //            } catch (UnsupportedEncodingException ex) {
-                out=new PrintStream(os, true);
+            out = new PrintStream(os, true);
 //            }
 
-            while(true) {
+            while (true) {
                 try {
                     /* If we don't have data in the System InputStream, we want
                        to ask to the user for an option. */
-                    if (in.available()==0) {
+                    if (in.available() == 0) {
                         out.println();
                         out.println("Please select one of the following:");
                         out.println("    1) Shutdown");
@@ -277,7 +272,7 @@ public class SimpleApplication implements Runnable {
                     }
 
                     /* Read an option from the client */
-                    int x=in.read();
+                    int x = in.read();
 
                     switch (x) {
                         /* If the socket was closed, we simply return */
@@ -298,13 +293,13 @@ public class SimpleApplication implements Runnable {
 
                         /* Create a file */
                         case '2':
-                            String name=this.getDirectoryName()+
-                                        "/SimpleApplication."+
-                                        this.getConnectionNumber()+
-                                        ".tmp";
+                            String name = this.getDirectoryName()
+                                    + "/SimpleApplication."
+                                    + this.getConnectionNumber()
+                                    + ".tmp";
                             try {
                                 this.createFile(name);
-                                out.println("File '"+name+"' created");
+                                out.println("File '" + name + "' created");
                             } catch (IOException e) {
                                 e.printStackTrace(out);
                             }
@@ -323,14 +318,14 @@ public class SimpleApplication implements Runnable {
 
                         /* Create a directory (PR 30177 with 1.4.x and 1.5.0 */
                         case '5':
-                            String name1=this.getDirectoryName()+
-                                        "/a/b/c/d/e"+
-                                        "/SimpleApplication."+
-                                        this.getConnectionNumber()+
-                                        ".tmp";
+                            String name1 = this.getDirectoryName()
+                                    + "/a/b/c/d/e"
+                                    + "/SimpleApplication."
+                                    + this.getConnectionNumber()
+                                    + ".tmp";
                             try {
                                 this.createDir(name1);
-                                out.println("File '"+name1+"' created");
+                                out.println("File '" + name1 + "' created");
                             } catch (IOException e) {
                                 e.printStackTrace(out);
                             }
@@ -344,16 +339,16 @@ public class SimpleApplication implements Runnable {
 
                         /* We got something that we weren't supposed to get */
                         default:
-                            out.println("Unknown option '"+(char)x+"'");
+                            out.println("Unknown option '" + (char) x + "'");
                             break;
 
                     }
 
-                /* If we get an IOException we return (disconnect) */
+                    /* If we get an IOException we return (disconnect) */
                 } catch (IOException e) {
-                    System.err.println("SimpleApplication: IOException in "+
-                                       "connection "+
-                                       this.getConnectionNumber());
+                    System.err.println("SimpleApplication: IOException in "
+                            + "connection "
+                            + this.getConnectionNumber());
                     return;
                 }
             }
