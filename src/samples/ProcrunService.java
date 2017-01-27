@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -31,12 +32,11 @@ import java.util.TreeSet;
  * limitations under the License.
  *
  */
-
 /**
  * Sample service implementation for use with Windows Procrun.
  * <p>
- * Use the main() method for running as a Java (external) service.
- * Use the start() and stop() methods for running as a jvm (in-process) service
+ * Use the main() method for running as a Java (external) service. Use the
+ * start() and stop() methods for running as a jvm (in-process) service
  */
 public class ProcrunService implements Runnable {
 
@@ -52,11 +52,12 @@ public class ProcrunService implements Runnable {
     /**
      *
      * @param wait seconds to wait in loop
-     * @param filename optional filename - if non-null, run loop will stop when it disappears
+     * @param filename optional filename - if non-null, run loop will stop when
+     * it disappears
      * @throws IOException
      */
     private ProcrunService(long wait, File file) {
-        pause=wait;
+        pause = wait;
         stopFile = file;
     }
 
@@ -65,7 +66,7 @@ public class ProcrunService implements Runnable {
                 filename != null ? filename : "ProcrunService.tmp");
     }
 
-    private static void usage(){
+    private static void usage() {
         System.err.println("Must supply the argument 'start' or 'stop'");
     }
 
@@ -76,7 +77,7 @@ public class ProcrunService implements Runnable {
      * @param argnum which argument to extract
      * @return the argument or null
      */
-    private static String getArg(String[] args, int argnum){
+    private static String getArg(String[] args, int argnum) {
         if (args.length > argnum) {
             return args[argnum];
         } else {
@@ -84,13 +85,13 @@ public class ProcrunService implements Runnable {
         }
     }
 
-    private static void logSystemEnvironment()
-    {
+    private static void logSystemEnvironment() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null)
+        if (cl == null) {
             log("Missing currentThread context ClassLoader");
-        else
+        } else {
             log("Using context ClassLoader : " + cl.toString());
+        }
         log("Program environment: ");
 
 // Java 1.5+ code
@@ -100,12 +101,11 @@ public class ProcrunService implements Runnable {
 //            String n = (String)i.next();
 //            log(n + " ->  " + em.get(n));
 //        }
-
         log("System properties: ");
         Properties ps = System.getProperties();
-        TreeSet    ts = new TreeSet(ps.keySet());
+        TreeSet ts = new TreeSet(ps.keySet());
         for (Iterator i = ts.iterator(); i.hasNext();) {
-            String n = (String)i.next();
+            String n = (String) i.next();
             log(n + " ->  " + ps.get(n));
         }
 
@@ -146,28 +146,29 @@ public class ProcrunService implements Runnable {
     }
 
     /**
-     * Common entry point for start and stop service functions.
-     * To allow for use with Java mode, a temporary file is created
-     * by the start service, and a deleted by the stop service.
+     * Common entry point for start and stop service functions. To allow for use
+     * with Java mode, a temporary file is created by the start service, and a
+     * deleted by the stop service.
      *
      * @param args [start [pause time] | stop]
-     * @throws IOException if there are problems creating or deleting the temporary file
+     * @throws IOException if there are problems creating or deleting the
+     * temporary file
      */
     public static void main(String[] args) throws IOException {
         final int argc = args.length;
-        log("ProcrunService called with "+argc+" arguments from thread: "+Thread.currentThread());
-        for(int i=0; i < argc; i++) {
-            System.out.println("["+i+"] "+args[i]);
+        log("ProcrunService called with " + argc + " arguments from thread: " + Thread.currentThread());
+        for (int i = 0; i < argc; i++) {
+            System.out.println("[" + i + "] " + args[i]);
         }
-        String mode=getArg(args, 0);
-        if ("start".equals(mode)){
+        String mode = getArg(args, 0);
+        if ("start".equals(mode)) {
             File f = tmpFile(getArg(args, 2));
-            log("Creating file: "+f.getPath());
+            log("Creating file: " + f.getPath());
             f.createNewFile();
             startThread(getArg(args, 1), f);
         } else if ("stop".equals(mode)) {
             final File tmpFile = tmpFile(getArg(args, 1));
-            log("Deleting file: "+tmpFile.getPath());
+            log("Deleting file: " + tmpFile.getPath());
             tmpFile.delete();
         } else {
             usage();
@@ -179,12 +180,12 @@ public class ProcrunService implements Runnable {
      *
      * @param args optional, arg[0] = timeout (seconds)
      */
-    public static void start(String [] args) {
+    public static void start(String[] args) {
         startThread(getArg(args, 0), null);
-        while(thrd.isAlive()){
+        while (thrd.isAlive()) {
             try {
                 thrd.join();
-            } catch (InterruptedException ie){
+            } catch (InterruptedException ie) {
                 // Ignored
             }
         }
@@ -195,8 +196,8 @@ public class ProcrunService implements Runnable {
         if (waitParam != null) {
             wait = Integer.valueOf(waitParam).intValue();
         }
-        log("Starting the thread, wait(seconds): "+wait);
-        thrd = new Thread(new ProcrunService(wait*MS_PER_SEC,file));
+        log("Starting the thread, wait(seconds): " + wait);
+        thrd = new Thread(new ProcrunService(wait * MS_PER_SEC, file));
         thrd.start();
     }
 
@@ -205,7 +206,7 @@ public class ProcrunService implements Runnable {
      *
      * @param args ignored
      */
-    public static void stop(String [] args){
+    public static void stop(String[] args) {
         if (thrd != null) {
             log("Interrupting the thread");
             thrd.interrupt();
@@ -215,13 +216,13 @@ public class ProcrunService implements Runnable {
     }
 
     /**
-     * This method performs the work of the service.
-     * In this case, it just logs a message every so often.
+     * This method performs the work of the service. In this case, it just logs
+     * a message every so often.
      */
     public void run() {
-        log("Started thread in "+System.getProperty("user.dir"));
+        log("Started thread in " + System.getProperty("user.dir"));
         logSystemEnvironment();
-        while(stopFile == null || stopFile.exists()){
+        while (stopFile == null || stopFile.exists()) {
             try {
                 log("pausing...");
                 Thread.sleep(pause);
@@ -232,12 +233,12 @@ public class ProcrunService implements Runnable {
         }
     }
 
-    private static void log(String msg){
+    private static void log(String msg) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ");
-        System.out.println(df.format(new Date())+msg);
+        System.out.println(df.format(new Date()) + msg);
     }
 
-    protected void finalize(){
-        log("Finalize called from thread "+Thread.currentThread());
+    protected void finalize() {
+        log("Finalize called from thread " + Thread.currentThread());
     }
 }

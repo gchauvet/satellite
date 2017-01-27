@@ -14,17 +14,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.commons.daemon;
 
 import java.util.EventListener;
 
 /**
  * EvenListener type wrapper.
+ *
  * @version $Id$
  */
-public interface DaemonListener extends EventListener
-{
+public interface DaemonListener extends EventListener {
 
 }
-

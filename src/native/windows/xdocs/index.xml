@@ -16,18 +16,18 @@
  limitations under the License.
 -->
 <document>
- <properties>
-  <title>Daemon : Procrun</title>
-  <author email="mturk@apache.org">Mladen Turk</author>
- </properties>
+    <properties>
+        <title>Daemon : Procrun</title>
+        <author email="mturk@apache.org">Mladen Turk</author>
+    </properties>
 
-<body> 
-<section name="Introduction">
-<p>
-    Procrun is a set of libraries and applications for making Java
-    applications to run on WIN32 much easier.    
-</p> 
-</section>
+    <body> 
+        <section name="Introduction">
+            <p>
+                Procrun is a set of libraries and applications for making Java
+                applications to run on WIN32 much easier.    
+            </p> 
+        </section>
 
-</body>
+    </body>
 </document> 

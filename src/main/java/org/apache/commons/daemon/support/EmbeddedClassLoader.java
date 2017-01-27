@@ -57,7 +57,7 @@ public final class EmbeddedClassLoader extends ClassLoader {
                     resolveClass(result);
                 }
             }
-            
+
         } catch (Throwable ex) {
             result = super.loadClass(name, resolve);
         }

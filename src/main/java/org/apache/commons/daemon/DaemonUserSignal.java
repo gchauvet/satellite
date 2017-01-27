@@ -14,23 +14,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.commons.daemon;
 
 /**
- * Tags a Daemon as supporting some kind of
- * signaling method that allows the java application to
- * perform a custom action.
+ * Tags a Daemon as supporting some kind of signaling method that allows the
+ * java application to perform a custom action.
  * <p>
- * User must implement a signal method that will be called from
- * native upon receiving {@code SIGUSR2} signal from the operating system.
+ * User must implement a signal method that will be called from native upon
+ * receiving {@code SIGUSR2} signal from the operating system.
  * </p>
+ *
  * @author Nick Griffiths <nicobrevin@gmail.com>
  * @author Mladen Turk <mturk@apache.org>
  * @version $Id$
  */
-public interface DaemonUserSignal
-{
+public interface DaemonUserSignal {
 
     /**
      * Performs a custom action on received user signal.

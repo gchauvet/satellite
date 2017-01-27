@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-/* @version $Id$ */
+ /* @version $Id$ */
 import java.io.InputStream;
 import java.io.IOException;
 import java.lang.Thread;
@@ -23,16 +23,21 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class ServiceDaemonReadThread extends Thread {
+
     private BufferedReader in;
+
     ServiceDaemonReadThread(InputStream in) {
-            this.in = new BufferedReader(new InputStreamReader(in));
-        }
+        this.in = new BufferedReader(new InputStreamReader(in));
+    }
+
     public void run() {
         String buff;
         for (;;) {
             try {
                 buff = in.readLine();
-                if (buff == null) break;
+                if (buff == null) {
+                    break;
+                }
                 System.err.print(in.readLine());
             } catch (IOException ex) {
                 break; // Exit thread.

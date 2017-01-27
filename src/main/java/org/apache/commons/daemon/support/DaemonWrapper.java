@@ -15,8 +15,7 @@
  *  limitations under the License.
  */
 
-/* @version $Id$ */
-
+ /* @version $Id$ */
 package org.apache.commons.daemon.support;
 
 import java.lang.reflect.Method;
@@ -27,33 +26,30 @@ import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 
 /**
- * Implementation of the Daemon that allows running
- * standard applications as daemons.
- * The applications must have the mechanism to manage
- * the application lifecycle.
+ * Implementation of the Daemon that allows running standard applications as
+ * daemons. The applications must have the mechanism to manage the application
+ * lifecycle.
  *
  * @version $Id$
  * @author Mladen Turk
  */
-public class DaemonWrapper implements Daemon
-{
+public class DaemonWrapper implements Daemon {
 
-    private final static String ARGS            = "args";
-    private final static String START_CLASS     = "start";
-    private final static String START_METHOD    = "start.method";
-    private final static String STOP_CLASS      = "stop";
-    private final static String STOP_METHOD     = "stop.method";
-    private final static String STOP_ARGS       = "stop.args";
-    private String              configFileName  = null;
+    private final static String ARGS = "args";
+    private final static String START_CLASS = "start";
+    private final static String START_METHOD = "start.method";
+    private final static String STOP_CLASS = "stop";
+    private final static String STOP_METHOD = "stop.method";
+    private final static String STOP_ARGS = "stop.args";
+    private String configFileName = null;
     private final DaemonConfiguration config;
 
-    private final Invoker             startup;
-    private final Invoker             shutdown;
+    private final Invoker startup;
+    private final Invoker shutdown;
 
-    public DaemonWrapper()
-    {
-        config   = new DaemonConfiguration();
-        startup  = new Invoker();
+    public DaemonWrapper() {
+        config = new DaemonConfiguration();
+        startup = new Invoker();
         shutdown = new Invoker();
     }
 
@@ -62,7 +58,8 @@ public class DaemonWrapper implements Daemon
      * <p>
      * Accepts the following configuration arguments:
      * <ul>
-     * <li>-daemon-properties: - load DaemonConfiguration properties from the specified file to act as defaults</li>
+     * <li>-daemon-properties: - load DaemonConfiguration properties from the
+     * specified file to act as defaults</li>
      * <li>-start: set start class name</li>
      * <li>-start-method: set start method name</li>
      * <li>-stop: set stop class name</li>
@@ -81,12 +78,11 @@ public class DaemonWrapper implements Daemon
      * <li>stop.args</li>
      * </ul>
      * These are used to set the corresponding item if it has not already been
-     * set by the command arguments. <b>However, note that args and stop.args are
-     * appended to any existing values.</b>
+     * set by the command arguments. <b>However, note that args and stop.args
+     * are appended to any existing values.</b>
      */
     public void init(DaemonContext context)
-        throws Exception
-    {
+            throws Exception {
         String[] args = context.getArguments();
 
         if (args != null) {
@@ -98,46 +94,39 @@ public class DaemonWrapper implements Daemon
                 if (args[i].equals("--")) {
                     // Done with argument processing
                     break;
-                }
-                else if (args[i].equals("-daemon-properties")) {
+                } else if (args[i].equals("-daemon-properties")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     configFileName = args[i];
-                }
-                else if (args[i].equals("-start")) {
+                } else if (args[i].equals("-start")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     startup.setClassName(args[i]);
-                }
-                else if (args[i].equals("-start-method")) {
+                } else if (args[i].equals("-start-method")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     startup.setMethodName(args[i]);
-                }
-                else if (args[i].equals("-stop")) {
+                } else if (args[i].equals("-stop")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     shutdown.setClassName(args[i]);
-                }
-                else if (args[i].equals("-stop-method")) {
+                } else if (args[i].equals("-stop-method")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     shutdown.setMethodName(args[i]);
-                }
-                else if (args[i].equals("-stop-argument")) {
+                } else if (args[i].equals("-stop-argument")) {
                     if (++i == args.length) {
                         throw new IllegalArgumentException(args[i - 1]);
                     }
                     String[] aa = new String[1];
                     aa[0] = args[i];
                     shutdown.addArguments(aa);
-                }
-                else {
+                } else {
                     // This is not our option.
                     // Everything else will be forwarded to the main
                     break;
@@ -167,54 +156,49 @@ public class DaemonWrapper implements Daemon
     /**
      */
     public void start()
-        throws Exception
-    {
+            throws Exception {
         startup.invoke();
     }
 
     /**
      */
     public void stop()
-        throws Exception
-    {
+            throws Exception {
         shutdown.invoke();
     }
 
     /**
      */
-    public void destroy()
-    {
+    public void destroy() {
         // Nothing for the moment
         System.err.println("DaemonWrapper: instance " + this.hashCode() + " destroy");
     }
 
     // Internal class for wrapping the start/stop methods
-    class Invoker
-    {
-        private String      name = null;
-        private String      call = null;
-        private String[]    args = null;
-        private Method      inst = null;
-        private Class<?>       main = null;
+    class Invoker {
 
-        protected Invoker()
-        {
+        private String name = null;
+        private String call = null;
+        private String[] args = null;
+        private Method inst = null;
+        private Class<?> main = null;
+
+        protected Invoker() {
         }
 
-        protected void setClassName(String name)
-        {
+        protected void setClassName(String name) {
             if (this.name == null) {
                 this.name = name;
             }
         }
-        protected void setMethodName(String name)
-        {
+
+        protected void setMethodName(String name) {
             if (this.call == null) {
                 this.call = name;
             }
         }
-        protected void addArguments(String[] args)
-        {
+
+        protected void addArguments(String[] args) {
             if (args != null) {
                 ArrayList<String> aa = new ArrayList<String>();
                 if (this.args != null) {
@@ -226,16 +210,14 @@ public class DaemonWrapper implements Daemon
         }
 
         protected void invoke()
-            throws Exception
-        {
+                throws Exception {
             if (name.equals("System") && call.equals("exit")) {
                 // Just call a System.exit()
                 // The start method was probably installed
                 // a shutdown hook.
                 System.exit(0);
-            }
-            else {
-                Object obj   = null;
+            } else {
+                Object obj = null;
                 if ((inst.getModifiers() & Modifier.STATIC) == 0) {
                     // We only need object instance for non-static methods.
                     obj = main.newInstance();
@@ -246,10 +228,10 @@ public class DaemonWrapper implements Daemon
                 inst.invoke(obj, arg);
             }
         }
+
         // Load the class using reflection
         protected void validate()
-            throws Exception
-        {
+                throws Exception {
             /* Check the class name */
             if (name == null) {
                 name = "System";
@@ -269,7 +251,7 @@ public class DaemonWrapper implements Daemon
                 throw new NullPointerException("Cannot retrieve ClassLoader instance");
             }
             Class<?>[] ca = new Class[1];
-            ca[0]      = args.getClass();
+            ca[0] = args.getClass();
             // Find the required class
             main = cl.loadClass(name);
             if (main == null) {

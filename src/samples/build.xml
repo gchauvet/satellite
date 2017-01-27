@@ -17,117 +17,117 @@
 
 <project name="daemons samples" default="jars" basedir=".">
 
-<!-- ========== Initialize Properties ===================================== -->
-  <property file="build.properties"/>
-  <property name="dist.home"   value="../../dist"/>
-  <property name="build.home"  value="./build"/>
-  <property name="source.home" value="."/>
+    <!-- ========== Initialize Properties ===================================== -->
+    <property file="build.properties"/>
+    <property name="dist.home"   value="../../dist"/>
+    <property name="build.home"  value="./build"/>
+    <property name="source.home" value="."/>
 
-  <target name="jars" depends="SimpleDaemon,SimpleApplication,ServiceDaemon,AloneService,ProcrunService"/>
+    <target name="jars" depends="SimpleDaemon,SimpleApplication,ServiceDaemon,AloneService,ProcrunService"/>
 
-  <target name="clean" description="Remove output files">
-    <delete quiet="true">
-      <fileset dir="${build.home}"/>
-      <fileset dir="${dist.home}" includes="SimpleDaemon.jar service.jar aloneservice.jar ProcrunService.jar"/>
-    </delete>
-  </target>
+    <target name="clean" description="Remove output files">
+        <delete quiet="true">
+            <fileset dir="${build.home}"/>
+            <fileset dir="${dist.home}" includes="SimpleDaemon.jar service.jar aloneservice.jar ProcrunService.jar"/>
+        </delete>
+    </target>
 
-  <target name="SimpleDaemon" depends="compile"
-   description="Create SimpleDaemon.jar">
-    <mkdir      dir="${dist.home}"/>
-    <jar    jarfile="${dist.home}/SimpleDaemon.jar">
-      <metainf dir="../..">
-        <include name="NOTICE.txt"/>
-        <include name="LICENSE.txt"/>
-      </metainf>
-      <fileset dir="${build.home}/classes">
-        <include name="SimpleDaemon*.class" />
-      </fileset>
-    </jar>
-  </target>
+    <target name="SimpleDaemon" depends="compile"
+            description="Create SimpleDaemon.jar">
+        <mkdir      dir="${dist.home}"/>
+        <jar    jarfile="${dist.home}/SimpleDaemon.jar">
+            <metainf dir="../..">
+                <include name="NOTICE.txt"/>
+                <include name="LICENSE.txt"/>
+            </metainf>
+            <fileset dir="${build.home}/classes">
+                <include name="SimpleDaemon*.class" />
+            </fileset>
+        </jar>
+    </target>
 
-  <target name="SimpleApplication" depends="compile"
-          description="Create SimpleApplication.jar">
-      <mkdir      dir="${dist.home}"/>
-      <jar    jarfile="${dist.home}/SimpleApplication.jar">
-          <metainf dir="../..">
-              <include name="NOTICE.txt"/>
-              <include name="LICENSE.txt"/>
-          </metainf>
-          <fileset dir="${build.home}/classes">
-              <include name="SimpleApplication*.class" />
-          </fileset>
-      </jar>
-  </target>
+    <target name="SimpleApplication" depends="compile"
+            description="Create SimpleApplication.jar">
+        <mkdir      dir="${dist.home}"/>
+        <jar    jarfile="${dist.home}/SimpleApplication.jar">
+            <metainf dir="../..">
+                <include name="NOTICE.txt"/>
+                <include name="LICENSE.txt"/>
+            </metainf>
+            <fileset dir="${build.home}/classes">
+                <include name="SimpleApplication*.class" />
+            </fileset>
+        </jar>
+    </target>
 
-  <target name="ServiceDaemon" depends="compile"
-   description="Create ServiceDaemon.jar">
-    <mkdir      dir="${dist.home}"/>
-    <jar    jarfile="${dist.home}/service.jar">
-      <metainf dir="../..">
-        <include name="NOTICE.txt"/>
-        <include name="LICENSE.txt"/>
-      </metainf>
-      <fileset dir="${build.home}/classes">
-        <include name="ServiceDaemon*.class" />
-      </fileset>
-    </jar>
-  </target>
+    <target name="ServiceDaemon" depends="compile"
+            description="Create ServiceDaemon.jar">
+        <mkdir      dir="${dist.home}"/>
+        <jar    jarfile="${dist.home}/service.jar">
+            <metainf dir="../..">
+                <include name="NOTICE.txt"/>
+                <include name="LICENSE.txt"/>
+            </metainf>
+            <fileset dir="${build.home}/classes">
+                <include name="ServiceDaemon*.class" />
+            </fileset>
+        </jar>
+    </target>
 
-  <target name="AloneService" depends="compile"
-   description="Create aloneservice.jar">
-    <mkdir      dir="${dist.home}"/>
-    <jar    jarfile="${dist.home}/aloneservice.jar">
-      <metainf dir="../..">
-        <include name="NOTICE.txt"/>
-        <include name="LICENSE.txt"/>
-      </metainf>
-      <fileset dir="${build.home}/classes">
-        <include name="AloneService*.class" />
-        <include name="ServiceDaemonReadThread*.class" />
-      </fileset>
-    </jar>
-  </target>
+    <target name="AloneService" depends="compile"
+            description="Create aloneservice.jar">
+        <mkdir      dir="${dist.home}"/>
+        <jar    jarfile="${dist.home}/aloneservice.jar">
+            <metainf dir="../..">
+                <include name="NOTICE.txt"/>
+                <include name="LICENSE.txt"/>
+            </metainf>
+            <fileset dir="${build.home}/classes">
+                <include name="AloneService*.class" />
+                <include name="ServiceDaemonReadThread*.class" />
+            </fileset>
+        </jar>
+    </target>
 
-  <target name="ProcrunService" depends="compile"
-   description="Create ProcrunService.jar">
-    <mkdir      dir="${dist.home}"/>
-    <jar    jarfile="${dist.home}/ProcrunService.jar">
-      <metainf dir="../..">
-        <include name="NOTICE.txt"/>
-        <include name="LICENSE.txt"/>
-      </metainf>
-      <manifest>
-         <attribute name="Main-Class" value="ProcrunService"/>
-      </manifest>
-      <fileset dir="${build.home}/classes">
-        <include name="ProcrunService.class" />
-      </fileset>
-    </jar>
-  </target>
+    <target name="ProcrunService" depends="compile"
+            description="Create ProcrunService.jar">
+        <mkdir      dir="${dist.home}"/>
+        <jar    jarfile="${dist.home}/ProcrunService.jar">
+            <metainf dir="../..">
+                <include name="NOTICE.txt"/>
+                <include name="LICENSE.txt"/>
+            </metainf>
+            <manifest>
+                <attribute name="Main-Class" value="ProcrunService"/>
+            </manifest>
+            <fileset dir="${build.home}/classes">
+                <include name="ProcrunService.class" />
+            </fileset>
+        </jar>
+    </target>
 
-  <target name="compile" depends="prepare"
-   description="Create class files">
-       <javac  srcdir="${source.home}"
-            source="1.3"
-            target="1.3"
-           destdir="${build.home}/classes"
-             debug="${compile.debug}"
-       deprecation="${compile.deprecation}"
-          optimize="${compile.optimize}">
-      <classpath refid="compile.classpath"/>
-    </javac>
-  </target>
+    <target name="compile" depends="prepare"
+            description="Create class files">
+        <javac  srcdir="${source.home}"
+                source="1.3"
+                target="1.3"
+                destdir="${build.home}/classes"
+                debug="${compile.debug}"
+                deprecation="${compile.deprecation}"
+                optimize="${compile.optimize}">
+            <classpath refid="compile.classpath"/>
+        </javac>
+    </target>
 
-  <target name="prepare">
-    <mkdir dir="${build.home}"/>
-    <mkdir dir="${build.home}/classes"/>
-  </target>
+    <target name="prepare">
+        <mkdir dir="${build.home}"/>
+        <mkdir dir="${build.home}/classes"/>
+    </target>
 
-  <!-- Construct compile classpath -->
-  <path id="compile.classpath">
-    <!-- output jar filename may vary between releases -->
-    <fileset dir="../../dist" includes="commons-daemon-*.jar"/>
-  </path>
+    <!-- Construct compile classpath -->
+    <path id="compile.classpath">
+        <!-- output jar filename may vary between releases -->
+        <fileset dir="../../dist" includes="commons-daemon-*.jar"/>
+    </path>
 
 </project>
