@@ -1,14 +1,11 @@
 FIND_PACKAGE(JNI)
 IF(JNI_FOUND)
   INCLUDE_DIRECTORIES(SYSTEM ${JNI_INCLUDE_DIRS})
-  MESSAGE(INFO ${JNI_INCLUDE_DIRS})
+  MESSAGE(STATUS "DOSSIER JNI => ${JNI_INCLUDE_DIRS}")
 ELSE()
-  IF(NOT JDK_HOME)
-    SET(JDK_HOME /usr/lib/jvm/default-java)
-  ENDIF()
   INCLUDE_DIRECTORIES(SYSTEM
-    ${JDK_HOME}/include
-    ${JDK_HOME}/include/linux
+    ${JAVA_HOME}/include
+    ${JAVA_HOME}/include/linux
   )
 ENDIF()
 
