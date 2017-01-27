@@ -1,9 +1,11 @@
 FIND_PACKAGE(JNI)
-
 IF(JNI_FOUND)
   INCLUDE_DIRECTORIES(SYSTEM ${JNI_INCLUDE_DIRS})
 ELSE()
-  INCLUDE_DIRECTORIES(SYSTEM /usr/lib/jvm/default-java/include /usr/lib/jvm/default-java/include/linux)
+  INCLUDE_DIRECTORIES(SYSTEM
+    /usr/lib/jvm/default-java/include
+    /usr/lib/jvm/default-java/include/linux
+  )
 ENDIF()
 
 FILE(GLOB SOURCES *.c)
