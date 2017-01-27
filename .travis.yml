@@ -15,7 +15,7 @@ addons:
       - libc6-dev-i386
 
 jdk:
-  - openjdk7
+  - openjdk8
 install:
   - mvn install -DskipTests=true -DskipPkg=true
   
@@ -26,6 +26,8 @@ env:
   - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
 
 before_script:
+  - sudo ln -nsf ${JAVA_HOME}/include/linux/jni_md.h ${JAVA_HOME}/include/jni_md.h
+  - sudo ln -nsf ${JAVA_HOME}/include/linux/jawt_md.h ${JAVA_HOME}/include/jawt_md.h
   - mvn clean test
 
 script:
