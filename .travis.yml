@@ -16,9 +16,6 @@ addons:
 
 jdk:
   - openjdk7
-
-install:
-#  - mvn install -DskipTests=true -DskipPkg=true
   
 env:
   - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Linux32.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/unix
