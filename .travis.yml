@@ -27,6 +27,5 @@ env:
   - TOOLCHAIN=$TRAVIS_BUILD_DIR/src/native/toolchains/Windows64.cmake SOURCE_DIR=$TRAVIS_BUILD_DIR/src/native/windows
 
 script:
-  - mvn clean test
   - cd target && cmake $SOURCE_DIR -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN && make
   
