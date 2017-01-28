@@ -30,4 +30,4 @@ script:
   - cd target && cmake $SOURCE_DIR -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN && make
 
 after_script:
-  - mvn clean test
+  - cd .. && mvn clean test
