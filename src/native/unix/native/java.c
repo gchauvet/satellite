@@ -346,7 +346,7 @@ bool java_init(arg_data *args, home_data *data)
     // Prepare an array of bytes
     jbyteArray content = (*env)->NewByteArray(
         env,
-        commons_daemon_1_1_0_SNAPSHOT_jar_len
+        commons_daemon_embedded_jar_len
     );
 
     // Inject jar content
@@ -354,8 +354,8 @@ bool java_init(arg_data *args, home_data *data)
         env,
         content,
         0,
-        commons_daemon_1_1_0_SNAPSHOT_jar_len,
-        commons_daemon_1_1_0_SNAPSHOT_jar
+        commons_daemon_embedded_jar_len,
+        commons_daemon_embedded_jar
     );
     
     // Create an instance of our internal classloader with embedded jar
