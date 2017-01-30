@@ -124,20 +124,7 @@ public final class DaemonLoader {
                 throw new NullPointerException("Null class name specified");
             }
 
-            Class<?> c;
-            if (className.charAt(0) == '@') {
-                /* Wrap the class with DaemonWrapper
-                 * and modify arguments to include the real class name.
-                 */
-                c = DaemonWrapper.class;
-                String[] a = new String[args.length + 2];
-                a[0] = "-start";
-                a[1] = className.substring(1);
-                System.arraycopy(args, 0, a, 2, args.length);
-                args = a;
-            } else {
-                c = Class.forName(className, true, loader);
-            }
+            final Class<?> c = Class.forName(className, true, loader);
 
             /* Check interfaces */
             final boolean isdaemon = Class.forName("org.apache.commons.daemon.Daemon", true, loader).isAssignableFrom(c);
