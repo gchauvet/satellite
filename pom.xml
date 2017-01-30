@@ -26,14 +26,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>commons-daemon</groupId>
-    <artifactId>commons-daemon</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
-    <name>Apache Commons Daemon</name>
+    <artifactId>commons-daemon-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <name>Apache Commons Daemon POM</name>
+    <packaging>pom</packaging>
     <!-- Daemon started in Commons in 2002 with an import of code from Tomcat,
     which is why the NOTICE file has an earlier date than the inceptionYear -->
     <inceptionYear>2002</inceptionYear>
-    <description>
-        Apache Commons Daemon software provides an alternative invocation mechanism for unix-daemon-like Java code.
+    <description>Apache Commons Daemon software provides an alternative invocation mechanism for unix-daemon-like Java code.
     </description>
     <url>http://commons.apache.org/proper/commons-daemon/</url>
 
@@ -89,107 +89,14 @@
     </dependencies>
 
     <properties>
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
-        <commons.componentid>daemon</commons.componentid>
-        <commons.release.version>1.1.0</commons.release.version>
-        <commons.jira.id>DAEMON</commons.jira.id>
-        <commons.jira.pid>12310468</commons.jira.pid>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <commons.release.version>${project.version}</commons.release.version>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/native-src.xml</descriptor>
-                        <descriptor>src/assembly/bin.xml</descriptor>
-                        <descriptor>src/assembly/src.xml</descriptor>
-                    </descriptors>
-                    <tarLongFileMode>gnu</tarLongFileMode>
-                </configuration>
-            </plugin>
-            <!--
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-                <configuration>
-                    <timestampFormat>EpochMillis</timestampFormat>
-                </configuration>
-            </plugin>-->
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/EmbeddedClassLoader.*</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    <profiles>
-        <profile>
-            <id>unix-profile</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.5.0</version>
-                        <executions>
-                            <execution>
-                                <id>embedding-kernel</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>xxd</executable>
-                                    <workingDirectory>${project.build.directory}</workingDirectory>
-                                    <arguments>
-                                        <argument>-i</argument>
-                                        <argument>${project.artifactId}-${project.version}.jar</argument>
-                                        <argument>${project.basedir}/src/native/unix/native/kernel.h</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>embedding-loader</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>xxd</executable>
-                                    <workingDirectory>${project.build.directory}</workingDirectory>
-                                    <arguments>
-                                        <argument>-i</argument>
-                                        <argument>classes/org/apache/commons/daemon/support/EmbeddedClassLoader.class</argument>
-                                        <argument>${project.basedir}/src/native/unix/native/classloader.h</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <modules>
+        <module>api</module>
+        <module>impl</module>
+    </modules>
 
 </project>
