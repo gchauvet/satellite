@@ -187,7 +187,6 @@ public final class DaemonConfiguration {
         String args;
 
         // Load daemon.arg[0] ... daemon.arg[n] into the String array.
-        //
         while ((args = getProperty(name + "[" + list.size() + "]")) != null) {
             list.add(args);
         }
