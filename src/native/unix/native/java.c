@@ -337,10 +337,10 @@ bool java_init(arg_data *args, home_data *data)
     // Load classloader class
     const jclass clazzloader = (*env)->DefineClass(
         env,
-        "org/apache/commons/daemon/support/EmbeddedClassLoader",
+        "org/apache/commons/daemon/impl/EmbeddedClassLoader",
         NULL,
-        classes_org_apache_commons_daemon_support_EmbeddedClassLoader_class,
-        classes_org_apache_commons_daemon_support_EmbeddedClassLoader_class_len
+        classes_org_apache_commons_daemon_impl_EmbeddedClassLoader_class,
+        classes_org_apache_commons_daemon_impl_EmbeddedClassLoader_class_len
     );
 
     // Prepare an array of bytes
