@@ -53,19 +53,16 @@
             <id>jfclere</id>
             <email>jfclere at apache.org</email>
         </developer>
-
         <developer>
             <name>Remy Maucherat</name>
             <id>remm</id>
             <email>remm at apache.org</email>
         </developer>
-
         <developer>
             <name>Yoav Shapira</name>
             <id>yoavs</id>
             <email>yoavs at apache.org</email>
         </developer>
-
         <developer>
             <name>Bill Barker</name>
             <id>billbarker</id>
@@ -75,6 +72,11 @@
             <name>Mladen Turk</name>
             <id>mturk</id>
             <email>mturk at apache.org</email>
+        </developer>
+        <developer>
+            <name>Guillaume Chauvet</name>
+            <id>gchauvet</id>
+            <email>gchauvet at zatarox.com</email>
         </developer>
     </developers>
 
