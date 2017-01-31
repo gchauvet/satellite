@@ -23,7 +23,7 @@
 #define RSTR_PRUNSRV "Commons Daemon Service Runner"
 
 IDI_MAINICON         ICON                   "../../resources/procrunw.ico"
-IDD_DAEMON_CL        RCDARA                 "../../../../../impl/target/classes/org/apache/commons/daemon/support/EmbeddedClassLoader.class"
+IDD_DAEMON_CL        RCDARA                 "../../../../../impl/target/classes/org/apache/commons/daemon/impl/EmbeddedClassLoader.class"
 IDD_DAEMON_JAR       RCDATA                 "../../../../../impl/target/commons-daemon-embedded.jar"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "prunsrv.manifest"
