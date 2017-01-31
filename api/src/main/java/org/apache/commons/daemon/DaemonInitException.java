@@ -24,7 +24,7 @@ package org.apache.commons.daemon;
  * @author Nick Griffiths (nicobrevin@gmail.com)
  * @version $Id$
  */
-public class DaemonInitException extends Exception {
+public final class DaemonInitException extends Exception {
 
     private static final long serialVersionUID = 5665891535067213551L;
 
