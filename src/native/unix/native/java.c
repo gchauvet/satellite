@@ -449,10 +449,6 @@ bool java_load(arg_data *args)
     jsvc_xlate_to_ascii(args->clas);
     className = (*env)->NewStringUTF(env, args->clas);
     jsvc_xlate_from_ascii(args->clas);
-    if (className == NULL) {
-        log_error("Cannot create string for class name");
-        return false;
-    }
 
     jsvc_xlate_to_ascii(lang);
     stringClass = (*env)->FindClass(env, lang);
