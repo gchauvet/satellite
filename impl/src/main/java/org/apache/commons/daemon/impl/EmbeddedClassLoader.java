@@ -43,6 +43,7 @@ public final class EmbeddedClassLoader extends ClassLoader {
             final byte[] bytes = out.toByteArray();
             result = defineClass(name, bytes, 0, bytes.length);
         } catch (IOException ex) {
+            throw new ClassNotFoundException(ex.getMessage(), ex);
         }
         return result;
     }
