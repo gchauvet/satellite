@@ -22,13 +22,13 @@
  * programs such as structure size changes.  No binary compatibility is
  * possible across a change in the major version.
  */
-#define JSVC_MAJOR_VERSION      1
+#define JSVC_MAJOR_VERSION      2
 
 /**
  * Minor API changes that do not cause binary compatibility problems.
  * Should be reset to 0 when upgrading JSVC_MAJOR_VERSION
  */
-#define JSVC_MINOR_VERSION      1
+#define JSVC_MINOR_VERSION      0
 
 /** patch level */
 #define JSVC_PATCH_VERSION      0
