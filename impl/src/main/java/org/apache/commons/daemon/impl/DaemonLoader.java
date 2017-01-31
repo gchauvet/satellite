@@ -206,8 +206,7 @@ public final class DaemonLoader {
 
     private native void failed(String message);
 
-    private class Controller
-            implements DaemonController {
+    private final class Controller implements DaemonController {
 
         private boolean available = false;
 

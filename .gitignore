@@ -8,3 +8,4 @@
 target/
 src/native/unix/native/kernel.h
 src/native/unix/native/classloader.h
+/impl/nbproject/
