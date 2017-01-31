@@ -446,9 +446,9 @@ bool java_load(arg_data *args)
     char load[] = "load";
     char loadparams[] = "(Ljava/lang/String;[Ljava/lang/String;)Z";
 
-    jsvc_xlate_to_ascii(args->clas);
-    className = (*env)->NewStringUTF(env, args->clas);
-    jsvc_xlate_from_ascii(args->clas);
+    jsvc_xlate_to_ascii(args->jar);
+    className = (*env)->NewStringUTF(env, args->jar);
+    jsvc_xlate_from_ascii(args->jar);
 
     jsvc_xlate_to_ascii(lang);
     stringClass = (*env)->FindClass(env, lang);
@@ -608,9 +608,9 @@ bool java_check(arg_data *args)
 
     log_debug("Checking daemon");
 
-    jsvc_xlate_to_ascii(args->clas);
-    className = (*env)->NewStringUTF(env, args->clas);
-    jsvc_xlate_from_ascii(args->clas);
+    jsvc_xlate_to_ascii(args->jar);
+    className = (*env)->NewStringUTF(env, args->jar);
+    jsvc_xlate_from_ascii(args->jar);
     if (className == NULL) {
         log_error("Cannot create string for class name");
         return false;
@@ -626,7 +626,7 @@ bool java_check(arg_data *args)
 
     ret = (*env)->CallBooleanMethod(env, loader, method, className);
     if (ret == FALSE) {
-        log_error("An error was detected checking the %s daemon", args->clas);
+        log_error("An error was detected checking the daemon provided in jar %s", args->jar);
         return false;
     }
 

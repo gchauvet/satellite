@@ -825,7 +825,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
     if (args->chck == true) {
         if (java_check(args) != true)
             return 2;
-        printf("Service \"%s\" checked successfully\n", args->clas);
+        printf("Service in jar \"%s\" checked successfully\n", args->jar);
         return 0;
     }
 

@@ -42,9 +42,7 @@ typedef struct {
     /** Number of JVM options. */
     int onum;
     /** The name of the class to invoke. */
-    char *clas;
-    /** Is a classpath is defined ? */
-    bool cp;
+    char *jar;
     /** Command line arguments to the class. */
     char **args;
     /** Number of class command line arguments. */
