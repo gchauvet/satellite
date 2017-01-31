@@ -16,6 +16,7 @@
  */
 package org.apache.commons.daemon.impl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,12 +77,12 @@ public final class DaemonConfiguration {
      * @param fileName The properties file to load.
      * @return <code>true</code> if the file was loaded.
      */
-    public boolean load(String fileName) {
+    public boolean load(File fileName) {
         boolean ok = false;
         FileInputStream file = null;
         try {
             if (fileName == null) {
-                fileName = DEFAULT_CONFIG;
+                fileName = new File(DEFAULT_CONFIG);
             }
             file = new FileInputStream(fileName);
             configurationProperties.clear();
@@ -156,8 +157,7 @@ public final class DaemonConfiguration {
      *
      * @throws ParseException if the property is wrongly formatted.
      */
-    public String getProperty(String name)
-            throws ParseException {
+    public String getProperty(String name) throws ParseException {
         if (name == null) {
             return null;
         }

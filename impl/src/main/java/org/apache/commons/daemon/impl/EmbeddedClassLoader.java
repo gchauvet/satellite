@@ -25,7 +25,7 @@ public final class EmbeddedClassLoader extends ClassLoader {
 
     private final byte[] content;
 
-    private EmbeddedClassLoader(final byte[] content) {
+    EmbeddedClassLoader(final byte[] content) {
         this.content = content;
     }
 
@@ -49,7 +49,7 @@ public final class EmbeddedClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> result = null;
+        Class<?> result;
         try {
             result = findClass(name);
             if (result != null) {
