@@ -30,8 +30,9 @@ public final class DaemonLoaderTest {
 
     @Before
     public void setUp() {
-        instance = new DaemonLoader(getClass().getClassLoader());
+        instance = new DaemonLoader(DaemonLoader.class.getClassLoader());
         assertTrue(instance.load(FakeDaemonImpl.class.getName(), null));
+        assertTrue(instance.load(null, null));
     }
 
     @Test

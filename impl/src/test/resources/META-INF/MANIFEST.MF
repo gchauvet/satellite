@@ -1,0 +1,1 @@
+Daemon-Class: org.apache.commons.daemon.impl.DaemonLoaderTest$FakeDaemonImpl
