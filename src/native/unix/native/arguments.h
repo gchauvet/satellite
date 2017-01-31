@@ -43,6 +43,8 @@ typedef struct {
     int onum;
     /** The name of the class to invoke. */
     char *clas;
+    /** Is a classpath is defined ? */
+    bool cp;
     /** Command line arguments to the class. */
     char **args;
     /** Number of class command line arguments. */

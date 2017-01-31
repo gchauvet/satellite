@@ -166,11 +166,12 @@ static arg_data *parse(int argc, char *argv[])
     args->home    = NULL;         /* No default JAVA_HOME */
     args->onum    = 0;            /* Zero arguments, but let's have some room */
     args->clas    = NULL;         /* No class predefined */
+    args->cp      = false;        /* No classpath defined by default */
     args->anum    = 0;            /* Zero class specific arguments but make room*/
-    args->cwd     = "/";           /* Use root as default */
-    args->outfile = "/dev/null";   /* Swallow by default */
-    args->errfile = "/dev/null";   /* Swallow by default */
-    args->redirectstdin = true;    /* Redirect stdin to /dev/null by default */
+    args->cwd     = "/";          /* Use root as default */
+    args->outfile = "/dev/null";  /* Swallow by default */
+    args->errfile = "/dev/null";  /* Swallow by default */
+    args->redirectstdin = true;   /* Redirect stdin to /dev/null by default */
     args->procname = "jsvc.exec";
 #ifndef JSVC_UMASK
     args->umask   = 0077;
@@ -201,6 +202,7 @@ static arg_data *parse(int argc, char *argv[])
                 log_error("Invalid classpath specified");
                 return NULL;
             }
+            args->cp = true;
             args->opts[args->onum] = eval_cpath(temp);
             if (args->opts[args->onum] == NULL) {
                 log_error("Invalid classpath specified");
@@ -399,7 +401,7 @@ static arg_data *parse(int argc, char *argv[])
         }
     }
 
-    if (args->clas == NULL && args->remove == false) {
+    if (args->clas == NULL && (args->remove == false && args->cp == false)) {
         log_error("No class specified");
         return NULL;
     }
