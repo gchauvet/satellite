@@ -21,9 +21,7 @@ void help(home_data *data)
 {
     int x;
 
-    printf("Usages:\n");
-    printf("\t%s [-options] class [args...]\n", log_prog);
-    printf("\t%s [-options] -cp [classpaths...] [args...]\n", log_prog);
+    printf("Usage: %s [-options...] [{main}.jar] [args...]\n", log_prog);
     printf("\n");
     printf("Where options include:\n");
     printf("\n");
@@ -41,8 +39,7 @@ void help(home_data *data)
     printf("    -server\n");
     printf("        use a server Java Virtual Machine.\n");
     printf("    -cp | -classpath <directories and zip/jar files>\n");
-    printf("        set search path for service classes, resouces and \n");
-    printf("        Daemon class entry point if defined in MANIFEST.MF\n");
+    printf("        set additional search path for classes not defined in MANIFEST.MF\n");
     printf("    -java-home | -home <directory>\n");
     printf("        set the path of your JDK or JRE installation (or set\n");
     printf("        the JAVA_HOME environment variable)\n");

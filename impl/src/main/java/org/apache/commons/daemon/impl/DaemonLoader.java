@@ -16,9 +16,10 @@
  */
 package org.apache.commons.daemon.impl;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.Collections;
+import java.net.URLClassLoader;
 import java.util.jar.Manifest;
 import org.apache.commons.daemon.*;
 import org.apache.commons.daemon.Daemon;
@@ -97,45 +98,32 @@ public final class DaemonLoader {
     /**
      * Load the Daemon class entry-point.
      *
-     * @param className Define explicitely then classname of entry point. If
-     * null, search the first MANIFEST.MF who contains Daemon-Class property
+     * @param jarName Define explicitely then jar who contains the entry point
+     * defined in the MANIFEST.MF (Daemon-Class property)
      * @param args Arguments to provide to the DaemonContext
      * @return true if loaded.
      */
-    public boolean load(String className, String args[]) {
+    public boolean load(final String jarName, final String args[]) {
         try {
-            /* Check if the underlying library supplied a valid list of
-               arguments */
-            if (args == null) {
-                args = new String[0];
+            if (jarName == null) {
+                throw new IllegalArgumentException("No main jar provided");
             }
 
-            /* Check the class name */
-            if (className == null) {
-                // Search if the class is defined in one of the MANIFEST.MF (first used)
-                for (URL url : Collections.list(getClass().getClassLoader().getResources("META-INF/MANIFEST.MF"))) {
-                    final Manifest manifest = new Manifest(url.openStream());
-                    className = manifest.getMainAttributes().getValue("Daemon-Class");
-                    if (className != null) {
-                        final Class<?> c = Class.forName(className, true, loader);
-                        daemon = c.newInstance();
-                        controller = new Controller();
-                        /* Set the availability flag in the controller */
-                        controller.setAvailable(false);
+            final URLClassLoader loader = new URLClassLoader(new URL[]{new File(jarName).toURI().toURL()}, this.loader);
+            final Manifest manifest = new Manifest(loader.findResource("META-INF/MANIFEST.MF").openStream());
 
-                        /* Create context */
-                        final Context context = new Context();
-                        context.setArguments(args);
-                        context.setController(controller);
+            final Class<?> c = Class.forName(manifest.getMainAttributes().getValue("Daemon-Class"), true, loader);
+            daemon = c.newInstance();
+            controller = new Controller();
+            /* Set the availability flag in the controller */
+            controller.setAvailable(false);
 
-                        ((Daemon) daemon).init(context);
-                        break;
-                    }
-                }
-                if (daemon == null) {
-                    throw new IllegalArgumentException("Classname unspecified");
-                }
-            }
+            /* Create context */
+            final Context context = new Context();
+            context.setArguments(args != null ? args : new String[0]);
+            context.setController(controller);
+
+            ((Daemon) daemon).init(context);
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
             /* DaemonInitExceptions can fail with a nicer message */

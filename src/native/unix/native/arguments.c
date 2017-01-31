@@ -165,8 +165,7 @@ static arg_data *parse(int argc, char *argv[])
     args->name    = NULL;         /* No VM version name */
     args->home    = NULL;         /* No default JAVA_HOME */
     args->onum    = 0;            /* Zero arguments, but let's have some room */
-    args->clas    = NULL;         /* No class predefined */
-    args->cp      = false;        /* No classpath defined by default */
+    args->jar    = NULL;          /* No main jar predefined */
     args->anum    = 0;            /* Zero class specific arguments but make room*/
     args->cwd     = "/";          /* Use root as default */
     args->outfile = "/dev/null";  /* Swallow by default */
@@ -202,7 +201,6 @@ static arg_data *parse(int argc, char *argv[])
                 log_error("Invalid classpath specified");
                 return NULL;
             }
-            args->cp = true;
             args->opts[args->onum] = eval_cpath(temp);
             if (args->opts[args->onum] == NULL) {
                 log_error("Invalid classpath specified");
@@ -396,13 +394,13 @@ static arg_data *parse(int argc, char *argv[])
             return NULL;
         }
         else {
-            args->clas=strdup(argv[x]);
+            args->jar=strdup(argv[x]);
             break;
         }
     }
 
-    if (args->clas == NULL && (args->remove == false && args->cp == false)) {
-        log_error("No class specified");
+    if (args->jar == NULL) {
+        log_error("No main jar specified");
         return NULL;
     }
 
@@ -475,7 +473,7 @@ arg_data *arguments(int argc, char *argv[])
             log_debug("|   \"%s\"", args->opts[x]);
         }
 
-        log_debug("| Class Invoked:   \"%s\"", PRINT_NULL(args->clas));
+        log_debug("| Jar Invoked:   \"%s\"", PRINT_NULL(args->jar));
         log_debug("| Class Arguments: %d", args->anum);
         for (x = 0; x < args->anum; x++) {
             log_debug("|   \"%s\"",args->args[x]);
