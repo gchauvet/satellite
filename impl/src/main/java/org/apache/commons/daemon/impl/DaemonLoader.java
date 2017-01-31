@@ -43,21 +43,11 @@ public final class DaemonLoader {
     }
 
     public void version() {
-        System.err.println("java version \""
-                + System.getProperty("java.version") + "\"");
-        System.err.println(System.getProperty("java.runtime.name")
-                + " (build "
-                + System.getProperty("java.runtime.version") + ")");
-        System.err.println(System.getProperty("java.vm.name")
-                + " (build "
-                + System.getProperty("java.vm.version")
-                + ", " + System.getProperty("java.vm.info") + ")");
-        System.err.println("commons daemon version \""
-                + System.getProperty("commons.daemon.version") + "\"");
-        System.err.println("commons daemon process (id: "
-                + System.getProperty("commons.daemon.process.id")
-                + ", parent: "
-                + System.getProperty("commons.daemon.process.parent") + ")");
+        System.out.println(String.format("java version \"%s\"", System.getProperty("java.version")));
+        System.out.println(String.format("%s (build %s)", System.getProperty("java.runtime.name"), System.getProperty("java.runtime.version")));
+        System.out.println(String.format("%s (build %s, %s)", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")));
+        System.out.println(String.format("commons daemon version \"%s\"", System.getProperty("commons.daemon.version")));
+        System.out.println(String.format("commons daemon process (id: %s, parent: %s)", System.getProperty("commons.daemon.process.id"), System.getProperty("commons.daemon.process.parent")));
     }
 
     public boolean check(String cn) {
