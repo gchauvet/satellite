@@ -17,10 +17,14 @@
 package org.apache.commons.daemon.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.jar.Manifest;
+import java.util.zip.ZipFile;
 import org.apache.commons.daemon.*;
 import org.apache.commons.daemon.Daemon;
 
@@ -109,9 +113,27 @@ public final class DaemonLoader {
                 throw new IllegalArgumentException("No main jar provided");
             }
 
-            final URLClassLoader loader = new URLClassLoader(new URL[]{new File(jarName).toURI().toURL()}, this.loader);
-            final Manifest manifest = new Manifest(loader.findResource("META-INF/MANIFEST.MF").openStream());
+            final File jar = new File(jarName);
+            final ZipFile archive = new ZipFile(jar);
+            final List<URL> urls = new LinkedList<URL>();
+            final Manifest manifest;
+            try {
+                manifest = new Manifest(archive.getInputStream(archive.getEntry("META-INF/MANIFEST.MF")));
+                final String paths = manifest.getMainAttributes().getValue("Class-Path");
+                urls.add(new File(jarName).toURI().toURL());
+                if (paths != null) {
+                    for (String path : paths.split("\\s+")) {
+                        urls.add(new File(jar.getParentFile(), path).toURI().toURL());
+                    }
+                }
+            } finally {
+                try {
+                    archive.close();
+                } catch (IOException ex) {
+                }
+            }
 
+            final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), this.loader);
             final Class<?> c = Class.forName(manifest.getMainAttributes().getValue("Daemon-Class"), true, loader);
             daemon = c.newInstance();
             controller = new Controller();
@@ -297,6 +319,5 @@ public final class DaemonLoader {
         public void setArguments(String[] args) {
             this.args = args;
         }
-
     }
 }
