@@ -16,12 +16,9 @@
  */
 package org.apache.commons.daemon.support;
 
-import org.apache.commons.daemon.DaemonContext;
-import org.apache.commons.daemon.DaemonController;
-import org.apache.commons.daemon.DaemonInitException;
-
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import org.apache.commons.daemon.*;
+import org.apache.commons.daemon.Daemon;
 
 /**
  * Used by jsvc for Daemon management.
@@ -31,15 +28,8 @@ import java.lang.reflect.Method;
 public final class DaemonLoader {
 
     // N.B. These static mutable variables need to be accessed using synch.
-    private Controller controller = null; //@GuardedBy("this")
-    private Object daemon = null; //@GuardedBy("this")
-    /* Methods to call */
-    private Method init = null; //@GuardedBy("this")
-    private Method start = null; //@GuardedBy("this")
-    private Method stop = null; //@GuardedBy("this")
-    private Method destroy = null; //@GuardedBy("this")
-    private Method signal = null; //@GuardedBy("this")
-
+    private Controller controller = null;
+    private Object daemon = null;
     private final ClassLoader loader;
 
     public DaemonLoader(ClassLoader loader) {
@@ -99,8 +89,8 @@ public final class DaemonLoader {
 
     public boolean signal() {
         try {
-            if (signal != null) {
-                signal.invoke(daemon, new Object[0]);
+            if (daemon instanceof DaemonUserSignal) {
+                ((DaemonUserSignal) daemon).signal();
                 return true;
             }
             System.out.println("Daemon doesn't support signaling");
@@ -125,55 +115,17 @@ public final class DaemonLoader {
             }
 
             final Class<?> c = Class.forName(className, true, loader);
-
-            /* Check interfaces */
-            final boolean isdaemon = Class.forName("org.apache.commons.daemon.Daemon", true, loader).isAssignableFrom(c);
-            /* Check methods */
-            Class<?>[] myclass = new Class[1];
-            if (isdaemon) {
-                myclass[0] = DaemonContext.class;
-            } else {
-                myclass[0] = args.getClass();
-            }
-
-            init = c.getMethod("init", myclass);
-
-            myclass = null;
-            start = c.getMethod("start", myclass);
-            stop = c.getMethod("stop", myclass);
-            destroy = c.getMethod("destroy", myclass);
-
-            try {
-                signal = c.getMethod("signal", myclass);
-            } catch (NoSuchMethodException e) {
-                // Signalling will be disabled.
-            }
-
-            /* Create a new instance of the daemon */
             daemon = c.newInstance();
+            controller = new Controller();
+            /* Set the availability flag in the controller */
+            controller.setAvailable(false);
 
-            if (isdaemon) {
-                /* Create a new controller instance */
-                controller = new Controller();
+            /* Create context */
+            final Context context = new Context();
+            context.setArguments(args);
+            context.setController(controller);
 
-                /* Set the availability flag in the controller */
-                controller.setAvailable(false);
-
-                /* Create context */
-                Context context = new Context();
-                context.setArguments(args);
-                context.setController(controller);
-
-                /* Now we want to call the init method in the class */
-                Object arg[] = new Object[1];
-                arg[0] = context;
-                init.invoke(daemon, arg);
-            } else {
-                Object arg[] = new Object[1];
-                arg[0] = args;
-                init.invoke(daemon, arg);
-            }
-
+            ((Daemon) daemon).init(context);
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
             /* DaemonInitExceptions can fail with a nicer message */
@@ -197,8 +149,7 @@ public final class DaemonLoader {
     public boolean start() {
         try {
             /* Attempt to start the daemon */
-            Object arg[] = null;
-            start.invoke(daemon, arg);
+            ((Daemon) daemon).start();
 
             /* Set the availability flag in the controller */
             if (controller != null) {
@@ -223,8 +174,7 @@ public final class DaemonLoader {
             }
 
             /* Attempt to stop the daemon */
-            Object arg[] = null;
-            stop.invoke(daemon, arg);
+            ((Daemon) daemon).stop();
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, start and stop won't be called).
@@ -238,8 +188,7 @@ public final class DaemonLoader {
     public boolean destroy() {
         try {
             /* Attempt to stop the daemon */
-            Object arg[] = null;
-            destroy.invoke(daemon, arg);
+            ((Daemon) daemon).destroy();
 
             daemon = null;
             controller = null;
@@ -330,8 +279,7 @@ public final class DaemonLoader {
 
     }
 
-    private class Context
-            implements DaemonContext {
+    private final class Context implements DaemonContext {
 
         private DaemonController daemonController = null;
 
