@@ -110,7 +110,7 @@
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
                                         <argument>-i</argument>
-                                        <argument>classes/org/apache/commons/daemon/support/EmbeddedClassLoader.class</argument>
+                                        <argument>classes/org/apache/commons/daemon/impl/EmbeddedClassLoader.class</argument>
                                         <argument>${project.basedir}/../src/native/unix/native/classloader.h</argument>
                                     </arguments>
                                 </configuration>

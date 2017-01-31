@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.commons.daemon.support;
+package org.apache.commons.daemon.impl;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -92,7 +92,7 @@ public final class EmbeddedClassLoader extends ClassLoader {
      */
     static Object createBootstrap(final byte[] content) throws Exception {
         final ClassLoader main = new EmbeddedClassLoader(content);
-        final Class<?> clazz = Class.forName("org.apache.commons.daemon.support.DaemonLoader", true, main);
+        final Class<?> clazz = Class.forName("org.apache.commons.daemon.impl.DaemonLoader", true, main);
         final Constructor<?> constructor = clazz.getConstructor(ClassLoader.class);
         return constructor.newInstance(main);
     }
