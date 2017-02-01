@@ -23,6 +23,10 @@
 #ifndef _PRUNMGR_H
 #define _PRUNMGR_H
 
+#if !defined(PRG_VERSION_MAJOR) || !defined(PRG_VERSION_MINOR) || !defined(PRG_VERSION_PATCH)
+#error "Version numbers undefined"
+#endif
+
 #define PRG_REGROOT   L"Apache Software Foundation\\Procrun 2.0"
 
 #define IDM_TM_EXIT                     2000
