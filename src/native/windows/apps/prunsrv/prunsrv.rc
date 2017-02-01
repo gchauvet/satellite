@@ -50,7 +50,7 @@ BEGIN
       VALUE "FileDescription", RSTR_PRUNSRV "\0"
       VALUE "FileVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
       VALUE "InternalName", RSTR_PRUNSRV "\0"
-      VALUE "LegalCopyright", "Copyright (c) 2000-2016 The Apache Software Foundation.\0"
+      VALUE "LegalCopyright", "Copyright (c) 2000-2017 The Apache Software Foundation.\0"
       VALUE "OriginalFilename", "prunsrv.exe\0"
       VALUE "ProductName", RSTR_PRUNSRV "\0"
       VALUE "ProductVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
