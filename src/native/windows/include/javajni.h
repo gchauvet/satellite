@@ -17,6 +17,9 @@
 #ifndef _JAVAJNI_H_INCLUDED_
 #define _JAVAJNI_H_INCLUDED_
 
+#define IDD_DAEMON_CL                   2100
+#define IDD_DAEMON_JAR                  2101
+
 __APXBEGIN_DECLS
 
 #define     APX_JVM_DESTROY 0x00000001
@@ -30,8 +33,7 @@ typedef struct stAPXJAVA_THREADARGS
     DWORD       dwMx;
     DWORD       dwSs;
     DWORD       bJniVfprintf;
-    LPCSTR      szClassName;
-    LPCSTR      szMethodName;
+    LPCSTR      szJarName;
     LPCVOID     lpArguments;
     BOOL        setErrorOrOut;
     LPCWSTR     szStdErrFilename;
@@ -40,18 +42,6 @@ typedef struct stAPXJAVA_THREADARGS
 } APXJAVA_THREADARGS, *LPAPXJAVA_THREADARGS;
 
 APXHANDLE   apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath);
-
-BOOL        apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
-                              LPCVOID lpOptions, DWORD dwMs, DWORD dwMx,
-                              DWORD dwSs, DWORD bJniVfprintf);
-DWORD
-apxJavaCmdInitialize(APXHANDLE hPool, LPCWSTR szClassPath, LPCWSTR szClass,
-                     LPCWSTR szOptions, DWORD dwMs, DWORD dwMx,
-                     DWORD dwSs, LPCWSTR szCmdArgs, LPWSTR **lppArray);
-
-BOOL        apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szClassName,
-                                 LPCSTR szMethodName,
-                                 LPCVOID lpArguments);
 
 BOOL        apxJavaStart(LPAPXJAVA_THREADARGS pArgs);
 

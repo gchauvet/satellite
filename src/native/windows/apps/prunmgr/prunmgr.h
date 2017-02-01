@@ -93,27 +93,12 @@
 #define IDC_PPJMX                       2667
 #define IDC_PPJSS                       2668
 
-#define IDD_PROPPAGE_START              2680
-#define IDC_PPRCLASS                    2681
-#define IDC_PPRIMAGE                    2682
-#define IDC_PPRBIMAGE                   2683
+#define IDD_PROPPAGE_SETUP              2680
+#define IDC_PPRJAR                    	2681
 #define IDC_PPRWPATH                    2684
 #define IDC_PPRBWPATH                   2685
-#define IDC_PPRMETHOD                   2686
 #define IDC_PPRARGS                     2687
 #define IDC_PPRTIMEOUT                  2688
-#define IDC_PPRMODE                     2689
-
-#define IDD_PROPPAGE_STOP               2700
-#define IDC_PPSCLASS                    2701
-#define IDC_PPSIMAGE                    2702
-#define IDC_PPSBIMAGE                   2703
-#define IDC_PPSWPATH                    2704
-#define IDC_PPSBWPATH                   2705
-#define IDC_PPSMETHOD                   2706
-#define IDC_PPSARGS                     2707
-#define IDC_PPSTIMEOUT                  2708
-#define IDC_PPSMODE                     2709
 
 #define IDS_ALREAY_RUNING               3100
 #define IDS_ERRORCMD                    3101

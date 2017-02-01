@@ -59,13 +59,7 @@ typedef struct APX_STDWRAP {
 
 /* Use static variables instead of #defines */
 static LPCWSTR  PRSRV_AUTO        = L"auto";
-static LPCWSTR  PRSRV_JAVA        = L"java";
-static LPCWSTR  PRSRV_JVM         = L"jvm";
-static LPCWSTR  PRSRV_JDK         = L"jdk";
-static LPCWSTR  PRSRV_JRE         = L"jre";
 static LPCWSTR  PRSRV_MANUAL      = L"manual";
-static LPCWSTR  PRSRV_JBIN        = L"\\bin\\java.exe";
-static LPCWSTR  PRSRV_PBIN        = L"\\bin";
 static LPCWSTR  PRSRV_SIGNAL      = L"SIGNAL";
 static LPCWSTR  STYPE_INTERACTIVE = L"interactive";
 
@@ -120,31 +114,21 @@ static APXCMDLINEOPT _options[] = {
 /* 15 */    { L"Classpath",         L"Classpath",       L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 /* 16 */    { L"JvmMs",             L"JvmMs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
 /* 17 */    { L"JvmMx",             L"JvmMx",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 19 */    { L"JvmSs",             L"JvmSs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 18 */    { L"JvmSs",             L"JvmSs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
 
-/* 19 */    { L"StopImage",         L"Image",           L"Stop",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 20 */    { L"StopPath",          L"WorkingPath",     L"Stop",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 21 */    { L"StopClass",         L"Class",           L"Stop",        APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 22 */    { L"StopParams",        L"Params",          L"Stop",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 23 */    { L"StopMethod",        L"Method",          L"Stop",        APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 24 */    { L"StopMode",          L"Mode",            L"Stop",        APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 25 */    { L"StopTimeout",       L"Timeout",         L"Stop",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 19 */    { L"StopTimeout",       L"Timeout",         L"Conf",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 20 */    { L"StartPath",         L"WorkingPath",     L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 21 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 22 */    { L"Arguments",         L"Params",          L"Conf",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
 
-/* 26 */    { L"StartImage",        L"Image",           L"Start",       APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 27 */    { L"StartPath",         L"WorkingPath",     L"Start",       APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 28 */    { L"StartClass",        L"Class",           L"Start",       APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 29 */    { L"StartParams",       L"Params",          L"Start",       APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 30 */    { L"StartMethod",       L"Method",          L"Start",       APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 31 */    { L"StartMode",         L"Mode",            L"Start",       APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-
-/* 32 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 33 */    { L"LogPrefix",         L"Prefix",          L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 34 */    { L"LogLevel",          L"Level",           L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 35 */    { L"StdError",          L"StdError",        L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 36 */    { L"StdOutput",         L"StdOutput",       L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 37 */    { L"LogJniMessages",    L"LogJniMessages",  L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
-/* 38 */    { L"PidFile",           L"PidFile",         L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 39 */    { L"Rotate",            L"Rotate",          L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 23 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 24 */    { L"LogPrefix",         L"Prefix",          L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 25 */    { L"LogLevel",          L"Level",           L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 26 */    { L"StdError",          L"StdError",        L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 27 */    { L"StdOutput",         L"StdOutput",       L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 28 */    { L"LogJniMessages",    L"LogJniMessages",  L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
+/* 29 */    { L"PidFile",           L"PidFile",         L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 30 */    { L"Rotate",            L"Rotate",          L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
             /* NULL terminate the array */
             { NULL }
 };
@@ -184,43 +168,26 @@ static APXCMDLINEOPT _options[] = {
 #define SO_JVMMX            GET_OPT_I(17)
 #define SO_JVMSS            GET_OPT_I(18)
 
-#define SO_STOPIMAGE        GET_OPT_V(19)
-#define SO_STOPPATH         GET_OPT_V(20)
-#define SO_STOPCLASS        GET_OPT_V(21)
-#define SO_STOPPARAMS       GET_OPT_V(22)
-#define SO_STOPMETHOD       GET_OPT_V(23)
-#define SO_STOPMODE         GET_OPT_V(24)
-#define SO_STOPTIMEOUT      GET_OPT_I(25)
+#define SO_STOPTIMEOUT      GET_OPT_I(19)
 
-#define SO_STARTIMAGE       GET_OPT_V(26)
-#define SO_STARTPATH        GET_OPT_V(27)
-#define SO_STARTCLASS       GET_OPT_V(28)
-#define SO_STARTPARAMS      GET_OPT_V(29)
-#define SO_STARTMETHOD      GET_OPT_V(30)
-#define SO_STARTMODE        GET_OPT_V(31)
+#define SO_STARTPATH        GET_OPT_V(20)
+#define SO_MAINJAR          GET_OPT_V(21)
+#define SO_ARGUMENTS        GET_OPT_V(22)
 
-#define SO_LOGPATH          GET_OPT_V(32)
-#define SO_LOGPREFIX        GET_OPT_V(33)
-#define SO_LOGLEVEL         GET_OPT_V(34)
+#define SO_LOGPATH          GET_OPT_V(23)
+#define SO_LOGPREFIX        GET_OPT_V(24)
+#define SO_LOGLEVEL         GET_OPT_V(25)
 
-#define SO_STDERROR         GET_OPT_V(35)
-#define SO_STDOUTPUT        GET_OPT_V(36)
-#define SO_JNIVFPRINTF      GET_OPT_I(37)
-#define SO_PIDFILE          GET_OPT_V(38)
-#define SO_LOGROTATE        GET_OPT_I(39)
+#define SO_STDERROR         GET_OPT_V(26)
+#define SO_STDOUTPUT        GET_OPT_V(27)
+#define SO_JNIVFPRINTF      GET_OPT_I(28)
+#define SO_PIDFILE          GET_OPT_V(29)
+#define SO_LOGROTATE        GET_OPT_I(30)
 
 static SERVICE_STATUS        _service_status;
 static SERVICE_STATUS_HANDLE _service_status_handle = NULL;
 /* Set if launched by SCM   */
 static BOOL                  _service_mode = FALSE;
-/* JVM used as worker       */
-static BOOL                  _jni_startup  = FALSE;
-/* JVM used for shutdown    */
-static BOOL                  _jni_shutdown = FALSE;
-/* Java used as worker       */
-static BOOL                  _java_startup  = FALSE;
-/* Java used for shutdown    */
-static BOOL                  _java_shutdown = FALSE;
 /* Global variables and objects */
 static APXHANDLE    gPool;
 static APXHANDLE    gWorker;
@@ -233,19 +200,12 @@ static LPSTR    _jni_jvmoptions           = NULL;   /* Path to jvm options */
 
 static LPSTR    _jni_classpath            = NULL;
 static LPCWSTR  _jni_rparam               = NULL;    /* Startup  arguments */
-static LPCWSTR  _jni_sparam               = NULL;    /* Shutdown arguments */
-static LPSTR    _jni_rmethod              = NULL;    /* Startup  method */
-static LPSTR    _jni_smethod              = NULL;    /* Shutdown method */
-static LPSTR    _jni_rclass               = NULL;    /* Startup  class */
-static LPSTR    _jni_sclass               = NULL;    /* Shutdown class */
 static HANDLE gShutdownEvent = NULL;
 static HANDLE gSignalEvent   = NULL;
 static HANDLE gSignalThread  = NULL;
 static HANDLE gPidfileHandle = NULL;
 static LPWSTR gPidfileName   = NULL;
 static BOOL   gSignalValid   = TRUE;
-static APXJAVA_THREADARGS gRargs;
-static APXJAVA_THREADARGS gSargs;
 
 DWORD WINAPI eventThread(LPVOID lpParam)
 {
@@ -265,7 +225,7 @@ DWORD WINAPI eventThread(LPVOID lpParam)
         if (dw == WAIT_OBJECT_0 && gSignalValid) {
             if (!GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, 0)) {
                 /* Invoke Thread dump */
-                if (gWorker && _jni_startup)
+                if (gWorker)
                     apxJavaDumpAllStacks(gWorker);
             }
             ResetEvent(gSignalEvent);
@@ -939,6 +899,7 @@ static DWORD WINAPI serviceStop(LPVOID lpParameter)
     BOOL   wait_to_die = FALSE;
     DWORD  timeout     = SO_STOPTIMEOUT * 1000;
     DWORD  dwCtrlType  = (DWORD)((BYTE *)lpParameter - (BYTE *)0);
+    APXJAVA_THREADARGS gSargs;
 
     apxLogWrite(APXLOG_MARK_INFO "Stopping service...");
 
@@ -946,120 +907,39 @@ static DWORD WINAPI serviceStop(LPVOID lpParameter)
         apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
         return TRUE;    /* Nothing to do */
     }
-    if (_jni_shutdown) {
-        if (!IS_VALID_STRING(SO_STARTPATH) && IS_VALID_STRING(SO_STOPPATH)) {
-            /* If the Working path is specified change the current directory
-             * but only if the start path wasn't specified already.
-             */
-            SetCurrentDirectoryW(SO_STOPPATH);
-        }
-        hWorker = apxCreateJava(gPool, _jni_jvmpath);
-        if (IS_INVALID_HANDLE(hWorker)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
-            return 1;
-        }
-        gSargs.hJava            = hWorker;
-        gSargs.szClassPath      = _jni_classpath;
-        gSargs.lpOptions        = _jni_jvmoptions;
-        gSargs.dwMs             = SO_JVMMS;
-        gSargs.dwMx             = SO_JVMMX;
-        gSargs.dwSs             = SO_JVMSS;
-        gSargs.bJniVfprintf     = SO_JNIVFPRINTF;
-        gSargs.szClassName      = _jni_sclass;
-        gSargs.szMethodName     = _jni_smethod;
-        gSargs.lpArguments      = _jni_sparam;
-        gSargs.szStdErrFilename = NULL;
-        gSargs.szStdOutFilename = NULL;
-        gSargs.szLibraryPath    = SO_LIBPATH;
-        /* Register onexit hook
-         */
-        _onexit(onExitStop);
-        /* Create shutdown event */
-        gShutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-        if (!apxJavaStart(&gSargs)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed starting java");
-            rv = 3;
-        }
-        else {
-            if (lstrcmpA(_jni_sclass, "java/lang/System") == 0) {
-                reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 20 * 1000);
-                apxLogWrite(APXLOG_MARK_DEBUG "Forcing java jni System.exit worker to finish...");
-                return 0;
-            }
-            else {
-                apxLogWrite(APXLOG_MARK_DEBUG "Waiting for java jni stop worker to finish...");
-                apxJavaWait(hWorker, INFINITE, FALSE);
-                apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop worker finished.");
-            }
-        }
-        wait_to_die = TRUE;
-    }
-    else if (IS_VALID_STRING(SO_STOPMODE)) { /* Only in case we have a stop mode */
-        DWORD nArgs;
-        LPWSTR *pArgs;
 
-        if (!IS_VALID_STRING(SO_STOPIMAGE)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Missing service ImageFile");
-            if (!_service_mode)
-                apxDisplayError(FALSE, NULL, 0, "Service '%S' is missing the ImageFile",
-                                _service_name ? _service_name : L"unknown");
-            return 1;
-        }
-        /* Redirect process */
-        hWorker = apxCreateProcessW(gPool,
-                                    0,
-                                    child_callback,
-                                    SO_USER,
-                                    SO_PASSWORD,
-                                    FALSE);
-        if (IS_INVALID_HANDLE(hWorker)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed creating process");
-            return 1;
-        }
-        if (!apxProcessSetExecutableW(hWorker, SO_STOPIMAGE)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process executable %S",
-                        SO_STOPIMAGE);
-            rv = 2;
-            goto cleanup;
-        }
-        /* Assemble the command line */
-        if (_java_shutdown) {
-            nArgs = apxJavaCmdInitialize(gPool, SO_CLASSPATH, SO_STOPCLASS,
-                                         SO_JVMOPTIONS, SO_JVMMS, SO_JVMMX,
-                                         SO_JVMSS, SO_STOPPARAMS, &pArgs);
-        }
-        else {
-            nArgs = apxMultiSzToArrayW(gPool, SO_STOPPARAMS, &pArgs);
-        }
-
-        /* Pass the argv to child process */
-        if (!apxProcessSetCommandArgsW(hWorker, SO_STOPIMAGE,
-                                       nArgs, (const WCHAR **) &pArgs)) {
-            rv = 3;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process arguments (argc=%d)",
-                        nArgs);
-            goto cleanup;
-        }
-        /* Set the working path */
-        if (!apxProcessSetWorkingPathW(hWorker, SO_STOPPATH)) {
-            rv = 4;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process working path to %S",
-                        SO_STOPPATH);
-            goto cleanup;
-        }
-        /* Finally execute the child process
-         */
-        if (!apxProcessExecute(hWorker)) {
-            rv = 5;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed executing process");
-            goto cleanup;
-        } else {
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for stop worker to finish...");
-            apxHandleWait(hWorker, INFINITE, FALSE);
-            apxLogWrite(APXLOG_MARK_DEBUG "Stop worker finished.");
-        }
-        wait_to_die = TRUE;
+    hWorker = apxCreateJava(gPool, _jni_jvmpath);
+    if (IS_INVALID_HANDLE(hWorker)) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
+        return 1;
     }
+    gSargs.hJava            = hWorker;
+    gSargs.szClassPath      = _jni_classpath;
+    gSargs.lpOptions        = _jni_jvmoptions;
+    gSargs.dwMs             = SO_JVMMS;
+    gSargs.dwMx             = SO_JVMMX;
+    gSargs.dwSs             = SO_JVMSS;
+    gSargs.bJniVfprintf     = SO_JNIVFPRINTF;
+    gSargs.szJarName        = SO_MAINJAR;
+    gSargs.lpArguments      = SO_ARGUMENTS;
+    gSargs.szStdErrFilename = NULL;
+    gSargs.szStdOutFilename = NULL;
+    gSargs.szLibraryPath    = SO_LIBPATH;
+    /* Register onexit hook
+     */
+    _onexit(onExitStop);
+    /* Create shutdown event */
+    gShutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (!apxJavaStart(&gSargs)) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed starting java");
+        rv = 3;
+    }
+    else {
+        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for java jni stop worker to finish...");
+        apxJavaWait(hWorker, INFINITE, FALSE);
+        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop worker finished.");
+    }
+    wait_to_die = TRUE;
 cleanup:
     /* Close Java JNI handle or stop worker
      * If this is the single JVM instance it will unload
@@ -1116,16 +996,14 @@ cleanup:
     return rv;
 }
 
-/* Executed when the service receives start event */
-static DWORD serviceStart()
+/* Executed when initialize the service */
+static DWORD serviceInit()
 {
     DWORD  rv = 0;
-    DWORD  nArgs;
-    LPWSTR *pArgs;
     FILETIME fts;
-
-    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
-
+    
+    apxLogWrite(APXLOG_MARK_INFO "Initialize service...");
+    
     if (!IS_INVALID_HANDLE(gWorker)) {
         apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
         return TRUE;    /* Nothing to do */
@@ -1138,117 +1016,31 @@ static DWORD serviceStart()
                 /* Delete failed. Either no access or opened */
                 apxLogWrite(APXLOG_MARK_ERROR "Pid file '%S' exists",
                             gPidfileName);
-                return 1;
+                return TRUE;
             }
         }
     }
     GetSystemTimeAsFileTime(&fts);
-    if (_jni_startup) {
-        if (IS_EMPTY_STRING(SO_STARTPATH))
-            SO_STARTPATH = gStartPath;
-        if (IS_VALID_STRING(SO_STARTPATH)) {
-            /* If the Working path is specified change the current directory */
-            SetCurrentDirectoryW(SO_STARTPATH);
-        }
-        if (IS_VALID_STRING(SO_LIBPATH)) {
-            /* Add LibraryPath to the PATH */
-           apxAddToPathW(gPool, SO_LIBPATH);
-        }
-        /* Set the environment using putenv, so JVM can use it */
-        setInprocEnvironment();
-        /* Create the JVM global worker */
-        gWorker = apxCreateJava(gPool, _jni_jvmpath);
-        if (IS_INVALID_HANDLE(gWorker)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
-            return 1;
-        }
-        gRargs.hJava            = gWorker;
-        gRargs.szClassPath      = _jni_classpath;
-        gRargs.lpOptions        = _jni_jvmoptions;
-        gRargs.dwMs             = SO_JVMMS;
-        gRargs.dwMx             = SO_JVMMX;
-        gRargs.dwSs             = SO_JVMSS;
-        gRargs.bJniVfprintf     = SO_JNIVFPRINTF;
-        gRargs.szClassName      = _jni_rclass;
-        gRargs.szMethodName     = _jni_rmethod;
-        gRargs.lpArguments      = _jni_rparam;
-        gRargs.szStdErrFilename = gStdwrap.szStdErrFilename;
-        gRargs.szStdOutFilename = gStdwrap.szStdOutFilename;
-        gRargs.szLibraryPath    = SO_LIBPATH;
-        /* Register onexit hook
-         */
-        _onexit(onExitStart);
-        if (!apxJavaStart(&gRargs)) {
-            rv = 4;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed to start Java");
-            goto cleanup;
-        }
-        apxLogWrite(APXLOG_MARK_DEBUG "Java started %s", _jni_rclass);
+    if (IS_EMPTY_STRING(SO_STARTPATH))
+        SO_STARTPATH = gStartPath;
+    if (IS_VALID_STRING(SO_STARTPATH)) {
+        /* If the Working path is specified change the current directory */
+        SetCurrentDirectoryW(SO_STARTPATH);
     }
-    else {
-        if (!IS_VALID_STRING(SO_STARTIMAGE)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Missing service ImageFile");
-            if (!_service_mode)
-                apxDisplayError(FALSE, NULL, 0, "Service '%S' is missing the ImageFile",
-                                _service_name ? _service_name : L"unknown");
-            return 1;
-        }
-        if (IS_VALID_STRING(SO_LIBPATH)) {
-            /* Add LibraryPath to the PATH */
-           apxAddToPathW(gPool, SO_LIBPATH);
-        }
-        /* Set the environment using putenv, so JVM can use it */
-        setInprocEnvironment();
-        /* Redirect process */
-        gWorker = apxCreateProcessW(gPool,
-                                    0,
-                                    child_callback,
-                                    SO_USER,
-                                    SO_PASSWORD,
-                                    FALSE);
-        if (IS_INVALID_HANDLE(gWorker)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed to create process");
-            return 1;
-        }
-        if (!apxProcessSetExecutableW(gWorker, SO_STARTIMAGE)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process executable %S",
-                        SO_STARTIMAGE);
-            rv = 2;
-            goto cleanup;
-        }
-        /* Assemble the command line */
-        if (_java_startup) {
-            nArgs = apxJavaCmdInitialize(gPool, SO_CLASSPATH, SO_STARTCLASS,
-                                         SO_JVMOPTIONS, SO_JVMMS, SO_JVMMX,
-                                         SO_JVMSS, SO_STARTPARAMS, &pArgs);
-        }
-        else {
-            nArgs = apxMultiSzToArrayW(gPool, SO_STARTPARAMS, &pArgs);
-        }
-
-        /* Pass the argv to child process */
-        if (!apxProcessSetCommandArgsW(gWorker, SO_STARTIMAGE,
-                                       nArgs, (const WCHAR **) pArgs)) {
-            rv = 3;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process arguments (argc=%d)",
-                        nArgs);
-            goto cleanup;
-        }
-        /* Set the working path */
-        if (!apxProcessSetWorkingPathW(gWorker, SO_STARTPATH)) {
-            rv = 4;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed setting process working path to %S",
-                        SO_STARTPATH);
-            goto cleanup;
-        }
-        /* Finally execute the child process
-         */
-        if (!apxProcessExecute(gWorker)) {
-            rv = 5;
-            apxLogWrite(APXLOG_MARK_ERROR "Failed to execute process");
-            goto cleanup;
-        }
+    if (IS_VALID_STRING(SO_LIBPATH)) {
+        /* Add LibraryPath to the PATH */
+       apxAddToPathW(gPool, SO_LIBPATH);
     }
+    /* Set the environment using putenv, so JVM can use it */
+    setInprocEnvironment();
+    /* Create the JVM global worker */
+    gWorker = apxCreateJava(gPool, _jni_jvmpath);
+    
+    if (IS_INVALID_HANDLE(gWorker)) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
+        return TRUE;
+    }
+    
     if (rv == 0) {
         FILETIME fte;
         ULARGE_INTEGER s, e;
@@ -1266,10 +1058,7 @@ static DWORD serviceStart()
 
             if (gPidfileHandle != INVALID_HANDLE_VALUE) {
                 DWORD wr = 0;
-                if (_jni_startup)
-                    _snprintf(pids, 32, "%d\r\n", GetCurrentProcessId());
-                else
-                    _snprintf(pids, 32, "%d\r\n", apxProcessGetPid(gWorker));
+                _snprintf(pids, 32, "%d\r\n", GetCurrentProcessId());
                 WriteFile(gPidfileHandle, pids, (DWORD)strlen(pids), &wr, NULL);
                 FlushFileBuffers(gPidfileName);
             }
@@ -1283,10 +1072,38 @@ static DWORD serviceStart()
         apxLogWrite(APXLOG_MARK_INFO "Service started in %d ms.", nms);
     }
     return rv;
-cleanup:
-    if (!IS_INVALID_HANDLE(gWorker))
-        apxCloseHandle(gWorker);    /* Close the worker handle */
-    gWorker = NULL;
+}
+
+/* Executed when the service receives start event */
+static DWORD serviceStart()
+{
+    DWORD  rv = 0;
+    APXJAVA_THREADARGS gRargs;
+    
+    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
+
+    gRargs.hJava            = gWorker;
+    gRargs.szClassPath      = _jni_classpath;
+    gRargs.lpOptions        = _jni_jvmoptions;
+    gRargs.dwMs             = SO_JVMMS;
+    gRargs.dwMx             = SO_JVMMX;
+    gRargs.dwSs             = SO_JVMSS;
+    gRargs.bJniVfprintf     = SO_JNIVFPRINTF;
+    gRargs.szStdErrFilename = gStdwrap.szStdErrFilename;
+    gRargs.szStdOutFilename = gStdwrap.szStdOutFilename;
+    gRargs.szLibraryPath    = SO_LIBPATH;
+    /* Register onexit hook
+     */
+    _onexit(onExitStart);
+    if (!apxJavaStart(&gRargs)) {
+        rv = 4;
+        apxLogWrite(APXLOG_MARK_ERROR "Failed to start Java");
+        if (!IS_INVALID_HANDLE(gWorker))
+            apxCloseHandle(gWorker);    /* Close the worker handle */
+        gWorker = NULL;
+    }
+    apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
+
     return rv;
 }
 
@@ -1393,181 +1210,78 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
             gSignalThread = CreateThread(NULL, 0, eventThread, NULL, 0, &tid);
         }
     }
-    /* Check the StartMode */
-    if (IS_VALID_STRING(SO_STARTMODE)) {
-        if (!lstrcmpiW(SO_STARTMODE, PRSRV_JVM)) {
-            _jni_startup = TRUE;
-            if (IS_VALID_STRING(SO_STARTCLASS)) {
-                _jni_rclass  = WideToANSI(SO_STARTCLASS);
-                /* Exchange all dots with slashes */
-                apxStrCharReplaceA(_jni_rclass, '.', '/');
-            }
-            else {
-                /* Presume its main */
-                _jni_rclass = WideToANSI(L"Main");
-            }
-            _jni_rparam = SO_STARTPARAMS;
-        }
-        else if (!lstrcmpiW(SO_STARTMODE, PRSRV_JAVA)) {
-            LPWSTR jx = NULL, szJH = SO_JAVAHOME;
-            if (!szJH)
-                szJH = apxGetJavaSoftHome(gPool, FALSE);
-            else if (!lstrcmpiW(szJH, PRSRV_JDK)) {
-                /* Figure out the JDK JavaHome */
-                szJH = apxGetJavaSoftHome(gPool, FALSE);
-            }
-            else if (!lstrcmpiW(szJH, PRSRV_JRE)) {
-                /* Figure out the JRE JavaHome */
-                szJH = apxGetJavaSoftHome(gPool, TRUE);
-            }
-            if (szJH) {
-                jx = apxPoolAlloc(gPool, (lstrlenW(szJH) + 16) * sizeof(WCHAR));
-                lstrcpyW(jx, szJH);
-                lstrcatW(jx, PRSRV_JBIN);
-                if (!SO_STARTPATH) {
-                    /* Use JAVA_HOME/bin as start path */
-                    LPWSTR szJP = apxPoolAlloc(gPool, (lstrlenW(szJH) + 8) * sizeof(WCHAR));
-                    lstrcpyW(szJP, szJH);
-                    lstrcatW(szJP, PRSRV_PBIN);
-                    SO_STARTPATH = szJP;
-                }
-            }
-            else {
-                apxLogWrite(APXLOG_MARK_ERROR "Unable to find Java Runtime Environment.");
-                goto cleanup;
-            }
-            _java_startup = TRUE;
-            /* StartImage now contains the full path to the java.exe */
-            SO_STARTIMAGE = jx;
-        }
-    }
-    /* Check the StopMode */
-    if (IS_VALID_STRING(SO_STOPMODE)) {
-        if (!lstrcmpiW(SO_STOPMODE, PRSRV_JVM)) {
-            _jni_shutdown = TRUE;
-            if (IS_VALID_STRING(SO_STOPCLASS)) {
-                _jni_sclass = WideToANSI(SO_STOPCLASS);
-                apxStrCharReplaceA(_jni_sclass, '.', '/');
-            }
-            else {
-                /* Defaults to Main */
-                _jni_sclass = WideToANSI(L"Main");
-            }
-            _jni_sparam = SO_STOPPARAMS;
-        }
-        else if (!lstrcmpiW(SO_STOPMODE, PRSRV_JAVA)) {
-            LPWSTR jx = NULL, szJH = SO_JAVAHOME;
-            if (!szJH)
-                szJH = apxGetJavaSoftHome(gPool, FALSE);
-            else if (!lstrcmpiW(szJH, PRSRV_JDK)) {
-                /* Figure out the JDK JavaHome */
-                szJH = apxGetJavaSoftHome(gPool, FALSE);
-            }
-            else if (!lstrcmpiW(szJH, PRSRV_JRE)) {
-                /* Figure out the JRE JavaHome */
-                szJH = apxGetJavaSoftHome(gPool, TRUE);
-            }
-            if (szJH) {
-                jx = apxPoolAlloc(gPool, (lstrlenW(szJH) + 16) * sizeof(WCHAR));
-                lstrcpyW(jx, szJH);
-                lstrcatW(jx, PRSRV_JBIN);
-                if (!SO_STOPPATH) {
-                    LPWSTR szJP = apxPoolAlloc(gPool, (lstrlenW(szJH) + 8) * sizeof(WCHAR));
-                    lstrcpyW(szJP, szJH);
-                    lstrcatW(szJP, PRSRV_PBIN);
-                    /* Use JAVA_HOME/bin as stop path */
-                    SO_STOPPATH = szJP;
-                }
-            }
-            else {
-                apxLogWrite(APXLOG_MARK_ERROR "Unable to find Java Runtime Environment.");
-                goto cleanup;
-            }
-            _java_shutdown = TRUE;
-            /* StopImage now contains the full path to the java.exe */
-            SO_STOPIMAGE = jx;
-        }
-    }
     /* Find the classpath */
-    if (_jni_shutdown || _jni_startup) {
-        if (IS_VALID_STRING(SO_JVM)) {
-            if (lstrcmpW(SO_JVM, PRSRV_AUTO))
-                _jni_jvmpath = SO_JVM;
-        }
-        if (IS_VALID_STRING(SO_CLASSPATH))
-            _jni_classpath = WideToANSI(SO_CLASSPATH);
-        if (IS_VALID_STRING(SO_STARTMETHOD))
-            _jni_rmethod   = WideToANSI(SO_STARTMETHOD);
-        if (IS_VALID_STRING(SO_STOPMETHOD))
-            _jni_smethod   = WideToANSI(SO_STOPMETHOD);
-        _jni_jvmoptions    = MzWideToANSI(SO_JVMOPTIONS);
-    }
-    if (_service_mode) {
-        /* Register Service Control handler */
-        _service_status_handle = RegisterServiceCtrlHandlerW(_service_name,
-                                                              service_ctrl_handler);
-        if (IS_INVALID_HANDLE(_service_status_handle)) {
-            apxLogWrite(APXLOG_MARK_ERROR "Failed to register Service Control for %S",
-                        _service_name);
-            goto cleanup;
-        }
-        /* Allocate console so that events gets processed */
-        if (!AttachConsole(ATTACH_PARENT_PROCESS) &&
-             GetLastError() == ERROR_INVALID_HANDLE) {
-            HWND hc;
-            AllocConsole();
-            if ((hc = GetConsoleWindow()) != NULL)
-                ShowWindow(hc, SW_HIDE);
-        }
-    }
-    reportServiceStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
+    _jni_jvmpath = SO_JVM;
+    _jni_classpath = WideToANSI(SO_CLASSPATH);
+    _jni_jvmoptions    = MzWideToANSI(SO_JVMOPTIONS);
+
+    apxLogWrite(APXLOG_MARK_DEBUG "Waiting for service initialization...");
     if ((rc = serviceStart()) == 0) {
-        /* Service is started */
-        reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
-        /* Set console handler to capture CTRL events */
-        SetConsoleCtrlHandler((PHANDLER_ROUTINE)console_handler, TRUE);
+        apxLogWrite(APXLOG_MARK_DEBUG "Initialization service finished.");
+        
+        if (_service_mode) {
+            /* Register Service Control handler */
+            _service_status_handle = RegisterServiceCtrlHandlerW(_service_name, service_ctrl_handler);
+            if (IS_INVALID_HANDLE(_service_status_handle)) {
+                apxLogWrite(APXLOG_MARK_ERROR "Failed to register Service Control for %S", _service_name);
+                goto cleanup;
+            }
+            /* Allocate console so that events gets processed */
+            if (!AttachConsole(ATTACH_PARENT_PROCESS) &&
+                 GetLastError() == ERROR_INVALID_HANDLE) {
+                HWND hc;
+                AllocConsole();
+                if ((hc = GetConsoleWindow()) != NULL)
+                    ShowWindow(hc, SW_HIDE);
+            }
+        }
+        reportServiceStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
 
-        apxHandleWait(gWorker, INFINITE, FALSE);
-        apxLogWrite(APXLOG_MARK_DEBUG "Worker finished.");
+        if ((rc = serviceStart()) == 0) {
+            /* Service is started */
+            reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
+            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
+            /* Set console handler to capture CTRL events */
+            SetConsoleCtrlHandler((PHANDLER_ROUTINE)console_handler, TRUE);
+
+            apxHandleWait(gWorker, INFINITE, FALSE);
+            apxLogWrite(APXLOG_MARK_DEBUG "Worker finished.");
+        }
     }
-    else {
+    
+    if(rc != 0) {
+cleanup:
         apxLogWrite(APXLOG_MARK_ERROR "ServiceStart returned %d", rc);
-        goto cleanup;
-    }
-    if (gShutdownEvent) {
+        reportServiceStatusStopped(rc);
+        gExitval = rc;
+    } else {
+        if (gShutdownEvent) {
 
-        /* Ensure that shutdown thread exits before us */
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for ShutdownEvent");
-        reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
-        WaitForSingleObject(gShutdownEvent, ONE_MINUTE);
-        apxLogWrite(APXLOG_MARK_DEBUG "ShutdownEvent signaled");
-        CloseHandle(gShutdownEvent);
+            /* Ensure that shutdown thread exits before us */
+            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for ShutdownEvent");
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
+            WaitForSingleObject(gShutdownEvent, ONE_MINUTE);
+            apxLogWrite(APXLOG_MARK_DEBUG "ShutdownEvent signaled");
+            CloseHandle(gShutdownEvent);
 
-        /* This will cause to wait for all threads to exit
-         */
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting 1 minute for all threads to exit");
-        reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
-        apxDestroyJvm(ONE_MINUTE);
-    }
-    else {
-        /* We came here without shutdown event
-         * Probably because main() returned without ensuring all threads
-         * have finished
-         */
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for all threads to exit");
-        apxDestroyJvm(INFINITE);
-        reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
+            /* This will cause to wait for all threads to exit
+             */
+            apxLogWrite(APXLOG_MARK_DEBUG "Waiting 1 minute for all threads to exit");
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
+            apxDestroyJvm(ONE_MINUTE);
+        }
+        else {
+            /* We came here without shutdown event
+             * Probably because main() returned without ensuring all threads
+             * have finished
+             */
+            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for all threads to exit");
+            apxDestroyJvm(INFINITE);
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
+        }
     }
     apxLogWrite(APXLOG_MARK_DEBUG "JVM destroyed.");
     reportServiceStatusStopped(apxGetVmExitCode());
-
-    return;
-cleanup:
-    /* Cleanup */
-    reportServiceStatusStopped(rc);
-    gExitval = rc;
-    return;
 }
 
 
