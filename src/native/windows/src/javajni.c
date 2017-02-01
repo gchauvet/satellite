@@ -21,15 +21,15 @@
 
 #include <jni.h>
 
-#ifndef JNI_VERSION_1_2
+/*#ifndef JNI_VERSION_1_2
 #error -------------------------------------------------------
 #error JAVA 1.1 IS NO LONGER SUPPORTED
 #error -------------------------------------------------------
 #endif
 
-#ifdef JNI_VERSION_1_4
+#ifdef JNI_VERSION_1_4*/
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_4
-#else
+/*#else
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_2
 #endif
 
@@ -65,6 +65,9 @@ static DYNLOAD_FPTR_DECLARE(SetDllDirectoryW) = NULL;
 
 #define JVM_EXCEPTION_CHECK(jvm) \
     ((*((jvm)->lpEnv))->ExceptionCheck((jvm)->lpEnv) != JNI_OK)
+
+#define JVM_DEFINE_CLASS(jvm, name, size, content) \
+    (*((jvm)->lpEnv))->DefineClass((jvm)->lpEnv, name, NULL, content, size)
 
 #define JVM_EXCEPTION_CLEAR(jvm) \
     APXMACRO_BEGIN                                              \
@@ -610,7 +613,7 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
 }
 
 /* ANSI version only */
-BOOL
+static BOOL
 apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
                   LPCVOID lpOptions, DWORD dwMs, DWORD dwMx,
                   DWORD dwSs, DWORD bJniVfprintf)
@@ -728,104 +731,8 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         return FALSE;
 }
 
-/* ANSI version only */
-DWORD
-apxJavaCmdInitialize(APXHANDLE hPool, LPCWSTR szClassPath, LPCWSTR szClass,
-                     LPCWSTR szOptions, DWORD dwMs, DWORD dwMx,
-                     DWORD dwSs, LPCWSTR szCmdArgs, LPWSTR **lppArray)
-{
-
-    DWORD i, nJVM, nCmd, nTotal, lJVM, lCmd;
-    LPWSTR p;
-
-    /* Calculate the number of all arguments */
-    nTotal = 0;
-    if (szClassPath)
-        ++nTotal;
-    if (szClass)
-        ++nTotal;
-    lJVM = __apxGetMultiSzLengthW(szOptions, &nJVM);
-    nTotal += nJVM;
-    lCmd = __apxGetMultiSzLengthW(szCmdArgs, &nCmd);
-    nTotal += nCmd;
-    if (dwMs)
-        ++nTotal;
-    if (dwMx)
-        ++nTotal;
-    if (dwSs)
-        ++nTotal;
-
-    if (nTotal == 0)
-        return 0;
-
-    /* Allocate the array to store all arguments' pointers
-     */
-    *lppArray = (LPWSTR *)apxPoolAlloc(hPool, (nTotal + 2) * sizeof(LPWSTR));
-
-    /* Process JVM options */
-    if (nJVM && lJVM) {
-        p = (LPWSTR)apxPoolAlloc(hPool, (lJVM + 1) * sizeof(WCHAR));
-        AplCopyMemory(p, szOptions, (lJVM + 1) * sizeof(WCHAR) + sizeof(WCHAR));
-        for (i = 0; i < nJVM; i++) {
-            (*lppArray)[i] = p;
-            while (*p)
-                p++;
-            p++;
-        }
-    }
-
-    /* Process the 3 extra JVM options */
-    if (dwMs) {
-        p = (LPWSTR)apxPoolAlloc(hPool, 64 * sizeof(WCHAR));
-        wsprintfW(p, L"-Xms%dm", dwMs);
-        (*lppArray)[i++] = p;
-    }
-    if (dwMx) {
-        p = (LPWSTR)apxPoolAlloc(hPool, 64 * sizeof(WCHAR));
-        wsprintfW(p, L"-Xmx%dm", dwMx);
-        (*lppArray)[i++] = p;
-    }
-    if (dwSs) {
-        p = (LPWSTR)apxPoolAlloc(hPool, 64 * sizeof(WCHAR));
-        wsprintfW(p, L"-Xss%dk", dwSs);
-        (*lppArray)[i++] = p;
-    }
-
-    /* Process the classpath and class */
-    if (szClassPath) {
-        p = (LPWSTR)apxPoolAlloc(hPool, (lstrlenW(JAVA_CLASSPATH_W) + lstrlenW(szClassPath)) * sizeof(WCHAR));
-        lstrcpyW(p, JAVA_CLASSPATH_W);
-        lstrcatW(p, szClassPath);
-        (*lppArray)[i++] = p;
-    }
-    if (szClass) {
-        p = (LPWSTR)apxPoolAlloc(hPool, (lstrlenW(szClass)) * sizeof(WCHAR));
-        lstrcpyW(p, szClass);
-        (*lppArray)[i++] = p;
-    }
-
-    /* Process command arguments */
-    if (nCmd && lCmd) {
-        p = (LPWSTR)apxPoolAlloc(hPool, (lCmd + 1) * sizeof(WCHAR));
-        AplCopyMemory(p, szCmdArgs, (lCmd + 1) * sizeof(WCHAR) + sizeof(WCHAR));
-        for (; i < nTotal; i++) {
-            (*lppArray)[i] = p;
-            while (*p)
-                p++;
-            p++;
-        }
-    }
-
-    (*lppArray)[++i] = NULL;
-
-    return nTotal;
-}
-
-
-BOOL
-apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szClassName,
-                     LPCSTR szMethodName,
-                     LPCVOID lpArguments)
+static BOOL
+apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
 {
     LPWSTR      *lpArgs = NULL;
     DWORD       nArgs;
@@ -838,58 +745,51 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szClassName,
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
         return FALSE;
-    if (IS_EMPTY_STRING(szMethodName))
-        szMethodName = "main";
-    if (lstrcmpA(szClassName, "java/lang/System") == 0) {
-        /* Usable only for exit method, so force */
-        szSignature  = "(I)V";
-        szMethodName = "exit";
-    }
-    lstrlcpyA(lpJava->clWorker.sClazz, 1024, szClassName);
-    lstrlcpyA(lpJava->clWorker.sMethod, 512, szMethodName);
+    
+    // Load our embedded classloader and embedded apache daemon jar
+    HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_CL), RT_RCDATA);
+    HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_JAR), RT_RCDATA);
+    HGLOBAL resCl = LoadResource(NULL, hresCl);
+    
+    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "org/apache/commons/daemon/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
 
-    jClazz = JNICALL_1(FindClass, JAVA_CLASSSTRING);
-    if (!jClazz) {
-        JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "FindClass "  JAVA_CLASSSTRING " failed");
-        return FALSE;
-    }
-    lpJava->clString.jClazz = JNICALL_1(NewGlobalRef, jClazz);
-    JNI_LOCAL_UNREF(jClazz);
-    /* Find the class */
-    jClazz  = JNICALL_1(FindClass, szClassName);
-    if (!jClazz) {
-        JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "FindClass %s failed", szClassName);
-        return FALSE;
-    }
-    /* Make the class global so that worker thread can attach */
-    lpJava->clWorker.jClazz  = JNICALL_1(NewGlobalRef, jClazz);
-    JNI_LOCAL_UNREF(jClazz);
+    // Load the embedded daemon single jar
+    DWORD szJar = SizeofResource(NULL, hresJar);
+    HGLOBAL resJar = LoadResource(NULL, hresJar);
+    jbyteArray array = (*((lpJava)->lpEnv))->NewByteArray((lpJava)->lpEnv, szJar);
+    (*((lpJava)->lpEnv))->SetByteArrayRegion(
+        (lpJava)->lpEnv,
+        array,
+        0,
+        szJar,
+        LockResource(resJar)
+    );
 
-    lpJava->clWorker.jMethod = JNICALL_3(GetStaticMethodID,
-                                         lpJava->clWorker.jClazz,
-                                         szMethodName, szSignature);
-    if (!lpJava->clWorker.jMethod) {
-        JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "Method 'static void %s(String[])' not found in Class %s",
-                szMethodName, szClassName);
-        return FALSE;
-    }
-    if (lstrcmpA(szClassName, "java/lang/System")) {
-        nArgs = apxMultiSzToArrayW(hJava->hPool, lpArguments, &lpArgs);
-        lpJava->clWorker.jArgs = JNICALL_3(NewObjectArray, nArgs,
-                                           lpJava->clString.jClazz, NULL);
-        if (nArgs) {
-            DWORD i;
-            for (i = 0; i < nArgs; i++) {
-                jstring arg = JNICALL_2(NewString, lpArgs[i], lstrlenW(lpArgs[i]));
-                JNICALL_3(SetObjectArrayElement, lpJava->clWorker.jArgs, i, arg);
-                apxLogWrite(APXLOG_MARK_DEBUG "argv[%d] = %S", i, lpArgs[i]);
-            }
+    // Call createBootstrap to get our DaemonLoader implementation.
+    lpJava->clWorker.jObject = (*((lpJava)->lpEnv))->CallStaticObjectMethod(
+        (lpJava)->lpEnv,
+        clLoader,
+        JNICALL_3(
+            GetStaticMethodID,
+            clLoader,
+            "createBootstrap",
+            "([B)Ljava/lang/Object;"
+        ),
+        array
+    );
+    
+    lpJava->clWorker.jClazz = JNICALL_1(GetObjectClass, lpJava->clWorker.jObject);
+    
+    nArgs = apxMultiSzToArrayW(hJava->hPool, lpArguments, &lpArgs);
+    lpJava->clWorker.jArgs = JNICALL_3(NewObjectArray, nArgs, lpJava->clString.jClazz, NULL);
+    if (nArgs) {
+        for (DWORD i = 0; i < nArgs; i++) {
+            jstring arg = JNICALL_2(NewString, lpArgs[i], lstrlenW(lpArgs[i]));
+            JNICALL_3(SetObjectArrayElement, lpJava->clWorker.jArgs, i, arg);
+            apxLogWrite(APXLOG_MARK_DEBUG "argv[%d] = %S", i, lpArgs[i]);
         }
-        apxFree(lpArgs);
     }
+    apxFree(lpArgs);
     return TRUE;
 }
 
@@ -925,8 +825,7 @@ static DWORD WINAPI __apxJavaWorkerThread(LPVOID lpParameter)
                     pArgs->szLibraryPath);
     }
     if (!apxJavaLoadMainClass(pArgs->hJava,
-                              pArgs->szClassName,
-                              pArgs->szMethodName,
+                              pArgs->szJarName,
                               pArgs->lpArguments)) {
         WORKER_EXIT(3);
     }
