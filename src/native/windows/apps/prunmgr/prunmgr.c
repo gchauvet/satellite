@@ -460,7 +460,9 @@ BOOL __generalConfigSave(HWND hDlg)
     apxRegistrySetStrW(hRegserv, APXREG_PARAMSOFTWARE, _s_conf, L"MainJar", szB);
     GetDlgItemTextW(hDlg, IDC_PPRWPATH,  szB, SIZ_HUGMAX);
     apxRegistrySetStrW(hRegserv, APXREG_PARAMSOFTWARE, _s_conf, L"WorkingPath", szB);
-
+    GetDlgItemTextW(hDlg, IDC_PPRTIMEOUT,  szB, SIZ_HUGMAX);
+    apxRegistrySetNumW(hRegserv, APXREG_PARAMSOFTWARE, _s_conf, L"Timeout", apxAtoulW(szB));
+    
     l = GetWindowTextLength(GetDlgItem(hDlg, IDC_PPRARGS));
     p = apxPoolAlloc(hPool, (l + 2) * sizeof(WCHAR));
     GetDlgItemTextW(hDlg, IDC_PPRARGS,  p, l + 1);
@@ -1119,12 +1121,11 @@ LRESULT CALLBACK __startProperty(HWND hDlg,
                     apxFree(b);
                 }
                 
-                if ((lpBuf = apxRegistryGetMzStrW(hRegserv, APXREG_PARAMSOFTWARE,
-                                               _s_conf, L"Timeout", NULL, NULL)) != NULL) {
+                DWORD timeout;
+                if ((timeout = apxRegistryGetNumberW(hRegserv, APXREG_PARAMSOFTWARE, _s_conf, L"Timeout")) != 0) {
                     CHAR bn[32];
-                    wsprintfA(bn, "%d", lpBuf);
+                    wsprintfA(bn, "%d", timeout);
                     SetDlgItemTextA(hDlg, IDC_PPRTIMEOUT, bn);
-                    apxFree(lpBuf);
                 }
             }
         break;
@@ -1141,6 +1142,7 @@ LRESULT CALLBACK __startProperty(HWND hDlg,
                     }
                 break;
                 case IDC_PPRJAR:
+                case IDC_PPRTIMEOUT:
                 case IDC_PPRARGS:
                 case IDC_PPRWPATH:
                     if (HIWORD(wParam) == EN_CHANGE) {
@@ -1200,7 +1202,7 @@ void ShowServiceProperties(HWND hWnd)
                 __loggingProperty);
     __initPpage(&psP[3], IDD_PROPPAGE_JVM, IDS_PPJAVAVM,
                 __jvmProperty);
-    __initPpage(&psP[4], IDD_PROPPAGE_SETUP, IDS_PPSTART,
+    __initPpage(&psP[4], IDD_PROPPAGE_SETUP, IDS_PPSETUP,
                 __startProperty);
 
     if (_currentEntry && _currentEntry->lpConfig)
