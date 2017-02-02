@@ -111,8 +111,7 @@
 #define IDS_PPLOGON                     3108
 #define IDS_PPLOGGING                   3109
 #define IDS_PPJAVAVM                    3110
-#define IDS_PPSTART                     3111
-#define IDS_PPSTOP                      3112
+#define IDS_PPSETUP                     3111
 #define IDS_LGPATHTITLE                 3113
 #define IDS_ALLFILES                    3114
 #define IDS_DLLFILES                    3115
