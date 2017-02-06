@@ -56,11 +56,12 @@ static JavaVM *_st_sys_jvm = NULL;
 DYNOLAD_TYPE_DECLARE(SetDllDirectoryW, WINAPI, BOOL)(LPCWSTR);
 static DYNLOAD_FPTR_DECLARE(SetDllDirectoryW) = NULL;
 
+#define JVM_GET_OBJECT_CLASS(jvm, cl) (*((jvm)->lpEnv))->GetObjectClass((jvm)->lpEnv, (jvm)->cl)
+
 #define JVM_DELETE_CLAZZ(jvm, cl)                                               \
     APXMACRO_BEGIN                                                              \
-    if ((jvm)->lpEnv && (jvm)->cl.jClazz) {                                   \
-        (*((jvm)->lpEnv))->DeleteGlobalRef((jvm)->lpEnv, (jvm)->cl.jClazz);   \
-        (jvm)->cl.jClazz = NULL;                                              \
+    if ((jvm)->lpEnv && (jvm)->cl) {                                   \
+        (*((jvm)->lpEnv))->DeleteGlobalRef((jvm)->lpEnv, (*((jvm)->lpEnv))->GetObjectClass((jvm)->lpEnv, (jvm)->cl));   \
     } APXMACRO_END
 
 #define JVM_EXCEPTION_CHECK(jvm) \
@@ -96,19 +97,9 @@ static DYNLOAD_FPTR_DECLARE(SetDllDirectoryW) = NULL;
 #define JNICALL_4(fName, a1, a2, a3, a4)  \
         ((*(lpJava->lpEnv))->fName(lpJava->lpEnv, (a1), (a2), (a3), (a4)))
 
-typedef struct APXJAVASTDCLAZZ {
-    CHAR        sClazz[1024];
-    CHAR        sMethod[512];
-    jclass      jClazz;
-    jmethodID   jMethod;
-    jobject     jObject;
-    jarray      jArgs;
-} APXJAVASTDCLAZZ, *LPAPXJAVASTDCLAZZ;
-
-typedef struct APXJAVAVM {
+typedef struct {
     DWORD           dwOptions;
-    APXJAVASTDCLAZZ clString;
-    APXJAVASTDCLAZZ clWorker;
+    jobject         jWrapper;
     jint            iVersion;
     jsize           iVmCount;
     JNIEnv          *lpEnv;
@@ -330,8 +321,7 @@ static BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
                 }
                 SAFE_CLOSE_HANDLE(lpJava->hWorkerThread);
                 __apxJvmAttach(lpJava);
-                JVM_DELETE_CLAZZ(lpJava, clWorker);
-                JVM_DELETE_CLAZZ(lpJava, clString);
+                JVM_DELETE_CLAZZ(lpJava, jWrapper);
                 __apxJvmDetach(lpJava);
                 /* Check if this is the jvm loader */
                 if (!lpJava->iVmCount && _st_sys_jvmDllHandle) {
@@ -348,10 +338,20 @@ static BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
     return TRUE;
 }
 
+static __inline const char *__apxJvmGetClassName(LPAPXJAVAVM lpJava, jobject obj)
+{
+    jclass cls = JNICALL_1(GetObjectClass, obj);
+    jmethodID mid = JNICALL_3(GetMethodID, cls, "getClass", "()Ljava/lang/Class;");
+    jobject clsObj = JNICALL_2(CallObjectMethod, obj, mid);
+    cls = JNICALL_1(GetObjectClass, clsObj);
+    mid = JNICALL_3(GetMethodID, cls, "getName", "()Ljava/lang/String;");
+    jstring strObj = (jstring) JNICALL_2(CallObjectMethod, clsObj, mid);
+    return JNICALL_2(GetStringUTFChars, strObj, NULL);
+}
+
 APXHANDLE
 apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
 {
-
     APXHANDLE    hJava;
     LPAPXJAVAVM  lpJava;
     jsize        iVmCount;
@@ -361,9 +361,6 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
     if (!__apxLoadJvmDll(szJvmDllPath))
         return NULL;
 
-
-    /*
-     */
     if (DYNLOAD_FPTR(JNI_GetCreatedJavaVMs)(&lpJvm, 1, &iVmCount) != JNI_OK) {
         return NULL;
     }
@@ -647,11 +644,11 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
             return FALSE;
         }
         rv = TRUE;
-    }
-    else {
+    } else {
         CHAR  iB[3][64];
         LPSTR szCp = NULL;
         lpJava->iVersion = JNI_VERSION_DEFAULT;
+
         if (dwMs)
             ++sOptions;
         if (dwMx)
@@ -711,13 +708,13 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         vmArgs.nOptions = nOptions;
         vmArgs.version  = lpJava->iVersion;
         vmArgs.ignoreUnrecognized = JNI_FALSE;
+        
         if (DYNLOAD_FPTR(JNI_CreateJavaVM)(&(lpJava->lpJvm),
                                            (void **)&(lpJava->lpEnv),
                                            &vmArgs) != JNI_OK) {
             apxLogWrite(APXLOG_MARK_ERROR "CreateJavaVM Failed");
             rv = FALSE;
-        }
-        else {
+        } else {
             rv = TRUE;
             if (!_st_sys_jvm)
                 _st_sys_jvm = lpJava->lpJvm;
@@ -736,175 +733,36 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
 {
     LPWSTR      *lpArgs = NULL;
     DWORD       nArgs;
+    jarray      jArgs;
     LPAPXJAVAVM lpJava;
-    jclass      jClazz;
-    LPCSTR      szSignature = "([Ljava/lang/String;)V";
-
+    jmethodID   method;
+    
     if (hJava->dwType != APXHANDLE_TYPE_JVM)
         return FALSE;
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
         return FALSE;
     
-    // Load our embedded classloader and embedded apache daemon jar
-    HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_CL), RT_RCDATA);
-    HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_JAR), RT_RCDATA);
-    HGLOBAL resCl = LoadResource(NULL, hresCl);
-    
-    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "org/apache/commons/daemon/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
-
-    // Load the embedded daemon single jar
-    DWORD szJar = SizeofResource(NULL, hresJar);
-    HGLOBAL resJar = LoadResource(NULL, hresJar);
-    jbyteArray array = (*((lpJava)->lpEnv))->NewByteArray((lpJava)->lpEnv, szJar);
-    (*((lpJava)->lpEnv))->SetByteArrayRegion(
-        (lpJava)->lpEnv,
-        array,
-        0,
-        szJar,
-        LockResource(resJar)
-    );
-
-    // Call createBootstrap to get our DaemonLoader implementation.
-    lpJava->clWorker.jObject = (*((lpJava)->lpEnv))->CallStaticObjectMethod(
-        (lpJava)->lpEnv,
-        clLoader,
-        JNICALL_3(
-            GetStaticMethodID,
-            clLoader,
-            "createBootstrap",
-            "([B)Ljava/lang/Object;"
-        ),
-        array
-    );
-    
-    lpJava->clWorker.jClazz = JNICALL_1(GetObjectClass, lpJava->clWorker.jObject);
-    
     nArgs = apxMultiSzToArrayW(hJava->hPool, lpArguments, &lpArgs);
-    lpJava->clWorker.jArgs = JNICALL_3(NewObjectArray, nArgs, lpJava->clString.jClazz, NULL);
+    jArgs = JNICALL_3(NewObjectArray, nArgs, JNICALL_1(FindClass, "java/lang/String"), NULL);
     if (nArgs) {
         for (DWORD i = 0; i < nArgs; i++) {
             jstring arg = JNICALL_2(NewString, lpArgs[i], lstrlenW(lpArgs[i]));
-            JNICALL_3(SetObjectArrayElement, lpJava->clWorker.jArgs, i, arg);
+            JNICALL_3(SetObjectArrayElement, jArgs, i, arg);
             apxLogWrite(APXLOG_MARK_DEBUG "argv[%d] = %S", i, lpArgs[i]);
         }
     }
     apxFree(lpArgs);
-    return TRUE;
-}
-
-/* Main java application worker thread
- * It will launch Java main and wait until
- * it finishes.
- */
-static DWORD WINAPI __apxJavaWorkerThread(LPVOID lpParameter)
-{
-#define WORKER_EXIT(x)  do { rv = x; goto finished; } while(0)
-    DWORD rv = 0;
-    LPAPXJAVAVM lpJava = NULL;
-    LPAPXJAVA_THREADARGS pArgs = (LPAPXJAVA_THREADARGS)lpParameter;
-    APXHANDLE hJava;
-
-    hJava  = (APXHANDLE)pArgs->hJava;
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        WORKER_EXIT(1);
-    lpJava = APXHANDLE_DATA(pArgs->hJava);
-    if (!lpJava)
-        WORKER_EXIT(1);
-    if (!apxJavaInitialize(pArgs->hJava,
-                           pArgs->szClassPath,
-                           pArgs->lpOptions,
-                           pArgs->dwMs, pArgs->dwMx, pArgs->dwSs,
-                           pArgs->bJniVfprintf)) {
-        WORKER_EXIT(2);
-    }
-    if (pArgs->szLibraryPath && *pArgs->szLibraryPath) {
-        DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
-        DYNLOAD_CALL(SetDllDirectoryW)(pArgs->szLibraryPath);
-        apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'",
-                    pArgs->szLibraryPath);
-    }
-    if (!apxJavaLoadMainClass(pArgs->hJava,
-                              pArgs->szJarName,
-                              pArgs->lpArguments)) {
-        WORKER_EXIT(3);
-    }
-    apxJavaSetOut(pArgs->hJava, TRUE,  pArgs->szStdErrFilename);
-    apxJavaSetOut(pArgs->hJava, FALSE, pArgs->szStdOutFilename);
-
-    /* Check if we have a class and a method */
-    if (!lpJava->clWorker.jClazz || !lpJava->clWorker.jMethod)
-        WORKER_EXIT(4);
-    if (!__apxJvmAttach(lpJava))
-        WORKER_EXIT(5);
-    apxLogWrite(APXLOG_MARK_DEBUG "Java Worker thread started %s:%s",
-                lpJava->clWorker.sClazz, lpJava->clWorker.sMethod);
-    lpJava->dwWorkerStatus = 1;
-    SetEvent(lpJava->hWorkerInit);
-    /* Ensure apxJavaStart worker has read our status */
-    WaitForSingleObject(lpJava->hWorkerSync, INFINITE);
-    JNICALL_3(CallStaticVoidMethod,
-              lpJava->clWorker.jClazz,
-              lpJava->clWorker.jMethod,
-              lpJava->clWorker.jArgs);
-    if (JVM_EXCEPTION_CHECK(lpJava)) {
-        apxLogWrite(APXLOG_MARK_DEBUG "Exception has been thrown");
-        vmExitCode = 1;
-        (*((lpJava)->lpEnv))->ExceptionDescribe((lpJava)->lpEnv);
-        __apxJvmDetach(lpJava);
-        WORKER_EXIT(6);
-    }
-    else {
-        __apxJvmDetach(lpJava);
-    }
-finished:
-    if (lpJava) {
-        lpJava->dwWorkerStatus = 0;
-        apxLogWrite(APXLOG_MARK_DEBUG "Java Worker thread finished %s:%s with status=%d",
-                    lpJava->clWorker.sClazz, lpJava->clWorker.sMethod, rv);
-        SetEvent(lpJava->hWorkerInit);
-    }
-    ExitThread(rv);
-    /* never gets here but keep the compiler happy */
-    return rv;
-}
-
-BOOL
-apxJavaStart(LPAPXJAVA_THREADARGS pArgs)
-{
-    LPAPXJAVAVM lpJava;
-    lpJava = APXHANDLE_DATA(pArgs->hJava);
-    if (!lpJava)
-        return FALSE;
-    lpJava->dwWorkerStatus = 0;
-    lpJava->hWorkerInit    = CreateEvent(NULL, FALSE, FALSE, NULL);
-    lpJava->hWorkerSync    = CreateEvent(NULL, FALSE, FALSE, NULL);
-    lpJava->hWorkerThread  = CreateThread(NULL,
-                                          lpJava->szStackSize,
-                                          __apxJavaWorkerThread,
-                                          pArgs, CREATE_SUSPENDED,
-                                          &lpJava->iWorkerThread);
-    if (IS_INVALID_HANDLE(lpJava->hWorkerThread)) {
-        apxLogWrite(APXLOG_MARK_SYSERR);
+    
+    method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), "load", "(Ljava/lang/String;[Ljava/lang/String;)Z");
+    if (method == NULL) {
+        apxLogWrite(APXLOG_MARK_ERROR, "Cannot find \"load\" entry point");
         return FALSE;
     }
-    ResumeThread(lpJava->hWorkerThread);
-    /* Wait until the worker thread initializes */
-    WaitForSingleObject(lpJava->hWorkerInit, INFINITE);
-    if (lpJava->dwWorkerStatus == 0)
-        return FALSE;
-    SetEvent(lpJava->hWorkerSync);
-    if (lstrcmpA(lpJava->clWorker.sClazz, "java/lang/System")) {
-        /* Give some time to initialize the thread
-         * Unless we are calling System.exit(0).
-         * This will be hanled by _onexit hook.
-         */
-        Sleep(1000);
-    }
-    return TRUE;
+    return JNICALL_4(CallBooleanMethod, lpJava->jWrapper, method, JNICALL_1(NewStringUTF, szJarName), jArgs) == JNI_TRUE ? TRUE : FALSE;
 }
 
-DWORD
+static DWORD
 apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions)
 {
     DWORD dwOrgOptions;
@@ -979,7 +837,7 @@ apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
     return cinst;
 }
 
-LPVOID
+static LPVOID
 apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName,
                    LPCSTR szSignature, ...)
 {
@@ -993,7 +851,7 @@ apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName,
     return rv;
 }
 
-LPVOID
+static LPVOID
 apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
 {
     LPAPXJAVAVM     lpJava;
@@ -1014,7 +872,7 @@ apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
     return str;
 }
 
-LPVOID
+static LPVOID
 apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
 {
     LPAPXJAVAVM     lpJava;
@@ -1035,7 +893,7 @@ apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
     return str;
 }
 
-jvalue
+static jvalue
 apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
                          LPCSTR szSignature, va_list lpArgs)
 {
@@ -1104,7 +962,7 @@ apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
     return rv;
 }
 
-jvalue
+static jvalue
 apxJavaCallStaticMethod(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
                         LPCSTR szSignature, ...)
 {
@@ -1121,7 +979,7 @@ apxJavaCallStaticMethod(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
 /* Call the Java:
  * System.setOut(new PrintStream(new FileOutputStream(filename)));
  */
-BOOL
+static BOOL
 apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
 {
     LPAPXJAVAVM lpJava;
@@ -1163,7 +1021,6 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
     }
     else
         return TRUE;
-
 }
 
 DWORD apxGetVmExitCode(void) {
@@ -1191,5 +1048,95 @@ apxJavaDumpAllStacks(APXHANDLE hJava)
         DYNLOAD_FPTR(JVM_DumpAllStacks)(lpEnv, NULL);
         if (bAttached)
             (*(lpJava->lpJvm))->DetachCurrentThread(lpJava->lpJvm);
+    }
+}
+
+BOOL
+apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
+{
+    const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
+    if (!lpJava)
+        return FALSE;
+    
+    if (!apxJavaInitialize(instance,
+                           options->szClassPath,
+                           options->lpOptions,
+                           options->dwMs, options->dwMx, options->dwSs,
+                           options->bJniVfprintf)) {
+        return FALSE;
+    }
+
+    if (options->szLibraryPath && *options->szLibraryPath) {
+        DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
+        DYNLOAD_CALL(SetDllDirectoryW)(options->szLibraryPath);
+        apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'",
+                    options->szLibraryPath);
+    }
+    
+    // Load our embedded classloader and embedded apache daemon jar
+    HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_CL), RT_RCDATA);
+    HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_JAR), RT_RCDATA);
+    HGLOBAL resCl = LoadResource(NULL, hresCl);
+    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "org/apache/commons/daemon/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
+
+    // Load the embedded daemon single jar
+    DWORD szJar = SizeofResource(NULL, hresJar);
+    HGLOBAL resJar = LoadResource(NULL, hresJar);
+    jbyteArray array = (*((lpJava)->lpEnv))->NewByteArray((lpJava)->lpEnv, szJar);
+    (*((lpJava)->lpEnv))->SetByteArrayRegion(
+        (lpJava)->lpEnv,
+        array,
+        0,
+        szJar,
+        LockResource(resJar)
+    );
+
+    // Call createBootstrap to get our DaemonLoader implementation.
+    lpJava->jWrapper = JNICALL_1(NewGlobalRef,
+        JNICALL_3(
+            CallStaticObjectMethod,
+            clLoader,
+            JNICALL_3(
+                GetStaticMethodID,
+                clLoader,
+                "createBootstrap",
+                "([B)Ljava/lang/Object;"
+            ),
+            array
+        )
+    );
+    
+    if (!apxJavaLoadMainClass(instance,
+                              options->szJarName,
+                              options->lpArguments)) {
+        return FALSE;
+    }
+    apxJavaSetOut(instance, TRUE,  options->szStdErrFilename);
+    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
+    return TRUE;
+}
+
+BOOL
+apxJavaCall(APXHANDLE instance, LPCSTR szMethod)
+{
+    const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
+    jmethodID method;
+    if (!lpJava)
+        return FALSE;
+    if (!__apxJvmAttach(lpJava))
+        return FALSE;
+    
+    method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), szMethod, "()Z");
+    JNICALL_2(CallVoidMethod, lpJava->jWrapper, method);
+    if (JVM_EXCEPTION_CHECK(lpJava)) {
+        apxLogWrite(APXLOG_MARK_DEBUG "Exception has been thrown");
+        vmExitCode = 1;
+        (*((lpJava)->lpEnv))->ExceptionDescribe((lpJava)->lpEnv);
+        __apxJvmDetach(lpJava);
+        return FALSE;
+    }
+    else {
+        __apxJvmDetach(lpJava);
+        return TRUE;
     }
 }

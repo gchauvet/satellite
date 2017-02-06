@@ -118,7 +118,7 @@ static APXCMDLINEOPT _options[] = {
 
 /* 19 */    { L"StopTimeout",       L"Timeout",         L"Conf",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
 /* 20 */    { L"StartPath",         L"WorkingPath",     L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 21 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 21 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 /* 22 */    { L"Arguments",         L"Params",          L"Conf",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
 
 /* 23 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
@@ -199,20 +199,21 @@ static LPWSTR   _jni_jvmpath              = NULL;   /* Path to jvm dll */
 static LPSTR    _jni_jvmoptions           = NULL;   /* Path to jvm options */
 
 static LPSTR    _jni_classpath            = NULL;
+static LPSTR    _jni_mainjar              = NULL;
 static LPCWSTR  _jni_rparam               = NULL;    /* Startup  arguments */
-static HANDLE gShutdownEvent = NULL;
 static HANDLE gSignalEvent   = NULL;
 static HANDLE gSignalThread  = NULL;
 static HANDLE gPidfileHandle = NULL;
 static LPWSTR gPidfileName   = NULL;
 static BOOL   gSignalValid   = TRUE;
 
+static
 DWORD WINAPI eventThread(LPVOID lpParam)
 {
     DWORD dwRotateCnt = SO_LOGROTATE;
 
     for (;;) {
-        DWORD dw = WaitForSingleObject(gSignalEvent, 1000);
+        const DWORD dw = WaitForSingleObject(gSignalEvent, 1000);
         if (dw == WAIT_TIMEOUT) {
             /* Do process maintenance */
             if (SO_LOGROTATE != 0 && --dwRotateCnt == 0) {
@@ -805,21 +806,32 @@ static BOOL reportServiceStatusE(DWORD dwCurrentState,
                dwCurrentState, dwWin32ExitCode, dwWaitHint, dwServiceSpecificExitCode);
 
    if (_service_mode && _service_status_handle) {
-       if (dwCurrentState == SERVICE_RUNNING)
-            _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
-        else
-            _service_status.dwControlsAccepted = 0;
+       switch(dwCurrentState) {
+           case SERVICE_RUNNING: 
+               _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE | SERVICE_ACCEPT_SHUTDOWN;
+               break;
+            case SERVICE_PAUSED: 
+                _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
+                break;
+           default:
+               _service_status.dwControlsAccepted = 0;
+               break;
+       }
 
        _service_status.dwCurrentState  = dwCurrentState;
        _service_status.dwWin32ExitCode = dwWin32ExitCode;
        _service_status.dwWaitHint      = dwWaitHint;
        _service_status.dwServiceSpecificExitCode = dwServiceSpecificExitCode;
 
-       if ((dwCurrentState == SERVICE_RUNNING) ||
-           (dwCurrentState == SERVICE_STOPPED))
-           _service_status.dwCheckPoint = 0;
-       else
-           _service_status.dwCheckPoint = dwCheckPoint++;
+       switch(dwCurrentState) {
+           case SERVICE_RUNNING:
+           case SERVICE_STOPPED:
+           case SERVICE_PAUSED:
+                _service_status.dwCheckPoint = dwCheckPoint++;
+                break;
+           default:
+               _service_status.dwCheckPoint = 0;
+       }
        fResult = SetServiceStatus(_service_status_handle, &_service_status);
        if (!fResult) {
            /* TODO: Deal with error */
@@ -847,107 +859,18 @@ static BOOL reportServiceStatusStopped(DWORD exitCode)
     }
 }
 
-BOOL child_callback(APXHANDLE hObject, UINT uMsg,
-                    WPARAM wParam, LPARAM lParam)
-{
-    /* TODO: Make stdout and stderr buffers
-     * to prevent streams intermixing when there
-     * is no separate file for each stream
-     */
-    if (uMsg == WM_CHAR) {
-        int ch = LOWORD(wParam);
-        if (lParam)
-            fputc(ch, stderr);
-        else
-            fputc(ch, stdout);
-    }
-    return TRUE;
-}
-
-static int onExitStop(void)
-{
-    if (_service_mode) {
-        apxLogWrite(APXLOG_MARK_DEBUG "Stop exit hook called ...");
-        reportServiceStatusStopped(0);
-    }
-    return 0;
-}
-
-static int onExitStart(void)
-{
-    if (_service_mode) {
-        apxLogWrite(APXLOG_MARK_DEBUG "Start exit hook called ...");
-        apxLogWrite(APXLOG_MARK_DEBUG "VM exit code: %d", apxGetVmExitCode());
-        /* Reporting the service as stopped even with a non-zero exit code
-         * will not cause recovery actions to be initiated, so don't report at all.
-         * "A service is considered failed when it terminates without reporting a
-         * status of SERVICE_STOPPED to the service controller"
-         * http://msdn.microsoft.com/en-us/library/ms685939(VS.85).aspx
-         */
-        if (apxGetVmExitCode() == 0) {
-            reportServiceStatusStopped(0);
-        }
-    }
-    return 0;
-}
-
 /* Executed when the service receives stop event */
-static DWORD WINAPI serviceStop(LPVOID lpParameter)
+static DWORD WINAPI serviceDestroy()
 {
-    APXHANDLE hWorker = NULL;
     DWORD  rv = 0;
-    BOOL   wait_to_die = FALSE;
-    DWORD  timeout     = SO_STOPTIMEOUT * 1000;
-    DWORD  dwCtrlType  = (DWORD)((BYTE *)lpParameter - (BYTE *)0);
-    APXJAVA_THREADARGS gSargs;
 
-    apxLogWrite(APXLOG_MARK_INFO "Stopping service...");
+    apxLogWrite(APXLOG_MARK_INFO "Destroying service...");
 
-    if (IS_INVALID_HANDLE(gWorker)) {
-        apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
-        return TRUE;    /* Nothing to do */
-    }
-
-    hWorker = apxCreateJava(gPool, _jni_jvmpath);
-    if (IS_INVALID_HANDLE(hWorker)) {
-        apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
-        return 1;
-    }
-    gSargs.hJava            = hWorker;
-    gSargs.szClassPath      = _jni_classpath;
-    gSargs.lpOptions        = _jni_jvmoptions;
-    gSargs.dwMs             = SO_JVMMS;
-    gSargs.dwMx             = SO_JVMMX;
-    gSargs.dwSs             = SO_JVMSS;
-    gSargs.bJniVfprintf     = SO_JNIVFPRINTF;
-    gSargs.szJarName        = SO_MAINJAR;
-    gSargs.lpArguments      = SO_ARGUMENTS;
-    gSargs.szStdErrFilename = NULL;
-    gSargs.szStdOutFilename = NULL;
-    gSargs.szLibraryPath    = SO_LIBPATH;
-    /* Register onexit hook
-     */
-    _onexit(onExitStop);
-    /* Create shutdown event */
-    gShutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    if (!apxJavaStart(&gSargs)) {
+    if (!apxJavaCall(gWorker, "destroy")) {
         apxLogWrite(APXLOG_MARK_ERROR "Failed starting java");
         rv = 3;
     }
-    else {
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for java jni stop worker to finish...");
-        apxJavaWait(hWorker, INFINITE, FALSE);
-        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop worker finished.");
-    }
-    wait_to_die = TRUE;
-cleanup:
-    /* Close Java JNI handle or stop worker
-     * If this is the single JVM instance it will unload
-     * the JVM dll too.
-     * The worker will be closed on service exit.
-     */
-    if (!IS_INVALID_HANDLE(hWorker))
-        apxCloseHandle(hWorker);
+
     if (gSignalEvent) {
         gSignalValid = FALSE;
         SetEvent(gSignalEvent);
@@ -956,53 +879,17 @@ cleanup:
         CloseHandle(gSignalThread);
         gSignalEvent = NULL;
     }
-    if (timeout > 0x7FFFFFFF)
-        timeout = INFINITE;     /* If the timeout was '-1' wait forewer */
-    if (wait_to_die && !timeout)
-        timeout = 300 * 1000;   /* Use the 5 minute default shutdown */
-
-    if (dwCtrlType == SERVICE_CONTROL_SHUTDOWN)
-        timeout = MIN(timeout, apxGetMaxServiceTimeout(gPool));
-    reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, timeout);
-
-    if (timeout) {
-        FILETIME fts, fte;
-        ULARGE_INTEGER s, e;
-        DWORD    nms;
-        /* Wait to give it a chance to die naturally, then kill it. */
-        apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to die naturally...");
-        GetSystemTimeAsFileTime(&fts);
-        rv = apxHandleWait(gWorker, timeout, TRUE);
-        GetSystemTimeAsFileTime(&fte);
-        s.LowPart  = fts.dwLowDateTime;
-        s.HighPart = fts.dwHighDateTime;
-        e.LowPart  = fte.dwLowDateTime;
-        e.HighPart = fte.dwHighDateTime;
-        nms = (DWORD)((e.QuadPart - s.QuadPart) / 10000);
-        if (rv == WAIT_OBJECT_0) {
-            rv = 0;
-            apxLogWrite(APXLOG_MARK_DEBUG "Worker finished gracefully in %d ms.", nms);
-        }
-        else
-            apxLogWrite(APXLOG_MARK_DEBUG "Worker was killed in %d ms.", nms);
-    }
-    else {
-        apxLogWrite(APXLOG_MARK_DEBUG "Sending WM_CLOSE to worker");
-        apxHandleSendMessage(gWorker, WM_CLOSE, 0, 0);
-    }
-
-    apxLogWrite(APXLOG_MARK_INFO "Service stop thread completed.");
-    SetEvent(gShutdownEvent);
+    
+    apxLogWrite(APXLOG_MARK_INFO "Service destroy thread completed.");
     return rv;
 }
 
 /* Executed when initialize the service */
-static DWORD serviceInit()
+static BOOL serviceInit()
 {
     DWORD  rv = 0;
     FILETIME fts;
-    
-    apxLogWrite(APXLOG_MARK_INFO "Initialize service...");
+    APXJAVA_INIT gArgs;
     
     if (!IS_INVALID_HANDLE(gWorker)) {
         apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
@@ -1035,13 +922,23 @@ static DWORD serviceInit()
     setInprocEnvironment();
     /* Create the JVM global worker */
     gWorker = apxCreateJava(gPool, _jni_jvmpath);
+    // Start init entry point
+    gArgs.szJarName        = _jni_mainjar;
+    gArgs.szClassPath      = _jni_classpath;
+    gArgs.lpOptions        = _jni_jvmoptions;
+    gArgs.lpArguments      = _jni_rparam;
+    gArgs.dwMs             = SO_JVMMS;
+    gArgs.dwMx             = SO_JVMMX;
+    gArgs.dwSs             = SO_JVMSS;
+    gArgs.szStdErrFilename = gStdwrap.szStdErrFilename;
+    gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
+    gArgs.szLibraryPath    = SO_LIBPATH;
+    gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
     
-    if (IS_INVALID_HANDLE(gWorker)) {
-        apxLogWrite(APXLOG_MARK_ERROR "Failed creating java %S", _jni_jvmpath);
-        return TRUE;
-    }
-    
-    if (rv == 0) {
+    if (!apxJavaInit(gWorker, &gArgs)) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
+        rv = 3;
+    } else {
         FILETIME fte;
         ULARGE_INTEGER s, e;
         DWORD    nms;
@@ -1063,6 +960,7 @@ static DWORD serviceInit()
                 FlushFileBuffers(gPidfileName);
             }
         }
+
         GetSystemTimeAsFileTime(&fte);
         s.LowPart  = fts.dwLowDateTime;
         s.HighPart = fts.dwHighDateTime;
@@ -1078,66 +976,75 @@ static DWORD serviceInit()
 static DWORD serviceStart()
 {
     DWORD  rv = 0;
-    APXJAVA_THREADARGS gRargs;
     
     apxLogWrite(APXLOG_MARK_INFO "Starting service...");
 
-    gRargs.hJava            = gWorker;
-    gRargs.szClassPath      = _jni_classpath;
-    gRargs.lpOptions        = _jni_jvmoptions;
-    gRargs.dwMs             = SO_JVMMS;
-    gRargs.dwMx             = SO_JVMMX;
-    gRargs.dwSs             = SO_JVMSS;
-    gRargs.bJniVfprintf     = SO_JNIVFPRINTF;
-    gRargs.szStdErrFilename = gStdwrap.szStdErrFilename;
-    gRargs.szStdOutFilename = gStdwrap.szStdOutFilename;
-    gRargs.szLibraryPath    = SO_LIBPATH;
     /* Register onexit hook
      */
-    _onexit(onExitStart);
-    if (!apxJavaStart(&gRargs)) {
+    if (!apxJavaCall(gWorker, "start")) {
         rv = 4;
-        apxLogWrite(APXLOG_MARK_ERROR "Failed to start Java");
+        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
         if (!IS_INVALID_HANDLE(gWorker))
             apxCloseHandle(gWorker);    /* Close the worker handle */
         gWorker = NULL;
     }
     apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
+    return rv;
+}
 
+/* Executed when the service receives stop event */
+static DWORD WINAPI serviceStop(LPVOID lpParameter)
+{
+    DWORD  rv = 0;
+    DWORD  timeout     = SO_STOPTIMEOUT * 1000;
+    const DWORD  dwCtrlType  = (DWORD)((BYTE *)lpParameter - (BYTE *)0);
+
+    apxLogWrite(APXLOG_MARK_DEBUG "Send stop signal");
+    if (!apxJavaCall(gWorker, "stop")) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
+        rv = 3;
+    } else {
+        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
+    }
+    if (timeout > 0x7FFFFFFF)
+        timeout = INFINITE;     /* If the timeout was '-1' wait forever */
+    if (!timeout)
+        timeout = 5 * 60 * 1000;   /* Use the 5 minute default shutdown */
+    if (dwCtrlType == SERVICE_CONTROL_SHUTDOWN)
+        timeout = MIN(timeout, apxGetMaxServiceTimeout(gPool));
     return rv;
 }
 
 /* Service control handler
  */
+static
 void WINAPI service_ctrl_handler(DWORD dwCtrlCode)
 {
-    DWORD  threadId;
-    HANDLE stopThread;
-
     switch (dwCtrlCode) {
+        case SERVICE_CONTROL_PAUSE:
+            apxLogWrite(APXLOG_MARK_INFO "Service PAUSE signalled");
+            reportServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
+            serviceStop((LPVOID) &dwCtrlCode);
+            reportServiceStatus(SERVICE_PAUSED, NO_ERROR, 0);
+            break;
+        case SERVICE_CONTROL_CONTINUE:
+            apxLogWrite(APXLOG_MARK_INFO "Service CONTINUE signalled");
+            reportServiceStatus(SERVICE_CONTINUE_PENDING, NO_ERROR, 0);
+            serviceStart();
+            reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
+            break;
         case SERVICE_CONTROL_SHUTDOWN:
-            apxLogWrite(APXLOG_MARK_INFO "Service SHUTDOWN signalled");
         case SERVICE_CONTROL_STOP:
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 3 * 1000);
-            /* Stop the service asynchronously */
-            stopThread = CreateThread(NULL, 0,
-                                      serviceStop,
-                                      (LPVOID)dwCtrlCode,
-                                      0, &threadId);
-#if 0
-            /* Seems we don't need to wait for the stop thread
-             * to finish
-             */
-            WaitForSingleObject(stopThread, INFINITE);
-#endif
-            CloseHandle(stopThread);
-            return;
+            apxLogWrite(APXLOG_MARK_INFO "Service STOP signalled");
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
+            serviceStop((LPVOID) &dwCtrlCode);
+            reportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
+            serviceDestroy();
+            break;
         case SERVICE_CONTROL_INTERROGATE:
             reportServiceStatus(_service_status.dwCurrentState,
                                 _service_status.dwWin32ExitCode,
                                 _service_status.dwWaitHint);
-            return;
-        default:
             break;
    }
 }
@@ -1189,34 +1096,15 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
 
     apxLogWrite(APXLOG_MARK_DEBUG "Inside ServiceMain...");
 
-    if (IS_VALID_STRING(_service_name)) {
-        WCHAR en[SIZ_HUGLEN];
-        int i;
-        PSECURITY_ATTRIBUTES sa = GetNullACL();
-        lstrlcpyW(en, SIZ_DESLEN, L"Global\\");
-        lstrlcatW(en, SIZ_DESLEN, _service_name);
-        lstrlcatW(en, SIZ_DESLEN, PRSRV_SIGNAL);
-        for (i = 7; i < lstrlenW(en); i++) {
-            if (en[i] == L' ')
-                en[i] = L'_';
-            else
-                en[i] = towupper(en[i]);
-        }
-        gSignalEvent = CreateEventW(sa, TRUE, FALSE, en);
-        CleanNullACL((void *)sa);
-
-        if (gSignalEvent) {
-            DWORD tid;
-            gSignalThread = CreateThread(NULL, 0, eventThread, NULL, 0, &tid);
-        }
-    }
     /* Find the classpath */
     _jni_jvmpath = SO_JVM;
+    _jni_rparam = SO_ARGUMENTS;
     _jni_classpath = WideToANSI(SO_CLASSPATH);
-    _jni_jvmoptions    = MzWideToANSI(SO_JVMOPTIONS);
+    _jni_mainjar = WideToANSI(SO_MAINJAR);
+    _jni_jvmoptions = MzWideToANSI(SO_JVMOPTIONS);
 
     apxLogWrite(APXLOG_MARK_DEBUG "Waiting for service initialization...");
-    if ((rc = serviceStart()) == 0) {
+    if (serviceInit() == FALSE) {
         apxLogWrite(APXLOG_MARK_DEBUG "Initialization service finished.");
         
         if (_service_mode) {
@@ -1224,7 +1112,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
             _service_status_handle = RegisterServiceCtrlHandlerW(_service_name, service_ctrl_handler);
             if (IS_INVALID_HANDLE(_service_status_handle)) {
                 apxLogWrite(APXLOG_MARK_ERROR "Failed to register Service Control for %S", _service_name);
-                goto cleanup;
+                return;
             }
             /* Allocate console so that events gets processed */
             if (!AttachConsole(ATTACH_PARENT_PROCESS) &&
@@ -1238,52 +1126,36 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
         reportServiceStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
 
         if ((rc = serviceStart()) == 0) {
+            if (IS_VALID_STRING(_service_name)) {
+                WCHAR en[SIZ_HUGLEN];
+                int i;
+                PSECURITY_ATTRIBUTES sa = GetNullACL();
+                lstrlcpyW(en, SIZ_DESLEN, L"Global\\");
+                lstrlcatW(en, SIZ_DESLEN, _service_name);
+                lstrlcatW(en, SIZ_DESLEN, PRSRV_SIGNAL);
+                for (i = 7; i < lstrlenW(en); i++) {
+                    if (en[i] == L' ')
+                        en[i] = L'_';
+                    else
+                        en[i] = towupper(en[i]);
+                }
+                gSignalEvent = CreateEventW(sa, TRUE, FALSE, en);
+                CleanNullACL((void *)sa);
+
+                if (gSignalEvent) {
+                    DWORD tid;
+                    gSignalThread = CreateThread(NULL, 0, eventThread, NULL, 0, &tid);
+                }
+            }
             /* Service is started */
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
             /* Set console handler to capture CTRL events */
             SetConsoleCtrlHandler((PHANDLER_ROUTINE)console_handler, TRUE);
-
+            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
             apxHandleWait(gWorker, INFINITE, FALSE);
-            apxLogWrite(APXLOG_MARK_DEBUG "Worker finished.");
         }
     }
-    
-    if(rc != 0) {
-cleanup:
-        apxLogWrite(APXLOG_MARK_ERROR "ServiceStart returned %d", rc);
-        reportServiceStatusStopped(rc);
-        gExitval = rc;
-    } else {
-        if (gShutdownEvent) {
-
-            /* Ensure that shutdown thread exits before us */
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for ShutdownEvent");
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
-            WaitForSingleObject(gShutdownEvent, ONE_MINUTE);
-            apxLogWrite(APXLOG_MARK_DEBUG "ShutdownEvent signaled");
-            CloseHandle(gShutdownEvent);
-
-            /* This will cause to wait for all threads to exit
-             */
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting 1 minute for all threads to exit");
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, ONE_MINUTE);
-            apxDestroyJvm(ONE_MINUTE);
-        }
-        else {
-            /* We came here without shutdown event
-             * Probably because main() returned without ensuring all threads
-             * have finished
-             */
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for all threads to exit");
-            apxDestroyJvm(INFINITE);
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
-        }
-    }
-    apxLogWrite(APXLOG_MARK_DEBUG "JVM destroyed.");
-    reportServiceStatusStopped(apxGetVmExitCode());
 }
-
 
 /* Run the service in the debug mode */
 BOOL docmdDebugService(LPAPXCMDLINE lpCmdline)

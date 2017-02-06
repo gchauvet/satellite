@@ -237,10 +237,10 @@ DWORD __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount)
 
 DWORD __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount)
 {
-    LPCWSTR p = lpStr;
+    LPCWSTR p;
     if (lpdwCount)
         *lpdwCount = 0;
-    for ( ; p && *p; p++) {
+    for (p = lpStr; p && *p; p++) {
         if (lpdwCount)
             *lpdwCount += 1;
         while (*p)
@@ -319,6 +319,7 @@ apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray)
     *lppArray = (LPWSTR *)buff;
     p = (LPWSTR)(buff + (n + 2) * sizeof(LPWSTR));
     AplCopyMemory(p, lpString, (l + 1) * sizeof(WCHAR));
+
     for (i = 0; i < n; i++) {
         (*lppArray)[i] = p;
         while (*p)

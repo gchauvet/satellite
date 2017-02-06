@@ -77,7 +77,7 @@ DWORD     startPage  = 0;
 
 static LPCWSTR  _s_log          = L"Log";
 static LPCWSTR  _s_java         = L"Java";
-static LPCWSTR  _s_conf         = L"Config";
+static LPCWSTR  _s_conf         = L"Conf";
 
 /* Allowed prunmgr commands */
 static LPCWSTR _commands[] = {
