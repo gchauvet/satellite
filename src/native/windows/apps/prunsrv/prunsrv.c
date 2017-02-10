@@ -64,6 +64,8 @@ static LPCWSTR  PRSRV_SIGNAL      = L"SIGNAL";
 static LPCWSTR  STYPE_INTERACTIVE = L"interactive";
 
 static LPWSTR       _service_name = NULL;
+static DWORD        timeout = 0;
+
 /* Allowed commands */
 static LPCWSTR _commands[] = {
     L"RS",      /* 1 Run Service */
@@ -819,6 +821,13 @@ static BOOL serviceInit()
         /* Add LibraryPath to the PATH */
        apxAddToPathW(gPool, SO_LIBPATH);
     }
+    
+    timeout = SO_STOPTIMEOUT * 1000;
+    if (timeout > 0x7FFFFFFF)
+        timeout = INFINITE;     /* If the timeout was '-1' wait forever */
+    if (!timeout)
+        timeout = 5 * 60 * 1000;   /* Use the 5 minute default shutdown */
+    
     /* Set the environment using putenv, so JVM can use it */
     setInprocEnvironment();
     /* Create the JVM global worker */
@@ -876,11 +885,9 @@ static DWORD serviceStart()
 }
 
 /* Executed when the service receives stop event */
-static DWORD WINAPI serviceStop(LPVOID lpParameter)
+static DWORD WINAPI serviceStop()
 {
     DWORD  rv = 0;
-    DWORD  timeout     = SO_STOPTIMEOUT * 1000;
-    const DWORD  dwCtrlType  = (DWORD)((BYTE *)lpParameter - (BYTE *)0);
 
     apxLogWrite(APXLOG_MARK_DEBUG "Send stop signal");
     if (!apxJavaCall(gWorker, "stop")) {
@@ -889,12 +896,6 @@ static DWORD WINAPI serviceStop(LPVOID lpParameter)
     } else {
         apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
     }
-    if (timeout > 0x7FFFFFFF)
-        timeout = INFINITE;     /* If the timeout was '-1' wait forever */
-    if (!timeout)
-        timeout = 5 * 60 * 1000;   /* Use the 5 minute default shutdown */
-    if (dwCtrlType == SERVICE_CONTROL_SHUTDOWN)
-        timeout = MIN(timeout, apxGetMaxServiceTimeout(gPool));
     return rv;
 }
 
@@ -906,21 +907,21 @@ void WINAPI service_ctrl_handler(DWORD dwCtrlCode)
     switch (dwCtrlCode) {
         case SERVICE_CONTROL_PAUSE:
             apxLogWrite(APXLOG_MARK_INFO "Service PAUSE signalled");
-            reportServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
-            serviceStop((LPVOID) &dwCtrlCode);
+            reportServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR, timeout);
+            serviceStop();
             reportServiceStatus(SERVICE_PAUSED, NO_ERROR, 0);
             break;
         case SERVICE_CONTROL_CONTINUE:
             apxLogWrite(APXLOG_MARK_INFO "Service CONTINUE signalled");
-            reportServiceStatus(SERVICE_CONTINUE_PENDING, NO_ERROR, 0);
+            reportServiceStatus(SERVICE_CONTINUE_PENDING, NO_ERROR, timeout);
             serviceStart();
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
             break;
         case SERVICE_CONTROL_SHUTDOWN:
         case SERVICE_CONTROL_STOP:
             apxLogWrite(APXLOG_MARK_INFO "Service STOP signalled");
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
-            serviceStop((LPVOID) &dwCtrlCode);
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, dwCtrlCode != SERVICE_CONTROL_SHUTDOWN ? timeout : MIN(timeout, apxGetMaxServiceTimeout(gPool)));
+            serviceStop();
             reportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
             serviceDestroy();
             break;
