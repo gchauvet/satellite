@@ -95,8 +95,10 @@
 
 #define IDD_PROPPAGE_SETUP              2680
 #define IDC_PPRJAR                    	2681
+#define IDC_PPRJPATH                    2683
 #define IDC_PPRWPATH                    2684
 #define IDC_PPRBWPATH                   2685
+#define IDC_PPRBJPATH                   2686
 #define IDC_PPRARGS                     2687
 #define IDC_PPRTIMEOUT                  2688
 
@@ -122,6 +124,12 @@
 #define IDS_PPWPATH                     3120
 #define IDS_PPIMAGE                     3121
 #define IDS_ERRSREG                     3122
+
+#define IDS_PPJSS                       3200
+#define IDS_PPJMS                       3201
+#define IDS_PPJMX                       3202
+#define IDC_PPJBCLASSPATH               3203
+#define IDS_PPRTIMEOUT                  3203
 
 #define IDS_NOTIMPLEMENTED              3199
 
