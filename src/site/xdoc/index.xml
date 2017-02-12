@@ -112,7 +112,7 @@
             <p>The original Java classes came from the Jakarta Tomcat 4.0 project.</p>
 
             <p>The package name for the Daemon component is
-                <code>org.apache.commons.daemon</code>.
+                <code>io.zatarox.hall</code>.
             </p>
         </section>
 

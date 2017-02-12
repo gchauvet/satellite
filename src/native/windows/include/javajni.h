@@ -17,8 +17,8 @@
 #ifndef _JAVAJNI_H_INCLUDED_
 #define _JAVAJNI_H_INCLUDED_
 
-#define IDD_DAEMON_CL                   2100
-#define IDD_DAEMON_JAR                  2101
+#define IDD_HALL_CL                   2100
+#define IDD_HALL_JAR                  2101
 
 __APXBEGIN_DECLS
 
