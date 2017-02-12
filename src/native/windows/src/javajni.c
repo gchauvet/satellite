@@ -1,17 +1,23 @@
-/* Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * The MIT License
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 #include "apxwin.h"
@@ -21,15 +27,15 @@
 
 #include <jni.h>
 
-/*#ifndef JNI_VERSION_1_2
+#ifndef JNI_VERSION_1_2
 #error -------------------------------------------------------
 #error JAVA 1.1 IS NO LONGER SUPPORTED
 #error -------------------------------------------------------
 #endif
 
-#ifdef JNI_VERSION_1_4*/
+#ifdef JNI_VERSION_1_4
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_4
-/*#else
+#else
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_2
 #endif
 
@@ -1074,10 +1080,10 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
     }
     
     // Load our embedded classloader and embedded apache daemon jar
-    HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_CL), RT_RCDATA);
-    HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_DAEMON_JAR), RT_RCDATA);
+    HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_CL), RT_RCDATA);
+    HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_JAR), RT_RCDATA);
     HGLOBAL resCl = LoadResource(NULL, hresCl);
-    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "org/apache/commons/daemon/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
+    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "io/zatarox/hall/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
 
     // Load the embedded daemon single jar
     DWORD szJar = SizeofResource(NULL, hresJar);
@@ -1091,7 +1097,7 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
         LockResource(resJar)
     );
 
-    // Call createBootstrap to get our DaemonLoader implementation.
+    // Call createBootstrap to get our wrapper implementation.
     lpJava->jWrapper = JNICALL_1(NewGlobalRef,
         JNICALL_3(
             CallStaticObjectMethod,

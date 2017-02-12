@@ -1,20 +1,25 @@
-/* Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * The MIT License
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
-/* @version $Id$ */
 #include "jsvc.h"
 #include "classloader.h"
 #include "kernel.h"
@@ -119,7 +124,7 @@ bool java_signal(void)
     method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), start, startparams);
     if (method == NULL) {
         (*env)->ExceptionClear(env);
-        log_error("Cannot find DaemonLoader \"signal\" method");
+        log_error("Cannot find wrapped \"signal\" method");
         return false;
     }
 
@@ -337,16 +342,16 @@ bool java_init(arg_data *args, home_data *data)
     // Load classloader class
     const jclass clazzloader = (*env)->DefineClass(
         env,
-        "org/apache/commons/daemon/impl/EmbeddedClassLoader",
+        "io/zatarox/hall/impl/EmbeddedClassLoader",
         NULL,
-        classes_org_apache_commons_daemon_impl_EmbeddedClassLoader_class,
-        classes_org_apache_commons_daemon_impl_EmbeddedClassLoader_class_len
+        classes_io_zatarox_hall_impl_EmbeddedClassLoader_class,
+        classes_io_zatarox_hall_impl_EmbeddedClassLoader_class_len
     );
 
     // Prepare an array of bytes
     jbyteArray content = (*env)->NewByteArray(
         env,
-        commons_daemon_embedded_jar_len
+        hall_embedded_jar_len
     );
 
     // Inject jar content
@@ -354,8 +359,8 @@ bool java_init(arg_data *args, home_data *data)
         env,
         content,
         0,
-        commons_daemon_embedded_jar_len,
-        commons_daemon_embedded_jar
+        hall_embedded_jar_len,
+        hall_embedded_jar_jar
     );
     
     // Create an instance of our internal classloader with embedded jar
@@ -432,7 +437,7 @@ bool JVM_destroy(int exit)
     return true;
 }
 
-/* Call the load method in our DaemonLoader class */
+/* Call the load method in our wrapper class */
 bool java_load(arg_data *args)
 {
     jclass stringClass       = NULL;
@@ -597,7 +602,7 @@ bool java_version(void)
     return true;
 }
 
-/* Call the check method in our DaemonLoader class */
+/* Call the check method in our wrapper class */
 bool java_check(arg_data *args)
 {
     jstring className = NULL;
@@ -606,7 +611,7 @@ bool java_check(arg_data *args)
     char check[] = "check";
     char checkparams[] = "(Ljava/lang/String;)Z";
 
-    log_debug("Checking daemon");
+    log_debug("Checking wrapper");
 
     jsvc_xlate_to_ascii(args->jar);
     className = (*env)->NewStringUTF(env, args->jar);

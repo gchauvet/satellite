@@ -15,12 +15,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.zatarox.maven.plugins</groupId>
-                <artifactId>daemonize-maven-plugin</artifactId>
+                <groupId>io.zatarox.hall</groupId>
+                <artifactId>hall-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <daemon></daemon>
+                    <entryPoint></entryPoint>
                 </configuration>
             </plugin>
         </plugins>

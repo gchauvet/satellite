@@ -17,14 +17,14 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-daemon-parent</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <groupId>io.zatarox.hall</groupId>
+        <artifactId>hall-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>commons-daemon-impl</artifactId>
-    <name>Apache Commons Daemon Implementation</name>
-    <description>Implementation of Apache Commons Daemon software to building Unix-like Daemon application.</description>
+    <artifactId>hall-impl</artifactId>
+    <name>Hall Implementation</name>
+    <description>Implementation of Hall software to building Unix-like Daemon application.</description>
 
     <build>
         <plugins>
@@ -44,7 +44,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>commons-daemon-embedded</finalName>
+                            <finalName>hall-embedded</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -94,7 +94,7 @@
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
                                         <argument>-i</argument>
-                                        <argument>commons-daemon-embedded.jar</argument>
+                                        <argument>hall-embedded.jar</argument>
                                         <argument>${project.basedir}/../src/native/unix/native/kernel.h</argument>
                                     </arguments>
                                 </configuration>
@@ -110,7 +110,7 @@
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
                                         <argument>-i</argument>
-                                        <argument>classes/org/apache/commons/daemon/impl/EmbeddedClassLoader.class</argument>
+                                        <argument>classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</argument>
                                         <argument>${project.basedir}/../src/native/unix/native/classloader.h</argument>
                                     </arguments>
                                 </configuration>
@@ -124,11 +124,11 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>commons-daemon-api</artifactId>
+            <artifactId>hall-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.13</version>
             <scope>test</scope>
@@ -140,9 +140,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <properties>
-        <commons.componentid>daemon</commons.componentid>
-        <commons.jira.id>DAEMON</commons.jira.id>
-        <commons.jira.pid>12310468</commons.jira.pid>
-    </properties>
 </project>
