@@ -23,13 +23,13 @@ package io.zatarox.hall;
 
 /**
  * Defines a set of methods that a BackgroundProcess instance can use to communicate with
- * the Daemon container.
+ * the container.
  */
 public interface BackgroundContext {
 
     /**
-     * Returns  <code>BackgroundController</code> object that can be used to control
-     * the <code>Daemon</code> instance that this <code>BackgroundContext</code> is
+     * Returns <code>BackgroundController</code> object that can be used to control
+     * the instance that this <code>BackgroundContext</code> is
      * passed to.
      */
     public BackgroundController getController();

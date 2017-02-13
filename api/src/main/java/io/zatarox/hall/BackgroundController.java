@@ -27,37 +27,37 @@ package io.zatarox.hall;
 public interface BackgroundController {
 
     /**
-     * Shuts down the daemon.
+     * Shuts down the background process.
      */
     public void shutdown()
             throws IllegalStateException;
 
     /**
-     * Reloads daemon
+     * Reloads the background process
      */
     public void reload()
             throws IllegalStateException;
 
     /**
-     * Shuts down daemon and logs failed message.
+     * Shuts down the background process and logs failed message.
      */
     public void fail()
             throws IllegalStateException;
 
     /**
-     * Shuts down daemon and logs failed message.
+     * Shuts down the background process and logs failed message.
      */
     public void fail(String message)
             throws IllegalStateException;
 
     /**
-     * Shuts down daemon and logs failed message.
+     * Shuts down the background process and logs failed message.
      */
     public void fail(Exception exception)
             throws IllegalStateException;
 
     /**
-     * Shuts down daemon and logs failed message.
+     * Shuts down the background process and logs failed message.
      */
     public void fail(String message, Exception exception)
             throws IllegalStateException;

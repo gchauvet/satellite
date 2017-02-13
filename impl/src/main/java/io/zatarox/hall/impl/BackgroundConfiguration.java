@@ -30,10 +30,10 @@ import java.util.Properties;
 import java.text.ParseException;
 
 /**
- * Used by jsvc for Daemon configuration.
+ * Define Hall configuration settings.
  * <p>
  * Configuration is read from properties file. If no properties file is given
- * the <code>daemon.properties</code> is used from the current directory.
+ * the <code>hall.properties</code> is used from the current directory.
  * </p>
  * <p>
  * The properties file can have property values expanded at runtime by using
@@ -173,9 +173,9 @@ public final class BackgroundConfiguration {
      * <code>[index]</code>
      * </p>
      * <pre>
-     * daemon.arg[0] = argument 1
-     * daemon.arg[1] = argument 2
-     * daemon.arg[2] = argument 3
+     * hall.arg[0] = argument 1
+     * hall.arg[1] = argument 2
+     * hall.arg[2] = argument 3
      * </pre>
      *
      * @param name The name of the property array to get.
@@ -188,7 +188,7 @@ public final class BackgroundConfiguration {
         ArrayList<String> list = new ArrayList<String>();
         String args;
 
-        // Load daemon.arg[0] ... daemon.arg[n] into the String array.
+        // Load hall.arg[0] ... hall.arg[n] into the String array.
         while ((args = getProperty(name + "[" + list.size() + "]")) != null) {
             list.add(args);
         }

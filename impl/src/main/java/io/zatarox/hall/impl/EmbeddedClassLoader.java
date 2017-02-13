@@ -90,10 +90,10 @@ public final class EmbeddedClassLoader extends ClassLoader {
     }
 
     /**
-     * Instanciate a DaemonLoader object
+     * Instanciate a BackgroundWrapper class
      *
      * @param content Bytecodes of embedded jar
-     * @return a DaemonLoader as an Object
+     * @return a BackgroundWrapper instance
      * @throws Exception
      */
     static Object createBootstrap(final byte[] content) throws Exception {

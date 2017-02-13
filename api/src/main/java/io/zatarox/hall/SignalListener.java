@@ -22,11 +22,11 @@
 package io.zatarox.hall;
 
 /**
- * Tags a Daemon as supporting some kind of signaling method that allows the
+ * Tags a background process as supporting some kind of signaling method that allows the
  * java application to perform a custom action.
  * <p>
  * User must implement a signal method that will be called from native upon
- * receiving {@code SIGUSR2} signal from the operating system.
+ * receiving signal from the operating system ({@code SIGUSR2} for Unix-like, {@code LPC} for Windows).
  * </p>
  */
 public interface SignalListener {
