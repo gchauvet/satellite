@@ -95,7 +95,7 @@
                                     <arguments>
                                         <argument>-i</argument>
                                         <argument>hall-embedded.jar</argument>
-                                        <argument>${project.basedir}/../src/native/unix/native/kernel.h</argument>
+                                        <argument>${project.basedir}/../src/native/deimos/include/kernel.h</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -111,7 +111,7 @@
                                     <arguments>
                                         <argument>-i</argument>
                                         <argument>classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</argument>
-                                        <argument>${project.basedir}/../src/native/unix/native/classloader.h</argument>
+                                        <argument>${project.basedir}/../src/native/deimos/include/classloader.h</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
