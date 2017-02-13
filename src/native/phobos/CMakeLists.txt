@@ -24,7 +24,7 @@ ADD_DEFINITIONS(
     -DPRG_VERSION_PATCH=0
 )
 
-INCLUDE_DIRECTORIES (./include)
+INCLUDE_DIRECTORIES (./includes)
 FILE(GLOB SOURCES src/*.c)
 
 ADD_EXECUTABLE(phobos ${SOURCES} resources/phobos.rc)
