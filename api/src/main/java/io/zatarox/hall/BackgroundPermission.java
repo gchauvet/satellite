@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
 
 /**
  * Represents the permissions to control and query the status of a
- * <code>Daemon</code>. A <code>BackgroundPermission</code> consists of a target
+ * background process. A <code>BackgroundPermission</code> consists of a target
  * name and a list of actions associated with it.
  * <p>
  * In this specification version the only available target name for this
@@ -50,28 +50,28 @@ import java.util.StringTokenizer;
  * <td>&quot;start&quot;</td>
  * <td>
  * The permission to call the <code>start()</code> method in an instance of a
- * <code>DaemonController</code> interface.
+ * <code>BackgroundController</code> interface.
  * </td>
  * </tr>
  * <tr>
  * <td>&quot;stop&quot;</td>
  * <td>
  * The permission to call the <code>stop()</code> method in an instance of a
- * <code>DaemonController</code> interface.
+ * <code>BackgroundController</code> interface.
  * </td>
  * </tr>
  * <tr>
  * <td>&quot;shutdown&quot;</td>
  * <td>
  * The permission to call the <code>shutdown()</code> method in an instance of a
- * <code>DaemonController</code> interface.
+ * <code>BackgroundController</code> interface.
  * </td>
  * </tr>
  * <tr>
  * <td>&quot;reload&quot;</td>
  * <td>
  * The permission to call the <code>reload()</code> method in an instance of a
- * <code>DaemonController</code> interface.
+ * <code>BackgroundController</code> interface.
  * </td>
  * </tr>
  * <tr>
@@ -105,49 +105,49 @@ public final class BackgroundPermission extends Permission {
 
     /**
      * The action name associated with the permission to call the
-     * <code>DaemonController.start()</code> method.
+     * <code>BackgroundController.start()</code> method.
      */
     protected static final String CONTROL_START = "start";
 
     /**
      * The action name associated with the permission to call the
-     * <code>DaemonController.stop()</code> method.
+     * <code>BackgroundController.stop()</code> method.
      */
     protected static final String CONTROL_STOP = "stop";
 
     /**
      * The action name associated with the permission to call the
-     * <code>DaemonController.shutdown()</code> method.
+     * <code>BackgroundController.shutdown()</code> method.
      */
     protected static final String CONTROL_SHUTDOWN = "shutdown";
 
     /**
      * The action name associated with the permission to call the
-     * <code>DaemonController.reload()</code> method.
+     * <code>BackgroundController.reload()</code> method.
      */
     protected static final String CONTROL_RELOAD = "reload";
 
     /**
      * The action mask associated with the permission to call the
-     * <code>DaemonController.start()</code> method.
+     * <code>BackgroundController.start()</code> method.
      */
     protected static final int MASK_CONTROL_START = 0x01;
 
     /**
      * The action mask associated with the permission to call the
-     * <code>DaemonController.stop()</code> method.
+     * <code>BackgroundController.stop()</code> method.
      */
     protected static final int MASK_CONTROL_STOP = 0x02;
 
     /**
      * The action mask associated with the permission to call the
-     * <code>DaemonController.shutdown()</code> method.
+     * <code>BackgroundController.shutdown()</code> method.
      */
     protected static final int MASK_CONTROL_SHUTDOWN = 0x04;
 
     /**
      * The action mask associated with the permission to call the
-     * <code>DaemonController.reload()</code> method.
+     * <code>BackgroundController.reload()</code> method.
      */
     protected static final int MASK_CONTROL_RELOAD = 0x08;
 
@@ -177,10 +177,10 @@ public final class BackgroundPermission extends Permission {
      * Constructors
      */
     /**
-     * Creates a new <code>DaemonPermission</code> instance with a specified
+     * Creates a new <code>BackgroundPermission</code> instance with a specified
      * permission name.
      * <p>
-     * This constructor will create a new <code>DaemonPermission</code> instance
+     * This constructor will create a new <code>BackgroundPermission</code> instance
      * that <b>will not</b> grant any permission to the caller.
      *
      * @param target The target name of this permission.
@@ -209,7 +209,7 @@ public final class BackgroundPermission extends Permission {
     }
 
     /**
-     * Creates a new <code>DaemonPermission</code> instance with a specified
+     * Creates a new <code>BackgroundPermission</code> instance with a specified
      * permission name and a specified list of actions.
      * <p>
      * </p>

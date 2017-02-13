@@ -37,13 +37,13 @@ import io.zatarox.hall.BackgroundContext;
 import io.zatarox.hall.BackgroundController;
 
 /**
- * Used by jsvc for BackgroundProcess management.
+ * Wrapper to manage the BackgroundProcess instance.
  */
 public final class BackgroundWrapper {
 
     // N.B. These static mutable variables need to be accessed using synch.
     private Controller controller = null;
-    private Object daemon = null;
+    private Object instance = null;
     private final ClassLoader loader;
 
     public BackgroundWrapper(ClassLoader loader) {
@@ -57,8 +57,8 @@ public final class BackgroundWrapper {
         System.out.println(String.format("java version \"%s\"", System.getProperty("java.version")));
         System.out.println(String.format("%s (build %s)", System.getProperty("java.runtime.name"), System.getProperty("java.runtime.version")));
         System.out.println(String.format("%s (build %s, %s)", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")));
-        System.out.println(String.format("commons daemon version \"%s\"", System.getProperty("commons.daemon.version")));
-        System.out.println(String.format("commons daemon process (id: %s, parent: %s)", System.getProperty("commons.daemon.process.id"), System.getProperty("commons.daemon.process.parent")));
+        System.out.println(String.format("Hall version \"%s\"", System.getProperty("hall.version")));
+        System.out.println(String.format("Hall process (id: %s, parent: %s)", System.getProperty("hall.process.id"), System.getProperty("hall.process.parent")));
     }
 
     public boolean check(String cn) {
@@ -76,7 +76,7 @@ public final class BackgroundWrapper {
                 throw new ClassNotFoundException(cn);
             }
 
-            /* Create a new instance of the daemon */
+            /* Create a new instance of the background process */
             c.newInstance();
 
         } catch (Throwable t) {
@@ -93,11 +93,11 @@ public final class BackgroundWrapper {
 
     public boolean signal() {
         try {
-            if (daemon instanceof SignalListener) {
-                ((SignalListener) daemon).signal();
+            if (instance instanceof SignalListener) {
+                ((SignalListener) instance).signal();
                 return true;
             }
-            System.out.println("Daemon doesn't support signaling");
+            System.out.println("Background process doesn't support signaling");
         } catch (Throwable ex) {
             System.err.println("Cannot send signal: " + ex);
             ex.printStackTrace(System.err);
@@ -141,7 +141,7 @@ public final class BackgroundWrapper {
 
             final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), this.loader);
             final Class<?> c = Class.forName(manifest.getMainAttributes().getValue("Background-Process-Class"), true, loader);
-            daemon = c.newInstance();
+            instance = c.newInstance();
             controller = new Controller();
             /* Set the availability flag in the controller */
             controller.setAvailable(false);
@@ -151,10 +151,10 @@ public final class BackgroundWrapper {
             context.setArguments(args != null ? args : new String[0]);
             context.setController(controller);
 
-            ((BackgroundProcess) daemon).init(context);
+            ((BackgroundProcess) instance).init(context);
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
-            /* DaemonInitExceptions can fail with a nicer message */
+            /* BackgroundExceptions can fail with a nicer message */
             if (thrown instanceof BackgroundException) {
                 failed(((BackgroundException) thrown).getMessageWithCause());
             } else {
@@ -174,8 +174,8 @@ public final class BackgroundWrapper {
 
     public boolean start() {
         try {
-            /* Attempt to start the daemon */
-            ((BackgroundProcess) daemon).start();
+            /* Attempt to start the background process */
+            ((BackgroundProcess) instance).start();
 
             /* Set the availability flag in the controller */
             if (controller != null) {
@@ -199,8 +199,8 @@ public final class BackgroundWrapper {
                 controller.setAvailable(false);
             }
 
-            /* Attempt to stop the daemon */
-            ((BackgroundProcess) daemon).stop();
+            /* Attempt to stop the background process */
+            ((BackgroundProcess) instance).stop();
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, start and stop won't be called).
@@ -213,10 +213,10 @@ public final class BackgroundWrapper {
 
     public boolean destroy() {
         try {
-            /* Attempt to stop the daemon */
-            ((BackgroundProcess) daemon).destroy();
+            /* Attempt to stop the background process */
+            ((BackgroundProcess) instance).destroy();
 
-            daemon = null;
+            instance = null;
             controller = null;
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
@@ -306,16 +306,16 @@ public final class BackgroundWrapper {
 
     private final class Context implements BackgroundContext {
 
-        private BackgroundController daemonController = null;
+        private BackgroundController controller = null;
 
         private String[] args = null;
 
         public BackgroundController getController() {
-            return daemonController;
+            return controller;
         }
 
         public void setController(BackgroundController controller) {
-            this.daemonController = controller;
+            this.controller = controller;
         }
 
         public String[] getArguments() {

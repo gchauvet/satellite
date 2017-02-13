@@ -22,7 +22,7 @@
 package io.zatarox.hall;
 
 /**
- * Provides support for native daemon invocation. Using a platform dependant
+ * Provides support for native background process invocation. Using a platform dependant
  * helper program, classes that implement the <code>BackgroundProcess</code> interface can
  * be initialized, started and stopped according to the conventions of the
  * underlying operating system.
@@ -90,9 +90,9 @@ public interface BackgroundProcess {
             throws Exception;
 
     /**
-     * Frees any resources allocated by this daemon such as file descriptors or
+     * Frees any resources allocated by this background process such as file descriptors or
      * sockets. This method gets called by the container after stop() has been
- called, before the JVM exits. The BackgroundProcess can not be restarted after this
+ called and before the JVM exits. The BackgroundProcess can not be restarted after this
  method has been called without a new call to the init() method.
      */
     public void destroy();
