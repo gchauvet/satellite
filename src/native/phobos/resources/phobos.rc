@@ -1,0 +1,70 @@
+/*
+ * The MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+#include "apxwin.h"
+#include "phobos.h"
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define RSTR_PHOBOS "Hall Phobos Service Wrapper"
+
+IDI_MAINICON         ICON                   "../resources/procrunw.ico"
+IDD_HALL_CL        RCDATA                 "../../../../impl/target/classes/io/zatarox/hall/impl/EmbeddedClassLoader.class"
+IDD_HALL_JAR       RCDATA                 "../../../../impl/target/hall-embedded.jar"
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "phobos.manifest"
+
+1 VERSIONINFO
+ FILEVERSION PRG_VERSION_MAJOR,PRG_VERSION_MINOR,PRG_VERSION_PATCH,0
+ PRODUCTVERSION PRG_VERSION_MAJOR,PRG_VERSION_MINOR,PRG_VERSION_PATCH,0
+ FILEFLAGSMASK 0x3fL
+#if defined(_DEBUG)
+ FILEFLAGS 0x03L
+#else
+ FILEFLAGS 0x02L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "Comments", "\0"
+      VALUE "CompanyName", "Zatarox\0"
+      VALUE "FileDescription", RSTR_PHOBOS "\0"
+      VALUE "FileVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
+      VALUE "InternalName", RSTR_PHOBOS "\0"
+      VALUE "LegalCopyright", "Copyright (c) 2017 Zatarox.\0"
+      VALUE "OriginalFilename", "phobos.exe\0"
+      VALUE "ProductName", RSTR_PHOBOS "\0"
+      VALUE "ProductVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
+
