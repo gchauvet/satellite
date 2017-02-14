@@ -34,7 +34,6 @@
                 <version>1.0-alpha-9-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <provider>mingw</provider>
                     <linkerFinalNameExt>exe</linkerFinalNameExt>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>

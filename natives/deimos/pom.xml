@@ -73,7 +73,7 @@
                 <version>1.0-alpha-9-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <provider>mingw</provider>
+                    <linkerFinalNameExt>uexe</linkerFinalNameExt>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-DPRG_VERSION_MAJOR=1</compilerStartOption>
