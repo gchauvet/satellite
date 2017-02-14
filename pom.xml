@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.zatarox.hall</groupId>
     <artifactId>hall-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${project.version.major}.${project.version.minor}.${project.version.patch}-SNAPSHOT</version>
     <name>Hall Parent Project</name>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
@@ -51,6 +51,9 @@
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
+        <project.version.major>1</project.version.major>
+        <project.version.minor>0</project.version.minor>
+        <project.version.patch>0</project.version.patch>
     </properties>
 
     <modules>
@@ -59,5 +62,4 @@
         <module>plugin</module>
         <module>natives</module>
     </modules>
-
 </project>

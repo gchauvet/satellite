@@ -22,8 +22,51 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>hall-natives-deimos</artifactId>
+    <artifactId>deimos</artifactId>
     <packaging>uexe</packaging>
     <name>Hall Deimos frontend</name>
     <description>Hall Unix-like native frontend program</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>embedding-kernel</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>xxd</executable>
+                            <workingDirectory>${project.basedir}/../../impl/target</workingDirectory>
+                            <arguments>
+                                <argument>-i</argument>
+                                <argument>hall-embedded.jar</argument>
+                                <argument>${project.basedir}/src/c/include/kernel.h</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>embedding-loader</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>xxd</executable>
+                            <workingDirectory>${project.basedir}/../../impl/target</workingDirectory>
+                            <arguments>
+                                <argument>-i</argument>
+                                <argument>classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</argument>
+                                <argument>${project.basedir}/src/c/include/classloader.h</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
