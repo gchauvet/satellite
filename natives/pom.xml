@@ -31,9 +31,31 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>1.0-alpha-8</version>
+                <version>1.0-alpha-9-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <compilerStartOptions>
+                        <compilerStartOption>-std=c99</compilerStartOption>
+                        <compilerStartOption>-D_UNICODE</compilerStartOption>
+                        <compilerStartOption>-DUNICODE</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MAJOR=1</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MINOR=0</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_PATCH=0</compilerStartOption>
+                        <compilerStartOption>-Os</compilerStartOption>
+                    </compilerStartOptions>
+                    <linkerStartOptions>
+                        <linkerStartOption>-s</linkerStartOption>
+                    </linkerStartOptions>
+                    <resources>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>*.rc</include>
+                            </includes>
+                        </resource>
+                    </resources>
                     <sources>
                         <source>
                             <directory>src/main/c</directory>
@@ -45,10 +67,10 @@
                             <directory>src/main/include</directory>
                         </source>
                         <source>
-                            <directory>src/main/resources</directory>
-                            <includes>
-                                <include>*.rc</include>
-                            </includes>
+                            <directory>${env.JAVA_HOME}/include</directory>
+                        </source>
+                        <source>
+                            <directory>${env.JAVA_HOME}/include/win32</directory>
                         </source>
                     </sources>
                 </configuration>
@@ -59,4 +81,12 @@
         <module>phobos</module>
         <module>deimos</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hall-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
