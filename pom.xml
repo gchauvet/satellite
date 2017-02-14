@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.zatarox.hall</groupId>
     <artifactId>hall-parent</artifactId>
-    <version>${project.version.major}.${project.version.minor}.${project.version.patch}-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>Hall Parent Project</name>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
