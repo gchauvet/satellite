@@ -23,7 +23,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hall-natives-deimos</artifactId>
-    <packaging>nar</packaging>
+    <packaging>uexe</packaging>
     <name>Hall Deimos frontend</name>
-    <description>Hall Unix like native frontend software</description>
+    <description>Hall Unix-like native frontend program</description>
 </project>

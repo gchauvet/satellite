@@ -25,34 +25,38 @@
     <artifactId>hall-natives</artifactId>
     <packaging>pom</packaging>
     <name>Hall native frontends</name>
-    <description>Hall natives frontends softwares to interact with the OS host</description>
-    
+    <description>Hall natives frontends softwares to interact with the host OS</description>
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.maven-nar</groupId>
-                <artifactId>nar-maven-plugin</artifactId>
-                <version>3.5.1</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-alpha-8</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <libraries>
-                        <library>
-                            <type>executable</type>
-                        </library>
-                    </libraries>
+                    <sources>
+                        <source>
+                            <directory>src/main/c</directory>
+                            <includes>
+                                <include>*.c</include>
+                            </includes>
+                        </source>
+                        <source>
+                            <directory>src/main/include</directory>
+                        </source>
+                        <source>
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>*.rc</include>
+                            </includes>
+                        </source>
+                    </sources>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    
     <modules>
-        <module>deimos</module>
         <module>phobos</module>
+        <module>deimos</module>
     </modules>
 </project>
