@@ -26,6 +26,40 @@
     <packaging>pom</packaging>
     <name>Hall native frontends</name>
     <description>Hall natives frontends softwares to interact with the host OS</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-alpha-9-SNAPSHOT</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <provider>mingw</provider>
+                    <linkerStartOptions>
+                        <linkerStartOption>-s</linkerStartOption>
+                    </linkerStartOptions>
+                    <sources>
+                        <source>
+                            <directory>src/main/c</directory>
+                            <includes>
+                                <include>*.c</include>
+                            </includes>
+                        </source>
+                        <source>
+                            <directory>src/main/include</directory>
+                        </source>
+                        <source>
+                            <directory>${env.JAVA_HOME}/include</directory>
+                        </source>
+                        <source>
+                            <directory>${env.JAVA_HOME}/include/win32</directory>
+                        </source>
+                    </sources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+        
     <modules>
         <module>phobos</module>
         <module>deimos</module>

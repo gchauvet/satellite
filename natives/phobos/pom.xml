@@ -40,14 +40,18 @@
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-D_UNICODE</compilerStartOption>
                         <compilerStartOption>-DUNICODE</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MAJOR=1</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MINOR=0</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_PATCH=0</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MAJOR=${project.version.major}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MINOR=${project.version.minor}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_PATCH=${project.version.patch}</compilerStartOption>
                         <compilerStartOption>-Os</compilerStartOption>
                     </compilerStartOptions>
-                    <linkerStartOptions>
-                        <linkerStartOption>-s</linkerStartOption>
-                    </linkerStartOptions>
+                    <resourceStartOptions>
+                        <options>
+                            <option>-DPRG_VERSION_MAJOR=${project.version.major}</option>
+                            <option>-DPRG_VERSION_MINOR=${project.version.minor}</option>
+                            <option>-DPRG_VERSION_PATCH=${project.version.patch}</option>
+                        </options>
+                    </resourceStartOptions>
                     <resources>
                         <resource>
                             <directory>src/main/resources</directory>
@@ -59,23 +63,6 @@
                             <directory>src/main/include</directory>
                         </resource>
                     </resources>
-                    <sources>
-                        <source>
-                            <directory>src/main/c</directory>
-                            <includes>
-                                <include>*.c</include>
-                            </includes>
-                        </source>
-                        <source>
-                            <directory>src/main/include</directory>
-                        </source>
-                        <source>
-                            <directory>${env.JAVA_HOME}/include</directory>
-                        </source>
-                        <source>
-                            <directory>${env.JAVA_HOME}/include/win32</directory>
-                        </source>
-                    </sources>
                 </configuration>
             </plugin>
         </plugins>
