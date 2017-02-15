@@ -49,19 +49,12 @@
                             <source>
                                 <directory>src/main/include</directory>
                             </source>
-                            <source>
-                                <directory>${env.JAVA_HOME}/include</directory>
-                            </source>
-                            <source>
-                                <directory>${env.JAVA_HOME}/include/win32</directory>
-                            </source>
                         </sources>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-        
     <modules>
         <module>phobos</module>
         <module>deimos</module>

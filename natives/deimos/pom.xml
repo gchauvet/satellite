@@ -72,6 +72,7 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
                     <linkerFinalNameExt>uexe</linkerFinalNameExt>
+                    <javahOS>linux</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-DPRG_VERSION_MAJOR=1</compilerStartOption>
@@ -82,23 +83,6 @@
                     <linkerStartOptions>
                         <linkerStartOption>-s</linkerStartOption>
                     </linkerStartOptions>
-                    <sources>
-                        <source>
-                            <directory>src/main/c</directory>
-                            <includes>
-                                <include>*.c</include>
-                            </includes>
-                        </source>
-                        <source>
-                            <directory>src/main/include</directory>
-                        </source>
-                        <source>
-                            <directory>${env.JAVA_HOME}/include</directory>
-                        </source>
-                        <source>
-                            <directory>${env.JAVA_HOME}/include/win32</directory>
-                        </source>
-                    </sources>
                 </configuration>
             </plugin>
         </plugins>
