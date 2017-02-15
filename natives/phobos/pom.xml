@@ -33,6 +33,7 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
                     <linkerFinalNameExt>exe</linkerFinalNameExt>
+                    <javahOS>win32</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-D_UNICODE</compilerStartOption>
