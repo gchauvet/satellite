@@ -32,22 +32,21 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
-                    <linkerFinalNameExt>exe</linkerFinalNameExt>
                     <javahOS>win32</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-D_UNICODE</compilerStartOption>
                         <compilerStartOption>-DUNICODE</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MAJOR=${project.version.major}</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MINOR=${project.version.minor}</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_PATCH=${project.version.patch}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</compilerStartOption>
                         <compilerStartOption>-Os</compilerStartOption>
                     </compilerStartOptions>
                     <resourceStartOptions>
                         <options>
-                            <option>-DPRG_VERSION_MAJOR=${project.version.major}</option>
-                            <option>-DPRG_VERSION_MINOR=${project.version.minor}</option>
-                            <option>-DPRG_VERSION_PATCH=${project.version.patch}</option>
+                            <option>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</option>
+                            <option>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}}</option>
+                            <option>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</option>
                         </options>
                     </resourceStartOptions>
                     <resources>
@@ -62,6 +61,40 @@
                         </resource>
                     </resources>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>windows-x86</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>x86</classifier>
+                            <compilerStartOptions>
+                                <compilerStartOption>-m32</compilerStartOption>
+                            </compilerStartOptions>
+                            <linkerStartOptions>
+                                <linkerStartOption>-m32</linkerStartOption>
+                            </linkerStartOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>windows-x64</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>x86-64</classifier>
+                            <compilerStartOptions>
+                                <compilerStartOption>-m64</compilerStartOption>
+                            </compilerStartOptions>
+                            <linkerStartOptions>
+                                <linkerStartOption>-m64</linkerStartOption>
+                            </linkerStartOptions>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
