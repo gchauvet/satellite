@@ -75,9 +75,9 @@
                     <javahOS>linux</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MAJOR=1</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MINOR=0</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_PATCH=0</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</compilerStartOption>
+                        <compilerStartOption>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</compilerStartOption>
                         <compilerStartOption>-Os</compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
