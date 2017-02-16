@@ -65,15 +65,18 @@
                     <execution>
                         <id>windows-x86</id>
                         <goals>
+                            <goal>initialize</goal>
+                            <goal>resource-compile</goal>
                             <goal>compile</goal>
                             <goal>link</goal>
                         </goals>
+                        <phase>compile</phase>
                         <configuration>
                             <classifier>x86</classifier>
-                            <compilerStartOptions>
+                            <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m32</compilerStartOption>
                             </compilerStartOptions>
-                            <linkerStartOptions>
+                            <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m32</linkerStartOption>
                             </linkerStartOptions>
                         </configuration>
@@ -81,15 +84,18 @@
                     <execution>
                         <id>windows-x64</id>
                         <goals>
+                            <goal>initialize</goal>
+                            <goal>resource-compile</goal>
                             <goal>compile</goal>
                             <goal>link</goal>
                         </goals>
+                        <phase>compile</phase>
                         <configuration>
-                            <classifier>x86-64</classifier>
-                            <compilerStartOptions>
+                            <classifier>x86_64</classifier>
+                            <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m64</compilerStartOption>
                             </compilerStartOptions>
-                            <linkerStartOptions>
+                            <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m64</linkerStartOption>
                             </linkerStartOptions>
                         </configuration>
