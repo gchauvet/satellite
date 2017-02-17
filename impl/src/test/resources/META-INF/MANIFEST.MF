@@ -1,1 +1,1 @@
-Daemon-Class: org.apache.commons.daemon.impl.DaemonLoaderTest$FakeDaemonImpl
+Background-Process-Class: io.zatarox.hall.impl.BackgroundWrapperTest$FakeBackgroundProcessImpl
