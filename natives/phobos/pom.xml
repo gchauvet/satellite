@@ -32,6 +32,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
+                    <linkerFinalNameExt>exe</linkerFinalNameExt>
                     <javahOS>win32</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
