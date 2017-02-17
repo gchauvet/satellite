@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.zatarox.hall</groupId>
+        <artifactId>hall-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>daemonize-maven-plugin</artifactId>
+    <artifactId>hall-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.0.0-SNAPSHOT</version>
-    <developers>
-        <developer>
-            <name>Guillaume Chauvet</name>
-            <organization>gchauvet</organization>
-            <organizationUrl>http://github.com/gchauvet</organizationUrl>
-        </developer>
-    </developers>
     <dependencies>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -37,8 +33,8 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>commons-daemon-impl</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <artifactId>hall-impl</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -75,9 +71,9 @@
             </plugin>
         </plugins>
     </build>
-    <name>Apache Commons Daemon Maven Plugin</name>
-    <description>Provide a way to run a class that implements Apache Daemon interface</description>
+    <name>Hall Maven Plugin</name>
+    <description>Provide a way to run a class that implements Hall Daemon interface</description>
     <properties>
-        <commons.componentid>daemonize-maven-plugin</commons.componentid>
+        <commons.componentid>hall-maven-plugin</commons.componentid>
     </properties>
 </project>

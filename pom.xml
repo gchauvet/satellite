@@ -19,64 +19,23 @@
     xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-parent</artifactId>
-        <version>42</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>commons-daemon-parent</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-    <name>Apache Commons Daemon POM</name>
+    <groupId>io.zatarox.hall</groupId>
+    <artifactId>hall-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>Hall Parent Project</name>
     <packaging>pom</packaging>
-    <!-- Daemon started in Commons in 2002 with an import of code from Tomcat,
-    which is why the NOTICE file has an earlier date than the inceptionYear -->
-    <inceptionYear>2002</inceptionYear>
-    <description>Apache Commons Daemon software provides an alternative invocation mechanism for unix-daemon-like Java code.
+    <inceptionYear>2017</inceptionYear>
+    <description>Hall software provides an alternative invocation mechanism for unix-daemon-like Java code.
     </description>
-    <url>http://commons.apache.org/proper/commons-daemon/</url>
-
-    <issueManagement>
-        <system>jira</system>
-        <url>http://issues.apache.org/jira/browse/DAEMON</url>
-    </issueManagement>
-
-    <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/commons/proper/daemon/trunk</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/commons/proper/daemon/trunk</developerConnection>
-        <url>http://svn.apache.org/viewvc/commons/proper/daemon/trunk</url>
-    </scm>
+    <url>https://bitbucket.org/gchauvet/hall</url>
 
     <developers>
-        <developer>
-            <name>Jean-Frederic Clere</name>
-            <id>jfclere</id>
-            <email>jfclere at apache.org</email>
-        </developer>
-        <developer>
-            <name>Remy Maucherat</name>
-            <id>remm</id>
-            <email>remm at apache.org</email>
-        </developer>
-        <developer>
-            <name>Yoav Shapira</name>
-            <id>yoavs</id>
-            <email>yoavs at apache.org</email>
-        </developer>
-        <developer>
-            <name>Bill Barker</name>
-            <id>billbarker</id>
-            <email>billbarker at apache.org</email>
-        </developer>
-        <developer>
-            <name>Mladen Turk</name>
-            <id>mturk</id>
-            <email>mturk at apache.org</email>
-        </developer>
         <developer>
             <name>Guillaume Chauvet</name>
             <id>gchauvet</id>
             <email>gchauvet at zatarox.com</email>
+            <organization>https://bitbucket.org/gchauvet</organization>
         </developer>
     </developers>
 
@@ -92,13 +51,15 @@
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <commons.release.version>${project.version}</commons.release.version>
+        <project.version.major>1</project.version.major>
+        <project.version.minor>0</project.version.minor>
+        <project.version.patch>0</project.version.patch>
     </properties>
 
     <modules>
         <module>api</module>
         <module>impl</module>
         <module>plugin</module>
+        <module>natives</module>
     </modules>
-
 </project>
