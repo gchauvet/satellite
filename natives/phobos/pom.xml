@@ -37,7 +37,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
-                    <linkerFinalNameExt>exe</linkerFinalNameExt>
                     <javahOS>win32</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
@@ -70,13 +69,6 @@
                 <executions>
                     <execution>
                         <id>windows-x86</id>
-                        <goals>
-                            <goal>initialize</goal>
-                            <goal>resource-compile</goal>
-                            <goal>compile</goal>
-                            <goal>link</goal>
-                        </goals>
-                        <phase>compile</phase>
                         <configuration>
                             <classifier>x86</classifier>
                             <compilerStartOptions combine.children="append">
@@ -89,13 +81,6 @@
                     </execution>
                     <execution>
                         <id>windows-x64</id>
-                        <goals>
-                            <goal>initialize</goal>
-                            <goal>resource-compile</goal>
-                            <goal>compile</goal>
-                            <goal>link</goal>
-                        </goals>
-                        <phase>compile</phase>
                         <configuration>
                             <classifier>x86_64</classifier>
                             <compilerStartOptions combine.children="append">
