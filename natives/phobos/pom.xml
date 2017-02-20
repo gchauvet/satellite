@@ -37,7 +37,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
-                    <javahOS>win32</javahOS>
+                    <javahOS>${cross-compiler.os}</javahOS>
                     <compilerStartOptions>
                         <compilerStartOption>-std=c99</compilerStartOption>
                         <compilerStartOption>-D_UNICODE</compilerStartOption>
@@ -71,6 +71,8 @@
                         <id>windows-x86</id>
                         <configuration>
                             <classifier>x86</classifier>
+                            <compilerExecutable>${cross-compiler.x86}</compilerExecutable>
+                            <linkerExecutable>${cross-compiler.x86}</linkerExecutable>
                             <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m32</compilerStartOption>
                             </compilerStartOptions>
@@ -83,6 +85,8 @@
                         <id>windows-x64</id>
                         <configuration>
                             <classifier>x86_64</classifier>
+                            <compilerExecutable>${cross-compiler.x64}</compilerExecutable>
+                            <linkerExecutable>${cross-compiler.x64}</linkerExecutable>
                             <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m64</compilerStartOption>
                             </compilerStartOptions>
@@ -95,4 +99,32 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>from-linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <cross-compiler.x86>i686-w64-mingw32-gcc</cross-compiler.x86>
+                <cross-compiler.x64>x86_64-w64-mingw32-gcc</cross-compiler.x64>
+                <cross-compiler.os>linux</cross-compiler.os>
+            </properties>
+        </profile>
+        <profile>
+            <id>from-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <cross-compiler.x86>gcc</cross-compiler.x86>
+                <cross-compiler.x64>gcc</cross-compiler.x64>
+                <cross-compiler.os>win32</cross-compiler.os>
+            </properties>
+        </profile>
+    </profiles>
 </project>
