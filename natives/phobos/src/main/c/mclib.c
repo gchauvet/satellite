@@ -59,75 +59,6 @@ typedef UINT    word;       /* "word" used for optimal copy speed */
 #define wsize   sizeof(UINT)
 #define wmask   (wsize - 1)
 
-LPVOID AplFillMemory(PVOID Destination, SIZE_T Length, BYTE Fill)
-{
-
-    SIZE_T t;
-#ifdef WIN64
-    UINT64 c;
-#else
-    UINT   c;
-#endif
-    LPBYTE dst;
-
-    dst = Destination;
-    /*
-     * If not enough words, just fill bytes.  A length >= 2 words
-     * guarantees that at least one of them is `complete' after
-     * any necessary alignment.  For instance:
-     *
-     *  |-----------|-----------|-----------|
-     *  |00|01|02|03|04|05|06|07|08|09|0A|00|
-     *            ^---------------------^
-     *       dst         dst+length-1
-     *
-     * but we use a minimum of 3 here since the overhead of the code
-     * to do word writes is substantial.
-     */
-    if (Length < 3 * wsize) {
-        while (Length != 0) {
-            *dst++ = Fill;
-            --Length;
-        }
-        return (Destination);
-    }
-
-    if ((c = Fill) != 0) {  /* Fill the word. */
-        c = (c << 8) | c;   /* u_int is 16 bits. */
-        c = (c << 16) | c;  /* u_int is 32 bits. */
-#ifdef WIN64
-        c = (c << 32) | c;  /* u_int is 64 bits. */
-#endif
-    }
-    /* Align destination by filling in bytes. */
-    if ((t = (SIZE_T)dst & wmask) != 0) {
-        t = wsize - t;
-        Length -= t;
-        do {
-            *dst++ = Fill;
-        } while (--t != 0);
-    }
-
-    /* Fill words.  Length was >= 2*words so we know t >= 1 here. */
-    t = Length / wsize;
-    do {
-#ifdef WIN64
-        *(UINT64 *)dst = c;
-#else
-        *(UINT   *)dst = c;
-#endif
-        dst += wsize;
-    } while (--t != 0);
-
-    /* Mop up trailing bytes, if any. */
-    t = Length & wmask;
-    if (t != 0)
-        do {
-            *dst++ = Fill;
-        } while (--t != 0);
-    return (Destination);
-}
-
 void AplZeroMemory(PVOID Destination, SIZE_T Length)
 {
 
@@ -245,60 +176,6 @@ done:
     return (Destination);
 }
 
-
-INT
-AplMemCmp(LPCVOID lpA, LPCVOID lpB, SIZE_T nBytes)
-{
-    if (nBytes != 0) {
-        const BYTE *p1 = lpA, *p2 = lpB;
-
-        do {
-            if (*p1++ != *p2++)
-                return (*--p1 - *--p2);
-        } while (--nBytes != 0);
-    }
-    return 0;
-}
-
-/*
- * Find the first occurrence of lpFind in lpMem.
- * dwLen:   The length of lpFind
- * dwSize:  The length of lpMem
- */
-LPBYTE
-ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize)
-{
-    BYTE   c, sc;
-    SIZE_T cnt = 0;
-    const BYTE *s = lpMem, *find = lpFind;
-
-    if ((c = *find++) != 0) {
-        do {
-            do {
-                sc = *s++;
-                if (cnt++ > dwSize)
-                    return NULL;
-            } while (sc != c);
-        } while (AplMemCmp(s, find, dwLen - 1) != 0);
-        s--;
-    }
-    return (LPBYTE)s;
-}
-
-LPSTR
-AplRindexA(LPCSTR lpStr, int ch)
-{
-    LPSTR save;
-
-    for (save = NULL;; ++lpStr) {
-        if (*lpStr == ch)
-            save = (LPSTR)lpStr;
-        if (!*lpStr)
-            return save;
-    }
-    /* NOTREACHED */
-}
-
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters
@@ -360,32 +237,6 @@ lstrlcatW(LPWSTR dst, int siz, LPCWSTR src)
     *d = L'\0';
 
     return dst;
-}
-
-LPSTR
-lstrlcpyA(LPSTR dst, int siz, LPCSTR src)
-{
-    LPSTR  d = dst;
-    LPCSTR s = src;
-    int    n = siz;
-
-    /* Copy as many bytes as will fit */
-    if (n != 0) {
-        while (--n != 0) {
-            if ((*d++ = *s++) == '\0')
-                break;
-        }
-    }
-
-    /* Not enough room in dst, add NUL and traverse rest of src */
-    if (n == 0) {
-        if (siz != 0)
-            *d = '\0';      /* NUL-terminate dst */
-        while (*s++)
-            ;
-    }
-
-    return d;
 }
 
 LPWSTR

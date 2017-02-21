@@ -24,6 +24,7 @@
 #define _DEBUG_JNI  1
 #include "apxwin.h"
 #include "phobos.h"
+#include "mclib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -332,7 +333,7 @@ static void printVersion(void)
 {
     fwprintf(stderr, L"Hall Service Wrapper version %u.%u.%u/Win%d (%S)\n",
             PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
-    fwprintf(stderr, L"Copyright 2017 zatarox");
+    fwprintf(stderr, L"Copyright 2017 Zatarox, based on Apache Commons Daemon");
 }
 
 #ifdef _DEBUG
