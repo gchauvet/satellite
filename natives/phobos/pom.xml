@@ -69,6 +69,13 @@
                 <executions>
                     <execution>
                         <id>windows-x86</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>initialize</goal>
+                            <goal>resource-compile</goal>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
                         <configuration>
                             <classifier>x86</classifier>
                             <compilerExecutable>${cross-compiler.x86}</compilerExecutable>
@@ -79,10 +86,24 @@
                             <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m32</linkerStartOption>
                             </linkerStartOptions>
+                            <resourceCompilerOptions>
+                                <resourceCompilerOption>-F</resourceCompilerOption>
+                                <resourceCompilerOption>pe-i386</resourceCompilerOption>
+                            </resourceCompilerOptions>
+                            <resourceCompilerOutputDirectory>${project.build.directory}/resources/x86</resourceCompilerOutputDirectory>
+                            <compilerOutputDirectory>${project.build.directory}/objects/x86</compilerOutputDirectory>
+                            <linkerFinalName>phobos-x86</linkerFinalName>
                         </configuration>
                     </execution>
                     <execution>
                         <id>windows-x64</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>initialize</goal>
+                            <goal>resource-compile</goal>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
                         <configuration>
                             <classifier>x86_64</classifier>
                             <compilerExecutable>${cross-compiler.x64}</compilerExecutable>
@@ -93,6 +114,40 @@
                             <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m64</linkerStartOption>
                             </linkerStartOptions>
+                            <resourceCompilerOptions>
+                                <resourceCompilerOption>-F</resourceCompilerOption>
+                                <resourceCompilerOption>pe-x86-64</resourceCompilerOption>
+                            </resourceCompilerOptions>
+                            <resourceCompilerOutputDirectory>${project.build.directory}/resources/x64</resourceCompilerOutputDirectory>
+                            <compilerOutputDirectory>${project.build.directory}/objects/x64</compilerOutputDirectory>
+                            <linkerFinalName>phobos-x86_64</linkerFinalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/phobos-x86_64.exe</file>
+                                    <type>exe</type>
+                                    <classifier>x86_64</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>target/phobos-x86.exe</file>
+                                    <type>exe</type>
+                                    <classifier>x86</classifier>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
