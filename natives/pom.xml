@@ -77,7 +77,6 @@
     </build>
     <modules>
         <module>phobos</module>
-        <module>deimos</module>
     </modules>
     <dependencies>
         <dependency>
@@ -87,4 +86,16 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <modules>
+                <module>deimos</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
