@@ -139,12 +139,12 @@
                             <artifacts>
                                 <artifact>
                                     <file>target/phobos-x86_64.exe</file>
-                                    <type>exe</type>
+                                    <type>${project.artifact.type}</type>
                                     <classifier>x86_64</classifier>
                                 </artifact>
                                 <artifact>
                                     <file>target/phobos-x86.exe</file>
-                                    <type>exe</type>
+                                    <type>${project.artifact.type}</type>
                                     <classifier>x86</classifier>
                                 </artifact>
                             </artifacts>
