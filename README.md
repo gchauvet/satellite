@@ -20,8 +20,7 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 * libc6-dev-i386
 
 ## Hall in action
-Writting a agnostic OS service is pretty simple. The first part is a pure Java implementation.
-The second part require `Phobos` or `Deimos` depending if you are under Windows or Linux
+Writing an independent OS background process become pretty simple. The first step is to implement a java interface who manage background process behaviors. The second step require `Phobos` or `Deimos` depending if you are under Windows or Linux
 
 ### Dependency
 In your Maven POM project, add the Hall API dependency (check latest version):
