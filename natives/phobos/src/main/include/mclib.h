@@ -30,4 +30,13 @@
 #define  MAX(a,b)    (((a)>(b)) ? (a) : (b))
 #endif
 
+extern void AplZeroMemory(PVOID Destination, SIZE_T Length);
+extern LPVOID AplCopyMemory(PVOID Destination, const VOID* Source, SIZE_T Length);
+
+extern LPSTR lstrlcatA(LPSTR dst, int siz, LPCSTR src);
+extern LPWSTR lstrlcatW(LPWSTR dst, int siz, LPCWSTR src);
+extern LPSTR lstrlcpyA(LPSTR dst, int siz, LPCSTR src);
+extern LPWSTR lstrlcpyW(LPWSTR dst, int siz, LPCWSTR src);
+extern LPWSTR lstrlocaseW(LPWSTR str);
+
 #endif /* _MCLIB_H_INCLUDED_ */
