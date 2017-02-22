@@ -33,14 +33,14 @@
     <inceptionYear>2017</inceptionYear>
     <description>Hall software provides an alternative invocation mechanism for unix-daemon-like Java code.
     </description>
-    <url>https://bitbucket.org/gchauvet/hall</url>
+    <url>https://github.com/gchauvet/hall</url>
 
     <developers>
         <developer>
             <name>Guillaume Chauvet</name>
             <id>gchauvet</id>
-            <email>gchauvet at zatarox.com</email>
-            <organization>https://bitbucket.org/gchauvet</organization>
+            <email>gchauvet at zatarox dot com</email>
+            <organization>https://github.com/gchauvet</organization>
         </developer>
     </developers>
 
