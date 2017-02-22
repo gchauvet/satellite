@@ -222,8 +222,8 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         apxLogWrite(APXLOG_MARK_DEBUG "Invalid RuntimeLib '%S'", dllJvmPath);
         if (szJreHome) {
             apxLogWrite(APXLOG_MARK_DEBUG "Using Jre JavaHome '%S'", szJreHome);
-            lstrlcpyW(jreAltPath, SIZ_PATHLEN, szJreHome);
-            lstrlcatW(jreAltPath, SIZ_PATHLEN, L"\\bin\\server\\jvm.dll");
+            wcsncpy(jreAltPath, szJreHome, SIZ_PATHLEN);
+            wcsncat(jreAltPath, L"\\bin\\server\\jvm.dll", SIZ_PATHLEN);
             dllJvmPath = jreAltPath;
         }
     }
@@ -241,12 +241,12 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         WCHAR  crtBinPath[SIZ_PATHLEN];
         DWORD  i, l = 0;
 
-        lstrlcpyW(jreBinPath, SIZ_PATHLEN, dllJvmPath);
+        wcsncpy(jreBinPath, dllJvmPath, SIZ_PATHLEN);
         for (i = lstrlenW(jreBinPath); i > 0, l < 2; i--) {
             if (jreBinPath[i] == L'\\' || jreBinPath[i] == L'/') {
                 jreBinPath[i] = L'\0';
-                lstrlcpyW(crtBinPath, SIZ_PATHLEN, jreBinPath);
-                lstrlcatW(crtBinPath, SIZ_PATHLEN, MSVCRT71_DLLNAME);
+                wcsncpy(crtBinPath, jreBinPath, SIZ_PATHLEN);
+                wcsncat(crtBinPath, MSVCRT71_DLLNAME, SIZ_PATHLEN);
                 if (GetFileAttributesW(crtBinPath) != INVALID_FILE_ATTRIBUTES) {
                     if (LoadLibraryW(crtBinPath)) {
                         /* Found MSVCRTxx.dll
@@ -269,7 +269,7 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         WCHAR  jreBinPath[SIZ_PATHLEN];
         DWORD  i, l = 0;
 
-        lstrlcpyW(jreBinPath, SIZ_PATHLEN, dllJvmPath);
+        wcsncpy(jreBinPath, dllJvmPath, SIZ_PATHLEN);
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         for (i = lstrlenW(jreBinPath); i > 0, l < 2; i--) {
             if (jreBinPath[i] == L'\\' || jreBinPath[i] == L'/') {
@@ -385,7 +385,7 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
 
     /* Guess the stack size
      */
-    AplZeroMemory(&jArgs1_1, sizeof(jArgs1_1));
+    memset(&jArgs1_1, 0, sizeof(jArgs1_1));
     jArgs1_1.version = JNI_VERSION_1_1;
     DYNLOAD_FPTR(JNI_GetDefaultJavaVMInitArgs)(&jArgs1_1);
     if (jArgs1_1.javaStackSize < 0 || jArgs1_1.javaStackSize > (2048 * 1024))
@@ -448,7 +448,7 @@ static DWORD __apxMultiSzToJvmOptions(APXHANDLE hPool,
     *lppArray = (JavaVMOption *)buff;
     p = (LPSTR)(buff + (n + 1) * sizeof(JavaVMOption));
     if (lpString)
-        AplCopyMemory(p, lpString, l + 1);
+        memcpy(p, lpString, l + 1);
     for (i = 0; i < (n - nExtra); i++) {
         DWORD qr = apxStrUnQuoteInplaceA(p);
         (*lppArray)[i].optionString = p;

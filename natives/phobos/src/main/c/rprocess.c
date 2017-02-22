@@ -586,7 +586,7 @@ apxProcessExecute(APXHANDLE hProcess)
     if (!__apxProcCreateChildPipes(lpProc))
         goto cleanup;
     REDIRECT_STD_HANDLES(lpProc);
-    AplZeroMemory(&si, sizeof(STARTUPINFO));
+    memset(&si, 0, sizeof(STARTUPINFO));
 
     si.cb = sizeof(STARTUPINFO);
     si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;

@@ -324,7 +324,7 @@ apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray)
 
     *lppArray = (LPWSTR *)buff;
     p = (LPWSTR)(buff + (n + 2) * sizeof(LPWSTR));
-    AplCopyMemory(p, lpString, (l + 1) * sizeof(WCHAR));
+    memcpy(p, lpString, (l + 1) * sizeof(WCHAR));
 
     for (i = 0; i < n; i++) {
         (*lppArray)[i] = p;
@@ -354,7 +354,7 @@ apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray)
 
     *lppArray = (LPSTR *)buff;
     p = (LPSTR)(buff + (n + 2) * sizeof(LPSTR));
-    AplCopyMemory(p, lpString, (l + 1) * sizeof(CHAR));
+    memcpy(p, lpString, (l + 1) * sizeof(CHAR));
     for (i = 0; i < n; i++) {
         (*lppArray)[i] = p;
         while (*p)
@@ -406,7 +406,7 @@ LPTSTR  apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc)
             return NULL;
 
         lpmSz->dwAllocated = QSTR_SIZE(lpmSz->dwInsert + l);
-        AplZeroMemory(QSTR_DATA(lpmSz) + lpmSz->dwInsert + l,
+        memset(QSTR_DATA(lpmSz) + lpmSz->dwInsert + l, 0,
                    lpmSz->dwAllocated - (lpmSz->dwInsert + l));
     }
     p = (LPTSTR)QSTR_DATA(lpmSz) + lpmSz->dwInsert;

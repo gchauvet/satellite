@@ -83,8 +83,8 @@ static void logRotate(apx_logfile_st *lf, LPSYSTEMTIME t)
                   lf->sysTime.wYear,
                   lf->sysTime.wMonth,
                   lf->sysTime.wDay);
-    lstrlcpyW(lf->szFile, MAX_PATH, lf->szPath);
-    lstrlcatW(lf->szFile, MAX_PATH, sName);
+    wcsncpy(lf->szFile, lf->szPath, MAX_PATH);
+    wcsncat(lf->szFile, sName, MAX_PATH);
     h =  CreateFileW(lf->szFile,
                      GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
                      NULL,
@@ -120,10 +120,10 @@ LPWSTR apxLogFile(
     if (!szPath) {
         if (GetSystemDirectoryW(sPath, MAX_PATH) == 0)
             return INVALID_HANDLE_VALUE;
-        lstrlcatW(sPath, MAX_PATH, L"\\LogFiles\\Zatarox");
+        wcsncat(sPath, L"\\LogFiles\\Zatarox", MAX_PATH);
     }
     else {
-        lstrlcpyW(sPath, MAX_PATH, szPath);
+        wcsncpy(sPath, szPath, MAX_PATH);
     }
     if (!szPrefix)
         szPrefix = L"";
@@ -160,8 +160,8 @@ LPWSTR apxLogFile(
     /* Set default level to info */
     CreateDirectoryW(sPath, NULL);
 
-    lstrlcpyW(sRet, SIZ_PATHMAX, sPath);
-    lstrlcatW(sRet, SIZ_PATHMAX, sName);
+    wcsncpy(sRet, sPath, SIZ_PATHMAX);
+    wcsncat(sRet, sName, SIZ_PATHMAX);
 
     return sRet;
 }
@@ -189,19 +189,19 @@ HANDLE apxLogOpen(
     if (!szPath) {
         if (GetSystemDirectoryW(sPath, MAX_PATH) == 0)
             return INVALID_HANDLE_VALUE;
-        lstrlcatW(sPath, MAX_PATH, L"\\LogFiles");
+        wcsncat(sPath, L"\\LogFiles", MAX_PATH);
         if (!CreateDirectoryW(sPath, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
             if (!CreateDirectoryW(sPath, NULL))
                 return INVALID_HANDLE_VALUE;
         }
-        lstrlcatW(sPath, MAX_PATH, L"\\Zatarox");
+        wcsncat(sPath, L"\\Zatarox", MAX_PATH);
         if (!CreateDirectoryW(sPath, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
             if (!CreateDirectoryW(sPath, NULL))
                 return INVALID_HANDLE_VALUE;
         }
     }
     else {
-        lstrlcpyW(sPath, MAX_PATH, szPath);
+        wcsncpy(sPath, szPath, MAX_PATH);
     }
     if (!szPrefix)
         szPrefix = L"hall";
@@ -227,10 +227,10 @@ HANDLE apxLogOpen(
     CreateDirectoryW(sPath, NULL);
 
     h->sysTime = sysTime;
-    lstrlcpyW(h->szPath, MAX_PATH, sPath);
-    lstrlcpyW(h->szFile, MAX_PATH, sPath);
-    lstrlcatW(h->szFile, MAX_PATH, sName);
-    lstrlcpyW(h->szPrefix, MAX_PATH, szPrefix);
+    wcsncpy(h->szPath, sPath, MAX_PATH);
+    wcsncpy(h->szFile, sPath, MAX_PATH);
+    wcsncat(h->szFile, sName, MAX_PATH);
+    wcsncpy(h->szPrefix, szPrefix, MAX_PATH);
 
     h->hFile =  CreateFileW(h->szFile,
                       GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -483,10 +483,10 @@ apxDisplayError(
         if (f && *f) {
             CHAR sb[SIZ_PATHLEN];
             wsprintfA(sb, "%s (%d)", f, dwLine);
-            lstrcatA(sysbuf, sb);
+            strcat(sysbuf, sb);
         }
-        lstrlcatA(sysbuf, SIZ_HUGLEN, LINE_SEP);
-        lstrlcatA(sysbuf, SIZ_HUGLEN, buffer);
+        strncat(sysbuf, LINE_SEP, SIZ_HUGLEN);
+        strncat(sysbuf, buffer, SIZ_HUGLEN);
     }
     len = lstrlenA(sysbuf);
 #ifdef _DEBUG_FULL

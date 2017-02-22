@@ -23,8 +23,6 @@
 #ifndef _PRIVATE_H_INCLUDED_
 #define _PRIVATE_H_INCLUDED_
 
-#include "mclib.h"
-
 #ifdef _DEBUG
 
 HANDLE  HeapCREATE(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize);
@@ -268,5 +266,12 @@ DWORD   __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount);
 DWORD   __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount);
 LPSTR   __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName);
 LPWSTR  __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName);
+
+#ifndef  MIN
+#define  MIN(a,b)    (((a)<(b)) ? (a) : (b))
+#endif
+#ifndef  MAX
+#define  MAX(a,b)    (((a)>(b)) ? (a) : (b))
+#endif
 
 #endif /* _PRIVATE_H_INCLUDED_ */
