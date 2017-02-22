@@ -139,7 +139,7 @@ apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions)
         apxLogWrite(APXLOG_MARK_SYSERR);
         return FALSE;
     }
-    lstrlcpyW(lpService->stServiceEntry.szServiceName, SIZ_RESLEN, szServiceName);
+    wcsncpy(lpService->stServiceEntry.szServiceName, szServiceName, SIZ_RESLEN);
     if (!apxGetServiceDescriptionW(szServiceName,
                                    lpService->stServiceEntry.szServiceDescription,
                                    SIZ_DESLEN)) {
@@ -534,7 +534,7 @@ apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
 
     apxFree(lpService->stServiceEntry.lpConfig);
     lpService->stServiceEntry.lpConfig = NULL;
-    AplZeroMemory(&lpService->stServiceEntry, sizeof(APXSERVENTRY));
+    memset(&lpService->stServiceEntry, 0, sizeof(APXSERVENTRY));
 
     if (lpDependencies)
         lpDependencies = apxMultiSzCombine(NULL, lpDependencies,
@@ -560,8 +560,7 @@ apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
         return FALSE;
     }
     else {
-        lstrlcpyW(lpService->stServiceEntry.szServiceName,
-                  SIZ_RESLEN, szServiceName);
+        wcsncpy(lpService->stServiceEntry.szServiceName, szServiceName, SIZ_RESLEN);
         lpService->stServiceEntry.dwStart = dwStartType;
         return TRUE;
     }
@@ -624,12 +623,12 @@ apxServiceBrowse(APXHANDLE hService,
 
         return 0;
     }
-    AplZeroMemory(&stEnum, sizeof(APXREGENUM));
+    memset(&stEnum, 0, sizeof(APXREGENUM));
 
     while (TRUE) {
         APXSERVENTRY stEntry;
         BOOL rv;
-        AplZeroMemory(&stEntry, sizeof(APXSERVENTRY));
+        memset(&stEntry, 0, sizeof(APXSERVENTRY));
         rv = apxRegistryEnumServices(&stEnum, &stEntry);
 
         if (rv) {

@@ -281,8 +281,8 @@ void apxCmdlineLoadEnvVars(
     while (lpCmdline->lpOptions[i].szName) {
         DWORD l;
         WCHAR szVar[SIZ_HUGLEN];
-        lstrlcpyW(szEnv, 64, L"PR_");
-        lstrlcatW(szEnv, 64, lpCmdline->lpOptions[i].szName);
+        wcsncpy(szEnv, L"PR_", 64);
+        wcsncat(szEnv, lpCmdline->lpOptions[i].szName, 64);
         l = GetEnvironmentVariableW(szEnv, szVar, SIZ_HUGMAX);
         if (l == 0 || l >= SIZ_HUGMAX) {
             if (l == 0 && GetLastError() != ERROR_ENVVAR_NOT_FOUND) {

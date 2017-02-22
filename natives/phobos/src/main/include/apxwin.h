@@ -186,10 +186,6 @@ void            apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplac
 void            apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith);
 BOOL            apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd);
 
-
-LPVOID  AplFillMemory(PVOID Destination, SIZE_T Length, BYTE Fill);
-void    AplZeroMemory(PVOID Destination, SIZE_T Length);
-LPVOID  AplCopyMemory(PVOID Destination, const VOID* Source, SIZE_T Length);
 /*
  * Find the first occurrence of lpFind in lpMem.
  * dwLen:   The length of lpFind
@@ -198,7 +194,7 @@ LPVOID  AplCopyMemory(PVOID Destination, const VOID* Source, SIZE_T Length);
 LPBYTE  ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize);
 LPSTR   AplRindexA(LPCSTR lpStr, int ch);
 
-#define AplMoveMemory   AplCopyMemory
+#define AplMoveMemory   memcpy
 
 PSECURITY_ATTRIBUTES GetNullACL();
 void CleanNullACL(void *sa);

@@ -24,7 +24,6 @@
 #define _DEBUG_JNI  1
 #include "apxwin.h"
 #include "phobos.h"
-#include "mclib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -253,9 +252,9 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
         if (lstrcmpiW(lpWrapper->szStdOutFilename, PRSRV_AUTO) == 0) {
             WCHAR lsn[1024];
             aOut = TRUE;
-            lstrlcpyW(lsn, 1020, lpCmdline->szApplication);
-            lstrlcatW(lsn, 1020, L"-stdout");
-            lstrlocaseW(lsn);
+            wcsncpy(lsn, lpCmdline->szApplication, 1020);
+            wcsncat(lsn, L"-stdout", 1020);
+            CharLower(lsn);
             lpWrapper->szStdOutFilename = apxLogFile(gPool,
                                                      lpWrapper->szLogPath,
                                                      lsn,
@@ -280,9 +279,9 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
         if (lstrcmpiW(lpWrapper->szStdErrFilename, PRSRV_AUTO) == 0) {
             WCHAR lsn[1024];
             aErr = TRUE;
-            lstrlcpyW(lsn, 1020, lpCmdline->szApplication);
-            lstrlcatW(lsn, 1020, L"-stderr");
-            lstrlocaseW(lsn);
+            wcsncpy(lsn, lpCmdline->szApplication, 1020);
+            wcsncat(lsn, L"-stderr", 1020);
+            CharLower(lsn);
             lpWrapper->szStdErrFilename = apxLogFile(gPool,
                                                      lpWrapper->szLogPath,
                                                      lsn,
@@ -525,21 +524,21 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
 
     /* Check if --Install is provided */
     if (!IS_VALID_STRING(SO_INSTALL)) {
-        lstrlcpyW(szImage, SIZ_HUGLEN, lpCmdline->szExePath);
-        lstrlcatW(szImage, SIZ_HUGLEN, L"\\");
-        lstrlcatW(szImage, SIZ_HUGLEN, lpCmdline->szExecutable);
-        lstrlcatW(szImage, SIZ_HUGLEN, L".exe");
+        wcsncpy(szImage, lpCmdline->szExePath, SIZ_HUGLEN);
+        wcsncat(szImage, L"\\", SIZ_HUGLEN);
+        wcsncat(szImage, lpCmdline->szExecutable, SIZ_HUGLEN);
+        wcsncat(szImage, L".exe", SIZ_HUGLEN);
     }
     else
-        lstrlcpyW(szImage, SIZ_HUGLEN, SO_INSTALL);
+        wcsncpy(szImage, SO_INSTALL, SIZ_HUGLEN);
     /* Replace not needed quotes */
     apxStrQuoteInplaceW(szImage);
     /* Add run-service command line option */
-    lstrlcatW(szImage, SIZ_HUGLEN, L" ");
-    lstrlcpyW(szName, SIZ_BUFLEN, L"//RS//");
-    lstrlcatW(szName, SIZ_BUFLEN, lpCmdline->szApplication);
+    wcsncat(szImage, L" ", SIZ_HUGLEN);
+    wcsncpy(szName, L"//RS//", SIZ_BUFLEN);
+    wcsncat(szName, lpCmdline->szApplication, SIZ_BUFLEN);
     apxStrQuoteInplaceW(szName);
-    lstrlcatW(szImage, SIZ_HUGLEN, szName);
+    wcsncat(szImage, szName, SIZ_HUGLEN);
     SO_INSTALL = apxPoolStrdupW(gPool, szImage);
     /* Ensure that option gets saved in the registry */
     ST_INSTALL |= APXCMDOPT_FOUND;
@@ -606,8 +605,8 @@ static BOOL docmdDeleteService(LPAPXCMDLINE lpCmdline)
     if (apxServiceOpen(hService, lpCmdline->szApplication, SERVICE_ALL_ACCESS)) {
         WCHAR szWndManagerClass[SIZ_RESLEN];
         HANDLE hWndManager = NULL;
-        lstrlcpyW(szWndManagerClass, SIZ_RESLEN, lpCmdline->szApplication);
-        lstrlcatW(szWndManagerClass, SIZ_RESLEN, L"_CLASS");
+        wcsncpy(szWndManagerClass, lpCmdline->szApplication, SIZ_RESLEN);
+        wcsncat(szWndManagerClass, L"_CLASS", SIZ_RESLEN);
         /* Close the monitor application if running */
         if ((hWndManager = FindWindowW(szWndManagerClass, NULL)) != NULL) {
             SendMessage(hWndManager, WM_CLOSE, 0, 0);
@@ -971,9 +970,9 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
                 WCHAR en[SIZ_HUGLEN];
                 int i;
                 PSECURITY_ATTRIBUTES sa = GetNullACL();
-                lstrlcpyW(en, SIZ_DESLEN, L"Global\\");
-                lstrlcatW(en, SIZ_DESLEN, _service_name);
-                lstrlcatW(en, SIZ_DESLEN, PRSRV_SIGNAL);
+                wcsncpy(en, L"Global\\", SIZ_DESLEN);
+                wcsncat(en, _service_name, SIZ_DESLEN);
+                wcsncat(en, PRSRV_SIGNAL, SIZ_DESLEN);
                 for (i = 7; i < lstrlenW(en); i++) {
                     if (en[i] == L' ')
                         en[i] = L'_';
@@ -1065,7 +1064,7 @@ void __cdecl main(int argc, char **argv)
     apxLogWrite(APXLOG_MARK_INFO "Commons Daemon (%u.%u.%u %d-bit) started",
                 PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
 
-    AplZeroMemory(&gStdwrap, sizeof(APX_STDWRAP));
+    memset(&gStdwrap, 0, sizeof(APX_STDWRAP));
     gStartPath = lpCmdline->szExePath;
     gStdwrap.szLogPath = SO_LOGPATH;
     /* In debug mode allways use console */

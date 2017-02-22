@@ -506,7 +506,7 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
     }
     else if (dwDataSize && lpData) {
         hHandle->dwFlags |= APXHANDLE_HAS_USERDATA;
-        AplCopyMemory(APXHANDLE_DATA(hHandle), lpData, dwDataSize);
+        memcpy(APXHANDLE_DATA(hHandle), lpData, dwDataSize);
         hHandle->dwSize = dwDataSize;
     }
 
@@ -593,7 +593,7 @@ apxHandleSetUserData(APXHANDLE hObject, LPVOID lpData, DWORD dwDataSize)
     if (hObject->dwType == APXHANDLE_TYPE_INVALID)
         return NULL;
     if (hObject->dwFlags & APXHANDLE_HAS_USERDATA && hObject->dwSize > 0) {
-        AplCopyMemory(APXHANDLE_DATA(hObject), lpData,
+        memcpy(APXHANDLE_DATA(hObject), lpData,
                       MIN(hObject->dwSize, dwDataSize));
         return APXHANDLE_DATA(hObject);
     }
