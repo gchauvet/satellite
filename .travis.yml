@@ -1,1 +1,15 @@
 language: java
+
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+      - cmake-data
+      - gcc-mingw-w64-base
+      - binutils-mingw-w64-x86-64
+      - gcc-mingw-w64-x86-64
+      - gcc-mingw-w64
+      - libc6-dev-i386
