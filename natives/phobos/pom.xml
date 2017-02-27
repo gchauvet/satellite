@@ -79,14 +79,15 @@
                         </goals>
                         <configuration>
                             <classifier>x86</classifier>
-                            <compilerExecutable>${cross-compiler.x86}</compilerExecutable>
-                            <linkerExecutable>${cross-compiler.x86}</linkerExecutable>
+                            <compilerExecutable>${cross-compiler.x86}gcc</compilerExecutable>
+                            <linkerExecutable>${cross-compiler.x86}gcc</linkerExecutable>
                             <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m32</compilerStartOption>
                             </compilerStartOptions>
                             <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m32</linkerStartOption>
                             </linkerStartOptions>
+                            <resourceCompilerExecutable>${cross-compiler.x86}windres</resourceCompilerExecutable>
                             <resourceCompilerOptions>
                                 <resourceCompilerOption>-F</resourceCompilerOption>
                                 <resourceCompilerOption>pe-i386</resourceCompilerOption>
@@ -97,7 +98,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>windows-x64</id>
+                        <id>windows-x86_64</id>
                         <phase>package</phase>
                         <goals>
                             <goal>initialize</goal>
@@ -107,14 +108,15 @@
                         </goals>
                         <configuration>
                             <classifier>x86_64</classifier>
-                            <compilerExecutable>${cross-compiler.x64}</compilerExecutable>
-                            <linkerExecutable>${cross-compiler.x64}</linkerExecutable>
+                            <compilerExecutable>${cross-compiler.x64}gcc</compilerExecutable>
+                            <linkerExecutable>${cross-compiler.x64}gcc</linkerExecutable>
                             <compilerStartOptions combine.children="append">
                                 <compilerStartOption>-m64</compilerStartOption>
                             </compilerStartOptions>
                             <linkerStartOptions combine.children="append">
                                 <linkerStartOption>-m64</linkerStartOption>
                             </linkerStartOptions>
+                            <resourceCompilerExecutable>${cross-compiler.x64}windres</resourceCompilerExecutable>
                             <resourceCompilerOptions>
                                 <resourceCompilerOption>-F</resourceCompilerOption>
                                 <resourceCompilerOption>pe-x86-64</resourceCompilerOption>
@@ -173,8 +175,8 @@
                 </os>
             </activation>
             <properties>
-                <cross-compiler.x86>i686-w64-mingw32-gcc</cross-compiler.x86>
-                <cross-compiler.x64>x86_64-w64-mingw32-gcc</cross-compiler.x64>
+                <cross-compiler.x86>i686-w64-mingw32-</cross-compiler.x86>
+                <cross-compiler.x64>x86_64-w64-mingw32-</cross-compiler.x64>
                 <cross-compiler.os>linux</cross-compiler.os>
             </properties>
         </profile>
@@ -186,8 +188,8 @@
                 </os>
             </activation>
             <properties>
-                <cross-compiler.x86>gcc</cross-compiler.x86>
-                <cross-compiler.x64>gcc</cross-compiler.x64>
+                <cross-compiler.x86></cross-compiler.x86>
+                <cross-compiler.x64></cross-compiler.x64>
                 <cross-compiler.os>win32</cross-compiler.os>
             </properties>
         </profile>
