@@ -57,17 +57,13 @@
                         </sources>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.12</version>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
                 <executions>
                     <execution>
                         <id>parse-version</id>
@@ -84,7 +80,7 @@
     </modules>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>io.zatarox.hall</groupId>
             <artifactId>hall-impl</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
