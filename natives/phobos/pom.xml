@@ -27,6 +27,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>io.zatarox.hall.hall-natives</groupId>
     <artifactId>phobos</artifactId>
     <packaging>exe</packaging>
     <name>Hall Phobos frontend</name>
@@ -126,28 +127,37 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>attach-artifacts</id>
+                        <id>install-phobos-x86_64</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>attach-artifact</goal>
+                            <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/phobos-x86_64.exe</file>
-                                    <type>${project.artifact.type}</type>
-                                    <classifier>x86_64</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>target/phobos-x86.exe</file>
-                                    <type>${project.artifact.type}</type>
-                                    <classifier>x86</classifier>
-                                </artifact>
-                            </artifacts>
+                            <groupId>io.zatarox.hall.hall-natives</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <file>target/phobos-x86_64.exe</file>
+                            <packaging>${project.artifact.type}</packaging>
+                            <classifier>x86_64</classifier>
+                            <createChecksum>true</createChecksum>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-phobos-x86</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>io.zatarox.hall.hall-natives</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <file>target/phobos-x86.exe</file>
+                            <packaging>${project.artifact.type}</packaging>
+                            <classifier>x86</classifier>
+                            <createChecksum>true</createChecksum>
                         </configuration>
                     </execution>
                 </executions>
