@@ -29,136 +29,68 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.zatarox.hall.hall-natives</groupId>
     <artifactId>phobos</artifactId>
-    <packaging>exe</packaging>
+    <packaging>pom</packaging>
     <name>Hall Phobos frontend</name>
     <description>Hall Windows native frontend program</description>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <configuration>
-                    <javahOS>${cross-compiler.os}</javahOS>
-                    <compilerStartOptions>
-                        <compilerStartOption>-std=c99</compilerStartOption>
-                        <compilerStartOption>-D_UNICODE</compilerStartOption>
-                        <compilerStartOption>-DUNICODE</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</compilerStartOption>
-                        <compilerStartOption>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</compilerStartOption>
-                        <compilerStartOption>-Os</compilerStartOption>
-                    </compilerStartOptions>
-                    <resourceStartOptions>
-                        <options>
-                            <option>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</option>
-                            <option>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}}</option>
-                            <option>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</option>
-                        </options>
-                    </resourceStartOptions>
-                    <resources>
-                        <resource>
-                            <directory>src/main/resources</directory>
-                            <includes>
-                                <include>phobos.rc</include>
-                            </includes>
-                        </resource>
-                        <resource>
-                            <directory>src/main/include</directory>
-                        </resource>
-                    </resources>
-                </configuration>
+                <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>windows-x86</id>
-                        <phase>package</phase>
+                        <id>cmake</id>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>initialize</goal>
-                            <goal>resource-compile</goal>
-                            <goal>compile</goal>
-                            <goal>link</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <classifier>x86</classifier>
-                            <compilerExecutable>${cross-compiler.x86}gcc</compilerExecutable>
-                            <linkerExecutable>${cross-compiler.x86}gcc</linkerExecutable>
-                            <compilerStartOptions combine.children="append">
-                                <compilerStartOption>-m32</compilerStartOption>
-                            </compilerStartOptions>
-                            <linkerStartOptions combine.children="append">
-                                <linkerStartOption>-m32</linkerStartOption>
-                            </linkerStartOptions>
-                            <resourceCompilerExecutable>${cross-compiler.x86}windres</resourceCompilerExecutable>
-                            <resourceCompilerOptions>
-                                <resourceCompilerOption>-F</resourceCompilerOption>
-                                <resourceCompilerOption>pe-i386</resourceCompilerOption>
-                            </resourceCompilerOptions>
-                            <resourceCompilerOutputDirectory>${project.build.directory}/resources/x86</resourceCompilerOutputDirectory>
-                            <compilerOutputDirectory>${project.build.directory}/objects/x86</compilerOutputDirectory>
-                            <linkerFinalName>phobos-x86</linkerFinalName>
+                            <executable>cmake</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>-G</argument>
+                                <argument>MinGW Makefiles</argument>
+                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${hall.arch}.cmake</argument>
+                                <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
+                                <argument>${basedir}/src/main</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>windows-x86_64</id>
-                        <phase>package</phase>
+                        <id>make</id>
+                        <phase>compile</phase>
                         <goals>
-                            <goal>initialize</goal>
-                            <goal>resource-compile</goal>
-                            <goal>compile</goal>
-                            <goal>link</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <classifier>x86_64</classifier>
-                            <compilerExecutable>${cross-compiler.x64}gcc</compilerExecutable>
-                            <linkerExecutable>${cross-compiler.x64}gcc</linkerExecutable>
-                            <compilerStartOptions combine.children="append">
-                                <compilerStartOption>-m64</compilerStartOption>
-                            </compilerStartOptions>
-                            <linkerStartOptions combine.children="append">
-                                <linkerStartOption>-m64</linkerStartOption>
-                            </linkerStartOptions>
-                            <resourceCompilerExecutable>${cross-compiler.x64}windres</resourceCompilerExecutable>
-                            <resourceCompilerOptions>
-                                <resourceCompilerOption>-F</resourceCompilerOption>
-                                <resourceCompilerOption>pe-x86-64</resourceCompilerOption>
-                            </resourceCompilerOptions>
-                            <resourceCompilerOutputDirectory>${project.build.directory}/resources/x64</resourceCompilerOutputDirectory>
-                            <compilerOutputDirectory>${project.build.directory}/objects/x64</compilerOutputDirectory>
-                            <linkerFinalName>phobos-x86_64</linkerFinalName>
+                            <executable>make</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>CFLAGS+=-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
+                                <argument>CFLAGS+=-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</argument>
+                                <argument>CFLAGS+=-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</argument>
+                                <argument>install/strip</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>install-phobos-x86_64</id>
+                        <id>install</id>
                         <phase>install</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <groupId>io.zatarox.hall.hall-natives</groupId>
+                            <groupId>io.zatarox.hall.natives</groupId>
                             <artifactId>${project.artifactId}</artifactId>
-                            <file>target/phobos-x86_64.exe</file>
-                            <packaging>${project.artifact.type}</packaging>
-                            <classifier>x86_64</classifier>
-                            <createChecksum>true</createChecksum>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-phobos-x86</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>io.zatarox.hall.hall-natives</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <file>target/phobos-x86.exe</file>
-                            <packaging>${project.artifact.type}</packaging>
-                            <classifier>x86</classifier>
+                            <file>target/phobos.exe</file>
+                            <version>${project.version}</version>
+                            <packaging>exe</packaging>
+                            <classifier>${hall.arch}</classifier>
                             <createChecksum>true</createChecksum>
                         </configuration>
                     </execution>
@@ -168,29 +100,25 @@
     </build>
     <profiles>
         <profile>
-            <id>from-linux</id>
+            <id>from-linux-for-linux</id>
             <activation>
                 <os>
                     <family>unix</family>
                 </os>
             </activation>
             <properties>
-                <cross-compiler.x86>i686-w64-mingw32-</cross-compiler.x86>
-                <cross-compiler.x64>x86_64-w64-mingw32-</cross-compiler.x64>
-                <cross-compiler.os>linux</cross-compiler.os>
+                <cmake.toolchain.path>${basedir}/../src/cmake/linux</cmake.toolchain.path>
             </properties>
         </profile>
         <profile>
-            <id>from-windows</id>
+            <id>from-windows-for-windows</id>
             <activation>
                 <os>
                     <family>windows</family>
                 </os>
             </activation>
             <properties>
-                <cross-compiler.x86></cross-compiler.x86>
-                <cross-compiler.x64></cross-compiler.x64>
-                <cross-compiler.os>win32</cross-compiler.os>
+                <cmake.toolchain.path>${basedir}/../src/cmake/windows</cmake.toolchain.path>
             </properties>
         </profile>
     </profiles>
