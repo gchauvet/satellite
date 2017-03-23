@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Compile x86</actionName>
+            <displayName>Compile x86</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <hall.arch>x86</hall.arch>
+            </properties>
+        </action>
+    </actions>

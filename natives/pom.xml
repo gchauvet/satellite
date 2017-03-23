@@ -36,26 +36,8 @@
             <plugins>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>native-maven-plugin</artifactId>
-                    <version>1.0-alpha-9-SNAPSHOT</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <provider>mingw</provider>
-                        <linkerStartOptions>
-                            <linkerStartOption>-s</linkerStartOption>
-                        </linkerStartOptions>
-                        <sources>
-                            <source>
-                                <directory>src/main/c</directory>
-                                <includes>
-                                    <include>*.c</include>
-                                </includes>
-                            </source>
-                            <source>
-                                <directory>src/main/include</directory>
-                            </source>
-                        </sources>
-                    </configuration>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.6.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -77,6 +59,7 @@
     </build>
     <modules>
         <module>phobos</module>
+        <module>deimos</module>
     </modules>
     <dependencies>
         <dependency>
@@ -86,16 +69,4 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <modules>
-                <module>deimos</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
