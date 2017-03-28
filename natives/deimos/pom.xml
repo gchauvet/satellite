@@ -78,7 +78,7 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>cmake-x86_64</id>
+                                <id>cmake</id>
                                 <phase>process-sources</phase>
                                 <goals>
                                     <goal>exec</goal>
@@ -87,6 +87,8 @@
                                     <executable>cmake</executable>
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
+                                        <argument>-G</argument>
+                                        <argument>Unix Makefiles</argument>
                                         <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${hall.arch}.cmake</argument>
                                         <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                         <argument>${basedir}/src/main</argument>
@@ -110,6 +112,11 @@
                                     </arguments>
                                 </configuration>
                             </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
                             <execution>
                                 <id>install</id>
                                 <phase>install</phase>
@@ -121,6 +128,7 @@
                                     <artifactId>${project.artifactId}</artifactId>
                                     <file>target/deimos</file>
                                     <packaging>elf</packaging>
+                                    <version>${project.version}</version>
                                     <classifier>${hall.arch}</classifier>
                                     <createChecksum>true</createChecksum>
                                 </configuration>
