@@ -1,4 +1,4 @@
-#Hall Project (Work in Progress)
+# Hall Project (Work in Progress)
 
 Hall is a set of utilities and Java support classes for running Java applications as server processes.
 Commonly known as 'daemon' processes in Unix terminology, on Windows they are called 'services'.
@@ -13,7 +13,7 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 ### To compile Windows frontend (phobos) :
 * [tdm-gcc](http://tdm-gcc.tdragon.net)
 
-### To compile Unix frontend (deimos) :
+### To compile Unix frontend (deimos & phobos) :
 * gcc >= 5.x
 * gcc-mingw-w64-x86-64
 * gcc-mingw-w64
@@ -48,12 +48,12 @@ public final class FooBackgroundProcess implements BackgroundProcess {
     }
 
     @Override
-    public void start() throws Exception {
+    public void resume() throws Exception {
         System.err.println("Started...");
     }
 
     @Override
-    public void stop() throws Exception {
+    public void pause() throws Exception {
         System.err.println("Stopped !");
     }
 
@@ -74,15 +74,23 @@ TODO
 ```
 * To start :
 ```sh
-sudo deimos --MainJar={filename}.jar
+sudo deimos {filename}.jar
 ```
 * To stop :
 ```sh
-sudo deimos --MainJar={filename}.jar --stop
+sudo deimos {filename}.jar -stop
 ```
 * To send a signal :
 ```sh
 sudo kill -SIGUSR2 {pid}
+```
+* To pause the background process (stop method) :
+```sh
+sudo kill -SIGUSR1 {pid}
+```
+* To resume the background process (start method) :
+```sh
+sudo kill -SIGCONT {pid}
 ```
 
 #### Windows

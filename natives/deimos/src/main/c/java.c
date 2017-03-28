@@ -492,30 +492,55 @@ bool java_load(arg_data *args)
     return true;
 }
 
-/* Call the start method in our daemon loader */
-bool java_start(void)
+static bool java_call(char *method)
 {
-    jmethodID method;
-    jboolean ret;
-    char start[] = "start";
-    char startparams[] = "()Z";
+    jmethodID _method;
 
-    deimos_xlate_to_ascii(start);
-    deimos_xlate_to_ascii(startparams);
-    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), start, startparams);
-
-    if (method == NULL) {
-        log_error("Cannot find Daemon Loader \"start\" entry point");
+    deimos_xlate_to_ascii(method);
+    _method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), method, "()Z");
+    if (_method == NULL) {
+        log_error("Cannot found \"%s\" method", method);
         return false;
     }
 
-    ret = (*env)->CallBooleanMethod(env, loader, method);
-    if (ret == FALSE) {
+    return (*env)->CallBooleanMethod(env, loader, _method) == TRUE;
+}
+
+/* Call the start method in our daemon loader */
+bool java_start(void)
+{
+    bool result = java_call("resume");
+    
+    if (result == FALSE) {
         log_error("Cannot start daemon");
         return false;
     }
 
     log_debug("Daemon started successfully");
+    return true;
+}
+
+/* Call the stop method in our daemon loader */
+bool java_stop(void)
+{
+    bool result = java_call("pause");
+    if (result == FALSE) {
+        log_error("Cannot stop daemon");
+        return false;
+    }
+    log_debug("Daemon stopped successfully");
+    return true;
+}
+
+/* Call the destroy method in our daemon loader */
+bool java_destroy()
+{
+    bool result = java_call("destroy");
+    if (result == FALSE) {
+        log_error("Cannot destroy daemon");
+        return false;
+    }
+    log_debug("Daemon destroy successfully");
     return true;
 }
 
@@ -546,32 +571,6 @@ void java_sleep(int wait)
     }
 
     (*env)->CallVoidMethod(env, clsThread, method, (jlong) wait * 1000);
-}
-
-/* Call the stop method in our daemon loader */
-bool java_stop(void)
-{
-    jmethodID method;
-    jboolean ret;
-    char stop[] = "stop";
-    char stopparams[] = "()Z";
-
-    deimos_xlate_to_ascii(stop);
-    deimos_xlate_to_ascii(stopparams);
-    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), stop, stopparams);
-    if (method == NULL) {
-        log_error("Cannot found Daemon Loader \"stop\" entry point");
-        return false;
-    }
-
-    ret = (*env)->CallBooleanMethod(env, loader, method);
-    if (ret == FALSE) {
-        log_error("Cannot stop daemon");
-        return false;
-    }
-
-    log_debug("Daemon stopped successfully");
-    return true;
 }
 
 /* Call the version method in our daemon loader */
@@ -627,34 +626,6 @@ bool java_check(arg_data *args)
     }
 
     log_debug("Daemon checked successfully");
-    return true;
-}
-
-/* Call the destroy method in our daemon loader */
-bool java_destroy(void)
-{
-    jmethodID method;
-    jboolean ret;
-    char destroy[] = "destroy";
-    char destroyparams[] = "()Z";
-
-    deimos_xlate_to_ascii(destroy);
-    deimos_xlate_to_ascii(destroyparams);
-    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), destroy, destroyparams);
-    if (method == NULL) {
-        log_error("Cannot found Daemon Loader \"destroy\" entry point");
-        return false;
-    }
-
-    ret = (*env)->CallBooleanMethod(env, loader, method);
-    if (ret == FALSE) {
-        log_error("Cannot destroy daemon");
-        return false;
-    }
-    
-    (*env)->DeleteLocalRef(env, loader);
-    loader = NULL;
-    log_debug("Daemon destroyed successfully");
     return true;
 }
 

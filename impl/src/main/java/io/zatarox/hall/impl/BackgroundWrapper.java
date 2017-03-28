@@ -75,7 +75,7 @@ public final class BackgroundWrapper {
 
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
+             * return false (load, resume and pause won't be called).
              */
             t.printStackTrace(System.err);
             return false;
@@ -157,7 +157,7 @@ public final class BackgroundWrapper {
             return false;
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
+             * return false (load, resume and pause won't be called).
              */
             t.printStackTrace(System.err);
             return false;
@@ -166,10 +166,10 @@ public final class BackgroundWrapper {
         return true;
     }
 
-    public boolean start() {
+    public boolean resume() {
         try {
-            /* Attempt to start the background process */
-            ((BackgroundProcess) instance).start();
+            /* Attempt to resume the background process */
+            ((BackgroundProcess) instance).resume();
 
             /* Set the availability flag in the controller */
             if (controller != null) {
@@ -178,7 +178,7 @@ public final class BackgroundWrapper {
 
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
+             * return false (load, resume and pause won't be called).
              */
             t.printStackTrace(System.err);
             return false;
@@ -186,18 +186,18 @@ public final class BackgroundWrapper {
         return true;
     }
 
-    public boolean stop() {
+    public boolean pause() {
         try {
             /* Set the availability flag in the controller */
             if (controller != null) {
                 controller.setAvailable(false);
             }
 
-            /* Attempt to stop the background process */
-            ((BackgroundProcess) instance).stop();
+            /* Attempt to pause the background process */
+            ((BackgroundProcess) instance).pause();
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
+             * return false (load, resume and pause won't be called).
              */
             t.printStackTrace(System.err);
             return false;
@@ -207,14 +207,14 @@ public final class BackgroundWrapper {
 
     public boolean destroy() {
         try {
-            /* Attempt to stop the background process */
+            /* Attempt to pause the background process */
             ((BackgroundProcess) instance).destroy();
 
             instance = null;
             controller = null;
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, start and stop won't be called).
+             * return false (load, resume and pause won't be called).
              */
             t.printStackTrace(System.err);
             return false;
