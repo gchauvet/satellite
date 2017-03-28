@@ -49,7 +49,7 @@
                             <workingDirectory>${project.build.directory}</workingDirectory>
                             <arguments>
                                 <argument>-G</argument>
-                                <argument>MinGW Makefiles</argument>
+                                <argument>${cmake.generator}</argument>
                                 <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${hall.arch}.cmake</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                 <argument>${basedir}/src/main</argument>
@@ -107,7 +107,8 @@
                 </os>
             </activation>
             <properties>
-                <cmake.toolchain.path>${basedir}/../src/cmake/linux</cmake.toolchain.path>
+                <cmake.toolchain.path>${basedir}/../src/cmake/windows</cmake.toolchain.path>
+                <cmake.generator>Unix Makefiles</cmake.generator>
             </properties>
         </profile>
         <profile>
@@ -119,6 +120,7 @@
             </activation>
             <properties>
                 <cmake.toolchain.path>${basedir}/../src/cmake/windows</cmake.toolchain.path>
+                <cmake.generator>MinGW Makefiles</cmake.generator>
             </properties>
         </profile>
     </profiles>
