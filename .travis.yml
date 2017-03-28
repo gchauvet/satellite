@@ -15,5 +15,7 @@ addons:
       - libc6-dev-i386
       
 env:
-  - hall.arch=x86
-  - hall.arch=x86_64
+  - HALL_TRGT=x86
+  - HALL_TRGT=x86_64
+
+script: "mvn -Dhall.arch=:HALL_TRGT: clean package"
