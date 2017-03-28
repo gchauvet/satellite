@@ -45,7 +45,7 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
     @Override
     public void start() throws RemoteException {
         try {
-            instance.start();
+            instance.resume();
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage(), ex);
         }
@@ -54,7 +54,7 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
     @Override
     public void stop() throws RemoteException {
         try {
-            instance.stop();
+            instance.pause();
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage(), ex);
         }
