@@ -46,11 +46,11 @@ public interface BackgroundProcess {
      * system.
      * </p>
      * <p>
-     * Apart from set up and allocation of native resources, this method must
-     * not start the actual operation of the <code>BackgroundProcess</code> (such as
+ Apart from set up and allocation of native resources, this method must
+ not resume the actual operation of the <code>BackgroundProcess</code> (such as
      * starting threads calling the <code>ServerSocket.accept()</code> method)
-     * as this would impose some serious security hazards. The start of
-     * operation must be performed in the <code>start()</code> method.
+ as this would impose some serious security hazards. The resume of
+ operation must be performed in the <code>resume()</code> method.
      * </p>
      *
      * @param context A <code>BackgroundContext</code> object used to communicate
@@ -65,27 +65,27 @@ public interface BackgroundProcess {
 
     /**
      * Starts the operation of this <code>BackgroundProcess</code> instance. This method is
-     * to be invoked by the environment after the init() method has been
-     * successfully invoked and possibly the security level of the JVM has been
-     * dropped. Implementors of this method are free to start any number of
-     * threads, but need to return control after having done that to enable
-     * invocation of the stop()-method.
+ to be invoked by the environment after the init() method has been
+ successfully invoked and possibly the security level of the JVM has been
+ dropped. Implementors of this method are free to resume any number of
+ threads, but need to return control after having done that to enable
+ invocation of the pause()-method.
      */
-    public void start()
+    public void resume()
             throws Exception;
 
     /**
      * Stops the operation of this <code>BackgroundProcess</code> instance. Note that the
  proper place to free any allocated resources such as sockets or file
  descriptors is in the destroy method, as the container may restart the
- BackgroundProcess by calling start() after stop().
+ BackgroundProcess by calling resume() after pause().
      */
-    public void stop()
+    public void pause()
             throws Exception;
 
     /**
      * Frees any resources allocated by this background process such as file descriptors or
-     * sockets. This method gets called by the container after stop() has been
+     * sockets. This method gets called by the container after pause() has been
  called and before the JVM exits. The BackgroundProcess can not be restarted after this
  method has been called without a new call to the init() method.
      */

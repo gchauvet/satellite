@@ -86,13 +86,13 @@ public final class BackgroundWrapperTest {
     }
 
     @Test
-    public void start() {
-        assertTrue(instance.start());
+    public void resume() {
+        assertTrue(instance.resume());
     }
 
     @Test
-    public void stop() {
-        assertTrue(instance.stop());
+    public void pause() {
+        assertTrue(instance.pause());
     }
 
     @Test
@@ -105,10 +105,10 @@ public final class BackgroundWrapperTest {
         public void init(BackgroundContext context) throws BackgroundException, Exception {
         }
 
-        public void start() throws Exception {
+        public void resume() throws Exception {
         }
 
-        public void stop() throws Exception {
+        public void pause() throws Exception {
         }
 
         public void destroy() {

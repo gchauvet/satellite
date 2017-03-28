@@ -45,16 +45,18 @@ static mode_t envmask;          /* mask to create the files */
 
 pid_t controlled = 0;           /* the child process pid */
 pid_t logger_pid = 0;           /* the logger process pid */
-static bool stopping = false;
-static bool doreload = false;
-static bool doreopen = false;
-static bool dosignal = false;
+static volatile bool destroyed = false;
+static volatile bool stopped = false;
+static volatile bool started = true;
+static volatile bool doreload = false;
+static volatile bool dosignal = false;
 typedef void (*sighandler_t)(int);
-static sighandler_t handler_int  = NULL;
-static sighandler_t handler_usr1 = NULL;
-static sighandler_t handler_usr2 = NULL;
-static sighandler_t handler_hup  = NULL;
-static sighandler_t handler_trm  = NULL;
+static sighandler_t handler_start  = NULL;
+static sighandler_t handler_stop  = NULL;
+static sighandler_t handler_continue  = NULL;
+static sighandler_t handler_custom = NULL;
+static sighandler_t handler_reload  = NULL;
+static sighandler_t handler_destroy  = NULL;
 
 static int run_controller(arg_data *args, home_data *data, uid_t uid,
                           gid_t gid);
@@ -64,44 +66,60 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin,
 static void handler(int sig)
 {
     switch (sig) {
-        case SIGTERM:
-            log_debug("Caught SIGTERM: Scheduling a shutdown");
-            if (stopping == true) {
-                log_error("Shutdown or reload already scheduled");
+        case SIGCONT:
+            log_debug("Caught %s: Scheduling a start", strsignal(sig));
+            if (started == true) {
+                log_error("Daemon already started");
             }
             else {
-                stopping = true;
-            }
-        break;
-        case SIGINT:
-            log_debug("Caught SIGINT: Scheduling a shutdown");
-            if (stopping == true) {
-                log_error("Shutdown or reload already scheduled");
-            }
-            else {
-                stopping = true;
-            }
-        break;
-        case SIGHUP:
-            log_debug("Caught SIGHUP: Scheduling a reload");
-            if (stopping == true) {
-                log_error("Shutdown or reload already scheduled");
-            }
-            else {
-                stopping = true;
-                doreload = true;
+                stopped = false;
+                java_start();
+                started = true;
             }
         break;
         case SIGUSR1:
-             log_debug("Caught SIGUSR1: Reopening logs");
-             doreopen = true;
-	break;
+            log_debug("Caught %s: Scheduling a stop", strsignal(sig));
+            if(started == false ) {
+                log_error("Can't stop an unstarted daemon");
+            } else if (stopped == true) {
+                log_error("Shutdown or reload already stopped");
+            }
+            else {
+                started = false;
+                java_stop();
+                stopped = true;
+            }
+        break;
+        case SIGTERM:
+            log_debug("Caught %s: Scheduling a shutdown", strsignal(sig));
+            if (destroyed == true) {
+                log_error("Shutdown or reload already scheduled");
+            }
+            else {
+                java_stop();
+                stopped = true;
+                java_destroy();
+                destroyed = true;
+            }
+        break;
+        case SIGHUP:
+            log_debug("Caught %s: Scheduling a reload", strsignal(sig));
+            if (stopped == true) {
+                log_error("Shutdown or reload already scheduled");
+            }
+            else {
+                destroyed = true;
+                doreload = true;
+            }
+        break;
         case SIGUSR2:
-	     log_debug("Caught SIGUSR2: Scheduling a custom signal");
+	     log_debug("Caught %s: Scheduling a custom signal", strsignal(sig));
              dosignal = true;
+             java_signal();
+             dosignal = false;
         break;
         default:
-            log_debug("Caught unknown signal %d", sig);
+            log_debug("Caught unknown signal %s", strsignal(sig));
         break;
     }
 }
@@ -428,7 +446,7 @@ static void controller(int sig)
 {
     switch (sig) {
         case SIGTERM:
-        case SIGINT:
+        case SIGCONT:
         case SIGHUP:
         case SIGUSR1:
         case SIGUSR2:
@@ -451,8 +469,10 @@ static sighandler_t signal_set(int sig, sighandler_t newHandler)
 
     hand = signal(sig, newHandler);
 #ifdef SIG_ERR
-    if (hand == SIG_ERR)
+    if (hand == SIG_ERR) {
+        log_debug("Can't register signal % d", strsignal(sig));
         hand = NULL;
+    }
 #endif
     if (hand == handler || hand == controller)
         hand = NULL;
@@ -819,50 +839,33 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
         log_debug("java_start done");
 
     /* Install signal handlers */
-    handler_hup = signal_set(SIGHUP, handler);
-    handler_usr1 = signal_set(SIGUSR1, handler);
-    handler_usr2 = signal_set(SIGUSR2, handler);
-    handler_trm = signal_set(SIGTERM, handler);
-    handler_int = signal_set(SIGINT, handler);
+    handler_reload = signal_set(SIGHUP, handler);
+    handler_custom = signal_set(SIGUSR2, handler);
+    handler_destroy = signal_set(SIGTERM, handler);
+    handler_continue = signal_set(SIGCONT, handler);
+    handler_stop = signal_set(SIGUSR1, handler);
     controlled = getpid();
 
     log_debug("Waiting for a signal to be delivered");
     create_tmp_file(args);
-    while (!stopping) {
-#if defined(OSD_POSIX)
-        java_sleep(60);
-        /* pause(); */
-#else
+    while (!destroyed) {
         /* pause() is not threadsafe */
         sleep(60);
-#endif
-        if(doreopen) {
-            doreopen = false;
-            set_output(args->outfile, args->errfile, args->redirectstdin, args->procname);
-        }
-        if(dosignal) {
-            dosignal = false;
-            java_signal();
-        }
     }
     remove_tmp_file(args);
     log_debug("Shutdown or reload requested: exiting");
 
     /* Stop the service */
-    if (java_stop() != true)
+    if (stopped != true)
         return 6;
 
     if (doreload == true)
         ret = 123;
     else
         ret = 0;
-
-    /* Destroy the service */
-    java_destroy();
-
-    /* Destroy the Java VM */
+    
     if (JVM_destroy(ret) != true)
-        return 7;
+        ret = 7;
 
     return ret;
 }
@@ -1239,7 +1242,8 @@ static int run_controller(arg_data *args, home_data *data, uid_t uid,
         signal(SIGUSR1, controller);
         signal(SIGUSR2, controller);
         signal(SIGTERM, controller);
-        signal(SIGINT, controller);
+        signal(SIGTSTP, controller);
+        signal(SIGCONT, controller);
 
         while (waitpid(pid, &status, 0) != pid) {
             /* Waith for process */
