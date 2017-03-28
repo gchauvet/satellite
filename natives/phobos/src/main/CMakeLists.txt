@@ -34,6 +34,7 @@ ELSE()
   INCLUDE_DIRECTORIES(SYSTEM
     $ENV{JAVA_HOME}/include
     $ENV{JAVA_HOME}/include/win32
+    $ENV{JAVA_HOME}/include/linux
   )
 ENDIF()
 
