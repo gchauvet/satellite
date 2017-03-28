@@ -76,7 +76,7 @@ public final class StopBackgroundProcessMojoTest {
         final Mojo mojo = rule.lookupMojo("stop", pom);
         assertNotNull(mojo);
         mojo.execute();
-        verify(instance, times(1)).stop();
+        verify(instance, times(1)).pause();
         verify(instance, times(1)).destroy();
     }
 

@@ -57,24 +57,24 @@ public final class BackgroundProcessRemoteProxyTest {
     @Test
     public void startSuccess() throws Exception {
         proxy.start();
-        verify(instance, times(1)).start();
+        verify(instance, times(1)).resume();
     }
 
     @Test(expected = RemoteException.class)
     public void startError() throws Exception {
-        doThrow(UnsupportedOperationException.class).when(instance).start();
+        doThrow(UnsupportedOperationException.class).when(instance).resume();
         proxy.start();
     }
 
     @Test
     public void stopSuccess() throws Exception {
         proxy.stop();
-        verify(instance, times(1)).stop();
+        verify(instance, times(1)).pause();
     }
 
     @Test(expected = RemoteException.class)
     public void stopError() throws Exception {
-        doThrow(UnsupportedOperationException.class).when(instance).stop();
+        doThrow(UnsupportedOperationException.class).when(instance).pause();
         proxy.stop();
     }
 

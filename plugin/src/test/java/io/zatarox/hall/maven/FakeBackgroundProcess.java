@@ -45,7 +45,7 @@ public final class FakeBackgroundProcess implements BackgroundProcess {
     }
 
     @Override
-    public void start() throws Exception {
+    public void resume() throws Exception {
         executor.submit(new Runnable() {
             @Override
             public void run() {
@@ -59,7 +59,7 @@ public final class FakeBackgroundProcess implements BackgroundProcess {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void pause() throws Exception {
         socket.close();
         executor.shutdown();
     }
