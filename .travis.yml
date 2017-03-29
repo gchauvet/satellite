@@ -19,7 +19,7 @@ env:
   - HALL_TRGT=x86_64
 
 install:
-  - "mvn install -DskipTests=true -DskipPkg=true -Phall.arch=:HALL_TRGT:"
+  - "mvn install -DskipTests=true -DskipPkg=true -Phall.arch=$HALL_TRGT"
 
 script:
-  - "mvn clean test -Phall.arch=:HALL_TRGT:"
+  - "mvn clean test -Phall.arch=$HALL_TRGT"
