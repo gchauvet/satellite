@@ -15,8 +15,7 @@
  */
 
 #include "deimos.h"
-#include "classloader.h"
-#include "kernel.h"
+#include "embedded.h"
 
 #include <unistd.h>
 #include <jni.h>
@@ -335,14 +334,14 @@ bool java_init(arg_data *args, home_data *data)
         env,
         "io/zatarox/hall/impl/EmbeddedClassLoader",
         NULL,
-        classes_io_zatarox_hall_impl_EmbeddedClassLoader_class,
-        classes_io_zatarox_hall_impl_EmbeddedClassLoader_class_len
+        dump_get_content(EMBEDDEDCLASSLOADER_CLASS),
+        dump_get_size(EMBEDDEDCLASSLOADER_CLASS)
     );
 
     // Prepare an array of bytes
     jbyteArray content = (*env)->NewByteArray(
         env,
-        hall_embedded_jar_len
+        dump_get_size(HALL_EMBEDDED_JAR)
     );
 
     // Inject jar content
@@ -350,8 +349,8 @@ bool java_init(arg_data *args, home_data *data)
         env,
         content,
         0,
-        hall_embedded_jar_len,
-        hall_embedded_jar
+        dump_get_size(HALL_EMBEDDED_JAR),
+        dump_get_content(HALL_EMBEDDED_JAR)
     );
     
     // Create an instance of our internal classloader with embedded jar
