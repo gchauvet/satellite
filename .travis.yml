@@ -23,4 +23,4 @@ install:
   - "mvn install -DskipTests=true -DskipPkg=true -Dhall.arch=$HALL_TRGT"
 
 script:
-  - "mvn clean test -Dhall.arch=$HALL_TRGT"
+  - "mvn clean test -Dhall.arch=$HALL_TRGT -pl :hall-impl -am"
