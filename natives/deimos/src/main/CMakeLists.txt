@@ -38,8 +38,12 @@ ELSE()
   )
 ENDIF()
 
-INCLUDE_DIRECTORIES (./include)
+INCLUDE_DIRECTORIES (
+    ./include
+    ${CMAKE_BINARY_DIR}/generated-sources/c
+)
 FILE(GLOB SOURCES ./c/*.c)
+LIST(APPEND SOURCES ${CMAKE_BINARY_DIR}/generated-sources/c/embedded.c)
 
 ADD_EXECUTABLE (deimos ${SOURCES})
 TARGET_LINK_LIBRARIES(deimos dl)

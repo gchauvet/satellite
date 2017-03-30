@@ -61,7 +61,7 @@
     <modules>
         <module>api</module>
         <module>impl</module>
-        <module>plugin</module>
+        <module>plugins</module>
         <module>natives</module>
     </modules>
 </project>

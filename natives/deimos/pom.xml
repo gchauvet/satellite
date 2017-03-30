@@ -42,41 +42,28 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>io.zatarox.hall</groupId>
+                        <artifactId>dumper-maven-plugin</artifactId>
+                        <version>1.0.0-SNAPSHOT</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>dump</goal>
+                                </goals>
+                                <configuration>
+                                    <fileName>embedded</fileName>
+                                    <dumps>
+                                        <dump>${basedir}/../../impl/target/classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</dump>
+                                        <dump>${basedir}/../../impl/target/hall-embedded.jar</dump>
+                                    </dumps>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
-                            <execution>
-                                <id>embedding-kernel</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>xxd</executable>
-                                    <workingDirectory>${project.basedir}/../../impl/target</workingDirectory>
-                                    <arguments>
-                                        <argument>-i</argument>
-                                        <argument>hall-embedded.jar</argument>
-                                        <argument>${project.basedir}/src/main/include/kernel.h</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>embedding-loader</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>xxd</executable>
-                                    <workingDirectory>${project.basedir}/../../impl/target</workingDirectory>
-                                    <arguments>
-                                        <argument>-i</argument>
-                                        <argument>classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</argument>
-                                        <argument>${project.basedir}/src/main/include/classloader.h</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
                             <execution>
                                 <id>cmake</id>
                                 <phase>process-sources</phase>

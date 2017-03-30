@@ -1,0 +1,17 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.zatarox.hall</groupId>
+                <artifactId>dumper-maven-plugin</artifactId>
+                <configuration>
+                    <fileName>dump</fileName>
+                    <dumps>
+                        <file>src/test/resources/file1.dat</file>
+                        <file>src/test/resources/file2.dat</file>
+                    </dumps>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
