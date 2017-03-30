@@ -1,5 +1,4 @@
 language: java
-dist: trusty
 
 addons:
   apt:
@@ -9,6 +8,7 @@ addons:
     packages:
       - cmake
       - cmake-data
+      - gcc-5
       - gcc-mingw-w64-base
       - binutils-mingw-w64-x86-64
       - gcc-mingw-w64-x86-64
