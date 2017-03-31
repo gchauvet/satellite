@@ -24,7 +24,6 @@ package io.zatarox.satellite.impl;
 import io.zatarox.satellite.BackgroundContext;
 import io.zatarox.satellite.BackgroundException;
 import io.zatarox.satellite.BackgroundProcess;
-import io.zatarox.satellite.SignalListener;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -81,11 +80,6 @@ public final class BackgroundWrapperTest {
     }
 
     @Test
-    public void signal() {
-        assertTrue(instance.signal());
-    }
-
-    @Test
     public void resume() {
         assertTrue(instance.resume());
     }
@@ -100,21 +94,22 @@ public final class BackgroundWrapperTest {
         assertTrue(instance.destroy());
     }
 
-    public static final class FakeBackgroundProcessImpl implements BackgroundProcess, SignalListener {
+    public static final class FakeBackgroundProcessImpl implements BackgroundProcess {
 
+        @Override
         public void init(BackgroundContext context) throws BackgroundException, Exception {
         }
 
+        @Override
         public void resume() throws Exception {
         }
 
+        @Override
         public void pause() throws Exception {
         }
 
+        @Override
         public void destroy() {
-        }
-
-        public void signal() {
         }
 
     }

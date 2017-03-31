@@ -25,10 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Manifest;
 import java.util.zip.ZipFile;
-import io.zatarox.satellite.BackgroundProcess;
-import io.zatarox.satellite.SignalListener;
-import io.zatarox.satellite.BackgroundContext;
-import io.zatarox.satellite.BackgroundController;
+import io.zatarox.satellite.*;
 
 /**
  * Wrapper to manage the BackgroundProcess instance.
@@ -85,25 +82,11 @@ public final class BackgroundWrapper {
         return true;
     }
 
-    public boolean signal() {
-        try {
-            if (instance instanceof SignalListener) {
-                ((SignalListener) instance).signal();
-                return true;
-            }
-            System.out.println("Background process doesn't support signaling");
-        } catch (Throwable ex) {
-            System.err.println("Cannot send signal: " + ex);
-            ex.printStackTrace(System.err);
-        }
-        return false;
-    }
-
     /**
      * Load the BackgroundProcess class entry-point.
      *
      * @param jarName Define explicitely then jar who contains the entry point
- defined in the MANIFEST.MF (BackgroundProcess-Class property)
+     * defined in the MANIFEST.MF (BackgroundProcess-Class property)
      * @param args Arguments to provide to the BackgroundContext
      * @return true if loaded.
      */

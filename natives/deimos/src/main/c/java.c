@@ -102,31 +102,6 @@ char *java_library(arg_data *args, home_data *data)
 
 typedef jint (*jvm_create_t)(JavaVM **, JNIEnv **, JavaVMInitArgs *);
 
-bool java_signal(void)
-{
-    jmethodID method;
-    jboolean ret;
-    char start[] = "signal";
-    char startparams[] = "()Z";
-
-    deimos_xlate_to_ascii(start);
-    deimos_xlate_to_ascii(startparams);
-    method = (*env)->GetMethodID(env, (*env)->GetObjectClass(env, loader), start, startparams);
-    if (method == NULL) {
-        (*env)->ExceptionClear(env);
-        log_error("Cannot find wrapped \"signal\" method");
-        return false;
-    }
-
-    ret = (*env)->CallBooleanMethod(env, loader, method);
-    /* Clear any pending exception
-     * so we can continue calling native methods
-     */
-    (*env)->ExceptionClear(env);
-    log_debug("Daemon signal method returned %s", ret ? "true" : "false");
-    return ret;
-}
-
 /* Initialize the JVM and its environment, loading libraries and all */
 bool java_init(arg_data *args, home_data *data)
 {
