@@ -56,8 +56,12 @@ typedef struct {
     bool help;
     /** Only check environment without running the service. */
     bool chck;
-    /** Stop running deimos */
-    bool stop;
+    /** Shutdown a running deimos */
+    bool shutdown;
+    /** Pause a running deimos */
+    bool pause;
+    /** Continue to a running deimos*/
+    bool resume;
     /** number of seconds to until service started */
     int wait;
     /** Install as a service (win32) */

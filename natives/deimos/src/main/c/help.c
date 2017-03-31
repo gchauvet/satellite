@@ -95,8 +95,12 @@ void help(home_data *data)
     printf("    -wait <waittime>\n");
     printf("        wait waittime seconds for the service to start\n");
     printf("        waittime should multiple of 10 (min=10)\n");
-    printf("    -stop\n");
+    printf("    -shutdown\n");
     printf("        stop the service using the file given in the -pidfile option\n");
+    printf("    -pause\n");
+    printf("        pause the service using the file given in the -pidfile option\n");
+    printf("    -resume\n");
+    printf("        continue the service using the file given in the -pidfile option\n");
     printf("    -keepstdin\n");
     printf("        does not redirect stdin to /dev/null\n");
     printf("\nDeimos (Satellite Project) " DEIMOS_VERSION_STRING "\n");
