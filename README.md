@@ -1,4 +1,7 @@
 # Satellite Project (Work in Progress)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gchauvet/satellite/satellite.png"/>
+</p>
 
 Satellite is a set of utilities and Java support classes for running Java applications as server processes.
 Commonly known as 'daemon' processes in Unix terminology, on Windows they are called 'services'.
