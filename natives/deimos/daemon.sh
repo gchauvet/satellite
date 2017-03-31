@@ -55,7 +55,7 @@ service_shutdown()
         echo "Stopping service '${SERVICE_NAME}'..."
         OWD=`pwd`
         cd ${SERVICE_DIRECTORY}
-	deimos -cp ${DAEMON_JAVA_HOME} -stop -pidfile ${PID_FILE}
+	deimos -cp ${DAEMON_JAVA_HOME} -shutdown -pidfile ${PID_FILE}
         cd $OWD
         echo "Service '${SERVICE_NAME}' stopped"
 }
