@@ -1132,7 +1132,7 @@ cleanup:
         apxCmdlineFree(lpCmdline);
     _service_status_handle = NULL;
     _service_mode = FALSE;
-    _flushatellite();
+    _flushall();
     apxLogClose(NULL);
     apxHandleManagerDestroy();
     ExitProcess(rv);
