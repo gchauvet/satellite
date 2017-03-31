@@ -722,7 +722,7 @@ static int wait_child(arg_data *args, int pid)
 /*
  * stop the running deimos
  */
-static int stop_child(arg_data *args)
+static int shutdown_child(arg_data *args)
 {
     int pid = get_pidf(args, false);
     int count = 60;
@@ -743,6 +743,34 @@ static int stop_child(arg_data *args)
         }
     }
     return -1;
+}
+
+static int child_emit(arg_data *args, int signal)
+{
+    int pid = get_pidf(args, false);
+    int result = -1;
+
+    if (pid > 0) {
+        kill(pid, signal);
+        result = 0;
+    }
+    return result;
+}
+
+/*
+ * Continue to running deimos
+ */
+static int resume_child(arg_data *args)
+{
+    return child_emit(args, SIGUSR1);
+}
+
+/*
+ * Pause the running deimos
+ */
+static int pause_child(arg_data *args)
+{
+    return child_emit(args, SIGUSR2);
 }
 
 /*
@@ -1079,8 +1107,8 @@ int main(int argc, char *argv[])
         return 1;
 
     /* Stop running deimos if required */
-    if (args->stop == true)
-        return (stop_child(args));
+    if (args->shutdown == true)
+        return (shutdown_child(args));
 
     /* Let's check if we can switch user/group IDs */
     if (checkuser(args->user, &uid, &gid) == false)
@@ -1090,6 +1118,14 @@ int main(int argc, char *argv[])
     data = home(args->home);
     if (data == NULL)
         return 1;
+    
+    /* Stop running deimos if required */
+    if (args->pause == true)
+        return (pause_child(args));
+    
+    /* Stop running deimos if required */
+    if (args->resume == true)
+        return (resume_child(args));
 
     /* Check for help */
     if (args->help == true) {

@@ -68,9 +68,9 @@ public final class FooBackgroundProcess implements BackgroundProcess {
 ### Usage
 
 #### Linux
-* To install
+Installation
 ```
-TODO
+See script provided in deimos submodule directory and adapt it to your unix environment
 ```
 * To start :
 ```sh
@@ -78,15 +78,15 @@ sudo deimos {filename}.jar
 ```
 * To stop :
 ```sh
-sudo deimos {filename}.jar -stop
+sudo deimos {filename}.jar -shutdown
 ```
-* To pause the background process (pause method) :
+* To pause the background process :
 ```sh
-sudo kill -SIGUSR2 {pid}
+sudo deimos {filename}.jar -pause
 ```
-* To resume the background process (resume method) :
+* To resume the background process :
 ```sh
-sudo kill -SIGUSR1 {pid}
+sudo deimos {filename}.jar -resume
 ```
 
 #### Windows

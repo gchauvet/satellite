@@ -156,7 +156,9 @@ static arg_data *parse(int argc, char *argv[])
     args->vers    = false;        /* Don't display version */
     args->help    = false;        /* Don't display help */
     args->chck    = false;        /* Don't do a check-only startup */
-    args->stop    = false;        /* Stop a running deimos */
+    args->shutdown= false;        /* Shutdown a running deimos */
+    args->pause   = false;        /* Pause the running deimos */
+    args->resume  = false;        /* Continue the running deimos */
     args->wait    = 0;            /* Wait until deimos has started the JVM */
     args->install = false;        /* Don't install as a service */
     args->remove  = false;        /* Don't remove the installed service */
@@ -287,8 +289,14 @@ static arg_data *parse(int argc, char *argv[])
                 return NULL;
             }
         }
-        else if (!strcmp(argv[x], "-stop")) {
-            args->stop = true;
+        else if (!strcmp(argv[x], "-shutdown")) {
+            args->shutdown = true;
+        }
+        else if (!strcmp(argv[x], "-pause")) {
+            args->pause = true;
+        }
+        else if (!strcmp(argv[x], "-resume")) {
+            args->resume = true;
         }
         else if (!strcmp(argv[x], "-check")) {
             args->chck = true;
@@ -458,7 +466,9 @@ arg_data *arguments(int argc, char *argv[])
         log_debug("| Show Version:    %s", IsYesNo(args->vers));
         log_debug("| Show Help:       %s", IsYesNo(args->help));
         log_debug("| Check Only:      %s", IsEnabledDisabled(args->chck));
-        log_debug("| Stop:            %s", IsTrueFalse(args->stop));
+        log_debug("| Shutdown         %s", IsTrueFalse(args->shutdown));
+        log_debug("| Pause:           %s", IsTrueFalse(args->pause));
+        log_debug("| Resume :         %s", IsTrueFalse(args->resume));
         log_debug("| Wait:            %d", args->wait);
         log_debug("| Run as service:  %s", IsYesNo(args->service));
         log_debug("| Install service: %s", IsYesNo(args->install));
