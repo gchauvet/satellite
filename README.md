@@ -76,7 +76,7 @@ Finally, add a manifest entry in your main jar (and dependency jars OFC).
         <archive>
             <index>true</index>
             <manifestEntries>
-                <Background-Process-Class>net.ciril.sandbox.daemonized.TestDaemon</Background-Process-Class>
+                <Background-Process-Class>io.zatarox.satellite.FooBackgroundProcess</Background-Process-Class>
             </manifestEntries>
         </archive>
     </configuration>
