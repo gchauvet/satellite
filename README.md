@@ -68,7 +68,7 @@ public final class FooBackgroundProcess implements BackgroundProcess {
 ### Main jar assembly
 
 Finally, add a manifest entry in your main jar (and dependency jars OFC).
-```
+```xml
 <plugin>
 <artifactId>maven-jar-plugin</artifactId>
     <version>3.0.2</version>
