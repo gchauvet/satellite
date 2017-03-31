@@ -63,7 +63,6 @@ public final class FooBackgroundProcess implements BackgroundProcess {
     }
 }
 ```
-You can implements `SignalListener` if you want to be notified by a signal event (Unix) or by a LPC callback under Windows.
 
 ### Usage
 
@@ -80,17 +79,13 @@ sudo deimos {filename}.jar
 ```sh
 sudo deimos {filename}.jar -stop
 ```
-* To send a signal :
+* To pause the background process (stop method) :
 ```sh
 sudo kill -SIGUSR2 {pid}
 ```
-* To pause the background process (stop method) :
-```sh
-sudo kill -SIGUSR1 {pid}
-```
 * To resume the background process (start method) :
 ```sh
-sudo kill -SIGCONT {pid}
+sudo kill -SIGUSR1 {pid}
 ```
 
 #### Windows
@@ -113,10 +108,6 @@ net continue {service name}
 * To stop :
 ```sh
 net stop {service name}
-```
-*  To send a signal :
-```
-TODO
 ```
 
 ## Inspiration

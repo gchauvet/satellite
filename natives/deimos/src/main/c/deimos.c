@@ -54,8 +54,6 @@ typedef void (*sighandler_t)(int);
 static sighandler_t handler_start  = NULL;
 static sighandler_t handler_stop  = NULL;
 static sighandler_t handler_continue  = NULL;
-static sighandler_t handler_custom = NULL;
-static sighandler_t handler_reload  = NULL;
 static sighandler_t handler_destroy  = NULL;
 
 static int run_controller(arg_data *args, home_data *data, uid_t uid,
@@ -66,7 +64,7 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin,
 static void handler(int sig)
 {
     switch (sig) {
-        case SIGCONT:
+        case SIGUSR1:
             log_debug("Caught %s: Scheduling a start", strsignal(sig));
             if (started == true) {
                 log_error("Daemon already started");
@@ -77,7 +75,7 @@ static void handler(int sig)
                 started = true;
             }
         break;
-        case SIGUSR1:
+        case SIGUSR2:
             log_debug("Caught %s: Scheduling a stop", strsignal(sig));
             if(started == false ) {
                 log_error("Can't stop an unstarted daemon");
@@ -111,12 +109,6 @@ static void handler(int sig)
                 destroyed = true;
                 doreload = true;
             }
-        break;
-        case SIGUSR2:
-	     log_debug("Caught %s: Scheduling a custom signal", strsignal(sig));
-             dosignal = true;
-             java_signal();
-             dosignal = false;
         break;
         default:
             log_debug("Caught unknown signal %s", strsignal(sig));
@@ -446,8 +438,6 @@ static void controller(int sig)
 {
     switch (sig) {
         case SIGTERM:
-        case SIGCONT:
-        case SIGHUP:
         case SIGUSR1:
         case SIGUSR2:
             log_debug("Forwarding signal %d to process %d", sig, controlled);
@@ -839,11 +829,9 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
         log_debug("java_start done");
 
     /* Install signal handlers */
-    handler_reload = signal_set(SIGHUP, handler);
-    handler_custom = signal_set(SIGUSR2, handler);
     handler_destroy = signal_set(SIGTERM, handler);
-    handler_continue = signal_set(SIGCONT, handler);
-    handler_stop = signal_set(SIGUSR1, handler);
+    handler_continue = signal_set(SIGUSR1, handler);
+    handler_stop = signal_set(SIGUSR2, handler);
     controlled = getpid();
 
     log_debug("Waiting for a signal to be delivered");
@@ -1242,8 +1230,6 @@ static int run_controller(arg_data *args, home_data *data, uid_t uid,
         signal(SIGUSR1, controller);
         signal(SIGUSR2, controller);
         signal(SIGTERM, controller);
-        signal(SIGTSTP, controller);
-        signal(SIGCONT, controller);
 
         while (waitpid(pid, &status, 0) != pid) {
             /* Waith for process */
