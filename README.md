@@ -10,14 +10,12 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 [![Coverage Status](https://coveralls.io/repos/gchauvet/satellite/badge.png?branch=master)](https://coveralls.io/r/gchauvet/satellite?branch=master)
 
 ## Requirements
-* Satellite project requires Maven 3.x
+Compilation process is performed under Linux. Cross-compilation fanboy :-)
+
+* Maven 3.x
+* CMake 3.x
 * Java Development Kit >= 7
-
-### To compile Windows frontend (phobos) :
-* [tdm-gcc](http://tdm-gcc.tdragon.net)
-
-### To compile Unix frontend (deimos & phobos) :
-* gcc >= 5.x
+* gcc 5.x
 * gcc-mingw-w64-x86-64
 * gcc-mingw-w64
 * libc6-dev-i386
