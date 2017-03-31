@@ -65,6 +65,24 @@ public final class FooBackgroundProcess implements BackgroundProcess {
 }
 ```
 
+### Main jar assembly
+
+Finally, add a manifest entry in your main jar (and dependency jars OFC).
+```
+<plugin>
+<artifactId>maven-jar-plugin</artifactId>
+    <version>3.0.2</version>
+        <configuration>
+        <archive>
+            <index>true</index>
+            <manifestEntries>
+                <Background-Process-Class>net.ciril.sandbox.daemonized.TestDaemon</Background-Process-Class>
+            </manifestEntries>
+        </archive>
+    </configuration>
+</plugin>
+```
+
 ### Usage
 
 #### Linux
