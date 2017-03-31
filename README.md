@@ -82,11 +82,11 @@ sudo deimos {filename}.jar
 ```sh
 sudo deimos {filename}.jar -stop
 ```
-* To pause the background process (stop method) :
+* To pause the background process (pause method) :
 ```sh
 sudo kill -SIGUSR2 {pid}
 ```
-* To resume the background process (start method) :
+* To resume the background process (resume method) :
 ```sh
 sudo kill -SIGUSR1 {pid}
 ```
