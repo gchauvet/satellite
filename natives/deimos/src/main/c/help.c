@@ -99,7 +99,7 @@ void help(home_data *data)
     printf("        stop the service using the file given in the -pidfile option\n");
     printf("    -keepstdin\n");
     printf("        does not redirect stdin to /dev/null\n");
-    printf("\nDeimos (Hall Project) " DEIMOS_VERSION_STRING "\n");
+    printf("\nDeimos (Satellite Project) " DEIMOS_VERSION_STRING "\n");
     printf("Copyright 2017 Zatarox.\n");
 
     printf("\n");

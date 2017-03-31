@@ -1,1 +1,1 @@
-Background-Process-Class: io.zatarox.hall.impl.BackgroundWrapperTest$FakeBackgroundProcessImpl
+Background-Process-Class: io.zatarox.satellite.impl.BackgroundWrapperTest$FakeBackgroundProcessImpl

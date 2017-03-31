@@ -326,7 +326,7 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
 
 static void printVersion(void)
 {
-    fwprintf(stderr, L"Hall Service Wrapper version %u.%u.%u/Win%d (%S)\n",
+    fwprintf(stderr, L"Satellite Service Wrapper version %u.%u.%u/Win%d (%S)\n",
             PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
     fwprintf(stderr, L"Copyright 2017 Zatarox, based on Apache Commons Daemon");
 }
@@ -1132,7 +1132,7 @@ cleanup:
         apxCmdlineFree(lpCmdline);
     _service_status_handle = NULL;
     _service_mode = FALSE;
-    _flushall();
+    _flushatellite();
     apxLogClose(NULL);
     apxHandleManagerDestroy();
     ExitProcess(rv);

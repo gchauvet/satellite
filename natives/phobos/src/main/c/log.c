@@ -198,7 +198,7 @@ HANDLE apxLogOpen(
         wcsncpy(sPath, szPath, MAX_PATH);
     }
     if (!szPrefix)
-        szPrefix = L"hall";
+        szPrefix = L"satellite";
     if (dwRotate != 0 && dwRotate < 86400)
         wsprintfW(sName, L"\\%s"  LOGF_EXR,
                   szPrefix,

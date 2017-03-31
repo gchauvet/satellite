@@ -12,20 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * Contributed by Mladen Turk <mturk@apache.org> 05 Aug 2003
  */
+package io.zatarox.satellite;
 
-#ifndef _PHOBOS_H
-#define _PHOBOS_H
+/**
+ * Defines a set of methods that a BackgroundProcess instance can use to communicate with
+ * the container.
+ */
+public interface BackgroundContext {
 
-#define PRG_REGROOT   L"Zatarox\\Satellite\\1.0"
+    /**
+     * Returns <code>BackgroundController</code> object that can be used to control
+     * the instance that this <code>BackgroundContext</code> is
+     * passed to.
+     */
+    public BackgroundController getController();
 
-#if !defined(PRG_VERSION_MAJOR) || !defined(PRG_VERSION_MINOR) || !defined(PRG_VERSION_PATCH)
-#define PRG_VERSION_MAJOR 0
-#define PRG_VERSION_MINOR 0
-#define PRG_VERSION_PATCH 0
-#endif
+    /**
+     * Returns an array of <code>String</code> arguments supplied by the
+     * environment. corresponding to the array of arguments given in the
+     * <code>public static void main()</code> method used as an entry point to
+     * most other java programs.
+     */
+    public String[] getArguments();
 
-#endif /* _PHOBOS_H */
-
+}

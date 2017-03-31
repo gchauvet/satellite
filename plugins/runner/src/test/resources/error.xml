@@ -15,8 +15,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.zatarox.hall</groupId>
-                <artifactId>hall-maven-plugin</artifactId>
+                <groupId>io.zatarox.satellite</groupId>
+                <artifactId>satellite-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <extensions>true</extensions>
                 <configuration>

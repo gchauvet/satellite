@@ -26,11 +26,11 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define RSTR_PHOBOS "Hall Phobos Service Wrapper"
+#define RSTR_PHOBOS "Satellite Phobos Service Wrapper"
 
 IDI_MAINICON         ICON                   "../resources/phobos.ico"
-IDD_HALL_CL        RCDATA                 "../../../../../impl/target/classes/io/zatarox/hall/impl/EmbeddedClassLoader.class"
-IDD_HALL_JAR       RCDATA                 "../../../../../impl/target/hall-embedded.jar"
+IDD_HALL_CL        RCDATA                 "../../../../../impl/target/classes/io/zatarox/satellite/impl/EmbeddedClassLoader.class"
+IDD_HALL_JAR       RCDATA                 "../../../../../impl/target/satellite-embedded.jar"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "phobos.manifest"
 

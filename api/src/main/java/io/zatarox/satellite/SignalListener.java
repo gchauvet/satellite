@@ -12,20 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * Contributed by Mladen Turk <mturk@apache.org> 05 Aug 2003
  */
+package io.zatarox.satellite;
 
-#ifndef _PHOBOS_H
-#define _PHOBOS_H
+/**
+ * Tags a background process as supporting some kind of signaling method that allows the
+ * java application to perform a custom action.
+ * <p>
+ * User must implement a signal method that will be called from native upon
+ * receiving signal from the operating system ({@code SIGUSR2} for Unix-like, {@code LPC} for Windows).
+ * </p>
+ */
+public interface SignalListener {
 
-#define PRG_REGROOT   L"Zatarox\\Satellite\\1.0"
+    /**
+     * Performs a custom action on received user signal.
+     */
+    void signal();
 
-#if !defined(PRG_VERSION_MAJOR) || !defined(PRG_VERSION_MINOR) || !defined(PRG_VERSION_PATCH)
-#define PRG_VERSION_MAJOR 0
-#define PRG_VERSION_MINOR 0
-#define PRG_VERSION_PATCH 0
-#endif
-
-#endif /* _PHOBOS_H */
-
+}

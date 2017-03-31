@@ -22,16 +22,16 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.hall</groupId>
-        <artifactId>hall-natives</artifactId>
+        <groupId>io.zatarox.satellite</groupId>
+        <artifactId>satellite-natives</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.zatarox.hall.hall-natives</groupId>
+    <groupId>io.zatarox.satellite.natives</groupId>
     <artifactId>deimos</artifactId>
     <packaging>pom</packaging>
-    <name>Hall Deimos frontend</name>
-    <description>Hall Unix-like native frontend program</description>
+    <name>Satellite :: Frontends :: Deimos</name>
+    <description>Satellite Unix-like native frontend program</description>
     <profiles>
         <profile>
             <activation>
@@ -42,7 +42,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>io.zatarox.hall</groupId>
+                        <groupId>io.zatarox.satellite</groupId>
                         <artifactId>dumper-maven-plugin</artifactId>
                         <version>1.0.0-SNAPSHOT</version>
                         <executions>
@@ -53,8 +53,8 @@
                                 <configuration>
                                     <fileName>embedded</fileName>
                                     <dumps>
-                                        <dump>${basedir}/../../impl/target/classes/io/zatarox/hall/impl/EmbeddedClassLoader.class</dump>
-                                        <dump>${basedir}/../../impl/target/hall-embedded.jar</dump>
+                                        <dump>${basedir}/../../impl/target/classes/io/zatarox/satellite/impl/EmbeddedClassLoader.class</dump>
+                                        <dump>${basedir}/../../impl/target/satellite-embedded.jar</dump>
                                     </dumps>
                                 </configuration>
                             </execution>
@@ -76,7 +76,7 @@
                                     <arguments>
                                         <argument>-G</argument>
                                         <argument>Unix Makefiles</argument>
-                                        <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${hall.arch}.cmake</argument>
+                                        <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
                                         <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                         <argument>${basedir}/src/main</argument>
                                     </arguments>
@@ -111,12 +111,12 @@
                                     <goal>install-file</goal>
                                 </goals>
                                 <configuration>
-                                    <groupId>io.zatarox.hall.natives</groupId>
+                                    <groupId>io.zatarox.satellite.natives</groupId>
                                     <artifactId>${project.artifactId}</artifactId>
                                     <file>target/deimos</file>
                                     <packaging>elf</packaging>
                                     <version>${project.version}</version>
-                                    <classifier>${hall.arch}</classifier>
+                                    <classifier>${satellite.arch}</classifier>
                                     <createChecksum>true</createChecksum>
                                 </configuration>
                             </execution>

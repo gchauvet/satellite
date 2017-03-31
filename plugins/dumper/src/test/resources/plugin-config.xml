@@ -2,7 +2,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.zatarox.hall</groupId>
+                <groupId>io.zatarox.satellite</groupId>
                 <artifactId>dumper-maven-plugin</artifactId>
                 <configuration>
                     <fileName>dump</fileName>

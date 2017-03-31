@@ -332,7 +332,7 @@ bool java_init(arg_data *args, home_data *data)
     // Load classloader class
     const jclass clazzloader = (*env)->DefineClass(
         env,
-        "io/zatarox/hall/impl/EmbeddedClassLoader",
+        "io/zatarox/satellite/impl/EmbeddedClassLoader",
         NULL,
         dump_get_content(EMBEDDEDCLASSLOADER_CLASS),
         dump_get_size(EMBEDDEDCLASSLOADER_CLASS)
@@ -341,7 +341,7 @@ bool java_init(arg_data *args, home_data *data)
     // Prepare an array of bytes
     jbyteArray content = (*env)->NewByteArray(
         env,
-        dump_get_size(HALL_EMBEDDED_JAR)
+        dump_get_size(SATELLITE_EMBEDDED_JAR)
     );
 
     // Inject jar content
@@ -349,8 +349,8 @@ bool java_init(arg_data *args, home_data *data)
         env,
         content,
         0,
-        dump_get_size(HALL_EMBEDDED_JAR),
-        dump_get_content(HALL_EMBEDDED_JAR)
+        dump_get_size(SATELLITE_EMBEDDED_JAR),
+        dump_get_content(SATELLITE_EMBEDDED_JAR)
     );
     
     // Create an instance of our internal classloader with embedded jar
