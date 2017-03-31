@@ -1,13 +1,13 @@
-# Hall Project (Work in Progress)
+# Satellite Project (Work in Progress)
 
-Hall is a set of utilities and Java support classes for running Java applications as server processes.
+Satellite is a set of utilities and Java support classes for running Java applications as server processes.
 Commonly known as 'daemon' processes in Unix terminology, on Windows they are called 'services'.
 
-[![Build Status](https://travis-ci.org/gchauvet/hall.png)](https://travis-ci.org/gchauvet/hall)
-[![Coverage Status](https://coveralls.io/repos/gchauvet/hall/badge.png?branch=master)](https://coveralls.io/r/gchauvet/hall?branch=master)
+[![Build Status](https://travis-ci.org/gchauvet/satellite.png)](https://travis-ci.org/gchauvet/satellite)
+[![Coverage Status](https://coveralls.io/repos/gchauvet/satellite/badge.png?branch=master)](https://coveralls.io/r/gchauvet/satellite?branch=master)
 
 ## Requirements
-* Hall project requires Maven 3.x
+* Satellite project requires Maven 3.x
 * Java Development Kit >= 7
 
 ### To compile Windows frontend (phobos) :
@@ -19,16 +19,16 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 * gcc-mingw-w64
 * libc6-dev-i386
 
-## Hall in action
+## Satellite in action
 Writing an independent OS background process become pretty simple. The first step is to implement a java interface who manage background process behaviors. The second step require `Phobos` or `Deimos` depending if you are under Windows or Linux
 
 ### Dependency
-In your Maven POM project, add the Hall API dependency (check latest version):
+In your Maven POM project, add the Satellite API dependency (check latest version):
 
 ```xml
 <dependency>
-    <groupId>io.zatarox.hall</groupId>
-    <artifactId>hall-api</artifactId>
+    <groupId>io.zatarox.satellite</groupId>
+    <artifactId>satellite-api</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <scope>provided</scope>
 </dependency>
@@ -38,7 +38,7 @@ In your Maven POM project, add the Hall API dependency (check latest version):
 This is the facade of your service. Attention : calls on these methods are synchronous.
 
 ```java
-import io.zatarox.hall.*;
+import io.zatarox.satellite.*;
 
 public final class FooBackgroundProcess implements BackgroundProcess {
 

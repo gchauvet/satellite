@@ -22,14 +22,14 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.hall</groupId>
-        <artifactId>hall-parent</artifactId>
+        <groupId>io.zatarox.satellite</groupId>
+        <artifactId>satellite-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>hall-impl</artifactId>
-    <name>Hall Implementation</name>
-    <description>Implementation of Hall software to building Unix-like Daemon application.</description>
+    <artifactId>satellite-impl</artifactId>
+    <name>Satellite :: Implementation</name>
+    <description>Implementation of Satellite software to building Unix-like Daemon application.</description>
 
     <build>
         <plugins>
@@ -49,7 +49,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>hall-embedded</finalName>
+                            <finalName>satellite-embedded</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -76,7 +76,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hall-api</artifactId>
+            <artifactId>satellite-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -16,11 +16,11 @@ addons:
       - libc6-dev-i386
       
 env:
-  - HALL_TRGT=x86
-  - HALL_TRGT=x86_64
+  - TRGT_ARCH=x86
+  - TRGT_ARCH=x86_64
 
 install:
-  - "mvn install -DskipTests=true -DskipPkg=true -Dhall.arch=$HALL_TRGT"
+  - "mvn install -DskipTests=true -DskipPkg=true -Dsatellite.arch=$TRGT_ARCH"
 
 script:
-  - "mvn clean test -Dhall.arch=$HALL_TRGT -pl :hall-impl -am"
+  - "mvn clean test -Dhatellite.arch=$TRGT_ARCH -pl :satellite-impl -am"

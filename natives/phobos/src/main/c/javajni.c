@@ -1077,7 +1077,7 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
     HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_CL), RT_RCDATA);
     HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_JAR), RT_RCDATA);
     HGLOBAL resCl = LoadResource(NULL, hresCl);
-    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "io/zatarox/hall/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
+    jclass clLoader = JVM_DEFINE_CLASS(lpJava, "io/zatarox/satellite/impl/EmbeddedClassLoader", SizeofResource(NULL, hresCl), LockResource(resCl));
 
     // Load the embedded daemon single jar
     DWORD szJar = SizeofResource(NULL, hresJar);
