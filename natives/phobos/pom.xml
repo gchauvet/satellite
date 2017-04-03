@@ -52,6 +52,9 @@
                                 <argument>${cmake.generator}</argument>
                                 <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
+                                <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
+                                <argument>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</argument>
+                                <argument>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</argument>
                                 <argument>${basedir}/src/main</argument>
                             </arguments>
                         </configuration>
@@ -66,9 +69,6 @@
                             <executable>make</executable>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                             <arguments>
-                                <argument>CFLAGS+=-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
-                                <argument>CFLAGS+=-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</argument>
-                                <argument>CFLAGS+=-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</argument>
                                 <argument>install/strip</argument>
                             </arguments>
                         </configuration>
