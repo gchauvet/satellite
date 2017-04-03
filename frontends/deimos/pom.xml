@@ -96,6 +96,7 @@
                                     <executable>make</executable>
                                     <workingDirectory>${project.build.directory}</workingDirectory>
                                     <arguments>
+                                        <argument>CFLAGS+=-Wunused-result</argument>
                                         <argument>install/strip</argument>
                                     </arguments>
                                 </configuration>
