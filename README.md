@@ -7,7 +7,7 @@ Satellite is a set of utilities and Java support classes for running Java applic
 Commonly known as 'daemon' processes in Unix terminology, on Windows they are called 'services'.
 
 [![Build Status](https://travis-ci.org/gchauvet/satellite.png)](https://travis-ci.org/gchauvet/satellite)
-[![Coverage Status](https://coveralls.io/repos/gchauvet/satellite/badge.png?branch=master)](https://coveralls.io/r/gchauvet/satellite?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/gchauvet/satellite/badge.svg?branch=master)](https://coveralls.io/github/gchauvet/satellite?branch=master)
 
 ## Requirements
 Compilation process is performed under Linux. Cross-compilation fanboy :-)
