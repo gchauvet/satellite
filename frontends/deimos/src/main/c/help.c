@@ -20,7 +20,7 @@ void help(home_data *data)
 {
     int x;
 
-    printf("Usage: %s [-options...] [{main}.jar] [args...]\n", log_prog);
+    printf("Usage: %s [-options...] [\"main.jar\" | command] [args...]\n", log_prog);
     printf("\n");
     printf("Where options include:\n");
     printf("\n");
@@ -42,7 +42,6 @@ void help(home_data *data)
     printf("    -java-home | -home <directory>\n");
     printf("        set the path of your JDK or JRE installation (or set\n");
     printf("        the JAVA_HOME environment variable)\n");
-
     printf("    -version\n");
     printf("        show the current Java environment version (to check\n");
     printf("        correctness of -home and -jvm. Implies -nodetach)\n");
@@ -95,14 +94,17 @@ void help(home_data *data)
     printf("    -wait <waittime>\n");
     printf("        wait waittime seconds for the service to start\n");
     printf("        waittime should multiple of 10 (min=10)\n");
-    printf("    -shutdown\n");
-    printf("        stop the service using the file given in the -pidfile option\n");
-    printf("    -pause\n");
-    printf("        pause the service using the file given in the -pidfile option\n");
-    printf("    -resume\n");
-    printf("        continue the service using the file given in the -pidfile option\n");
     printf("    -keepstdin\n");
     printf("        does not redirect stdin to /dev/null\n");
+    
+    printf("\nWhere command are:\n");
+    printf("    shutdown\n");
+    printf("        stop the service using the file given in the -pidfile option\n");
+    printf("    pause\n");
+    printf("        pause the service using the file given in the -pidfile option\n");
+    printf("    resume\n");
+    printf("        continue the service using the file given in the -pidfile option\n");
+    
     printf("\nDeimos (Satellite Project) " DEIMOS_VERSION_STRING "\n");
     printf("Copyright 2017 Zatarox.\n");
 
