@@ -27,7 +27,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>satellite-natives</artifactId>
+    <artifactId>satellite-frontends</artifactId>
     <packaging>pom</packaging>
     <name>Satellite :: Frontends</name>
     <description>Satellite natives frontends softwares to interact with the host OS</description>
