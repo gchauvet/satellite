@@ -2,7 +2,7 @@
   <img src="https://github.com/gchauvet/satellite/blob/master/satellite.png"/>
 </p>
 
-# Satellite Project (Work in Progress)
+# Satellite Toolkit
 Satellite is a set of utilities and Java support classes for running Java applications as server processes.
 Commonly known as 'daemon' processes in Unix terminology, on Windows they are called 'services'.
 
@@ -16,8 +16,8 @@ Compilation process is performed under Linux. Cross-compilation fanboy :-)
 * CMake 3.x
 * Java Development Kit >= 7
 * gcc 5.x
-* gcc-mingw-w64-x86-64
-* gcc-mingw-w64
+* gcc-mingw-w64-x86-64 (gcc 5.x)
+* gcc-mingw-w64 (gcc 5.x)
 * libc6-dev-i386
 
 ## Satellite in action
@@ -96,15 +96,15 @@ sudo deimos {filename}.jar
 ```
 * To stop :
 ```sh
-sudo deimos {filename}.jar -shutdown
+sudo deimos {filename}.jar shutdown
 ```
 * To pause the background process :
 ```sh
-sudo deimos {filename}.jar -pause
+sudo deimos {filename}.jar pause
 ```
 * To resume the background process :
 ```sh
-sudo deimos {filename}.jar -resume
+sudo deimos {filename}.jar resume
 ```
 
 #### Windows

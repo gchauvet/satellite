@@ -64,12 +64,6 @@ typedef struct {
     bool resume;
     /** number of seconds to until service started */
     int wait;
-    /** Install as a service (win32) */
-    bool install;
-    /** Remove when installed as a service (win32) */
-    bool remove;
-    /** Run as a service (win32) */
-    bool service;
     /** Destination for stdout */
     char *outfile;
     /** Destination for stderr */
