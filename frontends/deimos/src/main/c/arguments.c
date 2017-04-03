@@ -305,15 +305,6 @@ static arg_data *parse(int argc, char *argv[])
         else if (!strcmp(argv[x], "-keepstdin")) {
            args->redirectstdin = false;
         }
-        else if (!strcmp(argv[x], "-service")) {
-            args->service = true;
-        }
-        else if (!strcmp(argv[x], "-install")) {
-            args->install = true;
-        }
-        else if (!strcmp(argv[x], "-remove")) {
-            args->remove = true;
-        }
         else if (!strcmp(argv[x], "-pidfile")) {
             args->pidf = optional(argc, argv, x++);
             if (args->pidf == NULL) {
