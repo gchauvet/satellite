@@ -97,7 +97,7 @@ public final class BackgroundWrapperTest {
     public static final class FakeBackgroundProcessImpl implements BackgroundProcess {
 
         @Override
-        public void init(BackgroundContext context) throws BackgroundException, Exception {
+        public void initialize(BackgroundContext context) throws BackgroundException, Exception {
         }
 
         @Override
@@ -109,7 +109,7 @@ public final class BackgroundWrapperTest {
         }
 
         @Override
-        public void destroy() {
+        public void shutdown() {
         }
 
     }
