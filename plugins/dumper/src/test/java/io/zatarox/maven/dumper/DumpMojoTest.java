@@ -61,7 +61,6 @@ public class DumpMojoTest extends AbstractMojoTestCase {
         mojo.setProject(project);
         mojo.execute();
 
-        boolean windows = SystemUtils.OS_NAME.contains("win");
         assertEquals("6e826326a65e54bf18f4498fec20378b", DigestUtils.md5Hex(new FileInputStream(new File("target/generated-sources/c/dump.h"))));
         assertEquals("a71bfe7718acb5461d2959377c8a8f4e", DigestUtils.md5Hex(new FileInputStream(new File("target/generated-sources/c/dump.c"))));
     }
