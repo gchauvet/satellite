@@ -62,6 +62,6 @@
         <module>api</module>
         <module>impl</module>
         <module>plugins</module>
-        <module>natives</module>
+        <module>frontends</module>
     </modules>
 </project>
