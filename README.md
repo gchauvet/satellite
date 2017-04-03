@@ -44,7 +44,7 @@ import io.zatarox.satellite.*;
 public final class FooBackgroundProcess implements BackgroundProcess {
 
     @Override
-    public void init(BackgroundContext dc) throws BackgroundException, Exception {
+    public void initialize(BackgroundContext dc) throws BackgroundException, Exception {
         System.err.println("Initialized");
     }
 
@@ -59,7 +59,7 @@ public final class FooBackgroundProcess implements BackgroundProcess {
     }
 
     @Override
-    public void destroy() {
+    public void shutdown() {
         System.err.println("Destroyed");
     }
 }
@@ -70,7 +70,7 @@ public final class FooBackgroundProcess implements BackgroundProcess {
 Finally, add a manifest entry in your main jar (and dependency jars OFC).
 ```xml
 <plugin>
-<artifactId>maven-jar-plugin</artifactId>
+  <artifactId>maven-jar-plugin</artifactId>
     <version>3.0.2</version>
         <configuration>
         <archive>
@@ -90,21 +90,21 @@ Installation
 ```
 See script provided in deimos submodule directory and adapt it to your unix environment
 ```
-* To start :
+* To start the background process :
 ```sh
-sudo deimos {filename}.jar
-```
-* To stop :
-```sh
-sudo deimos {filename}.jar shutdown
+sudo deimos -home $JAVA_HOME {filename}.jar
 ```
 * To pause the background process :
 ```sh
-sudo deimos {filename}.jar pause
+sudo deimos pause
 ```
 * To resume the background process :
 ```sh
-sudo deimos {filename}.jar resume
+sudo deimos resume
+```
+* To stop the background process :
+```sh
+sudo deimos shutdown
 ```
 
 #### Windows
@@ -112,19 +112,19 @@ sudo deimos {filename}.jar resume
 ```batch
 phobos.exe //IS/{service name} --MainJar={filname}.jar ...
 ```
-* To start :
+* To start the background process :
 ```sh
 net start {service name}
 ```
-* To pause :
+* To pause the background process :
 ```sh
 net pause {service name}
 ```
-* To continue :
+* To resume the background process :
 ```sh
 net continue {service name}
 ```
-* To stop :
+* To stop the background process :
 ```sh
 net stop {service name}
 ```

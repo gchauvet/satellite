@@ -1114,11 +1114,6 @@ int main(int argc, char *argv[])
     if (checkuser(args->user, &uid, &gid) == false)
         return 1;
 
-    /* Retrieve JAVA_HOME layout */
-    data = home(args->home);
-    if (data == NULL)
-        return 1;
-    
     /* Stop running deimos if required */
     if (args->pause == true)
         return (pause_child(args));
@@ -1126,7 +1121,12 @@ int main(int argc, char *argv[])
     /* Stop running deimos if required */
     if (args->resume == true)
         return (resume_child(args));
-
+    
+    /* Retrieve JAVA_HOME layout */
+    data = home(args->home);
+    if (data == NULL)
+        return 1;
+    
     /* Check for help */
     if (args->help == true) {
         help(data);
