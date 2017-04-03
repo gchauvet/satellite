@@ -41,7 +41,6 @@
                     <execution>
                         <goals>
                             <goal>cobertura</goal>
-                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
