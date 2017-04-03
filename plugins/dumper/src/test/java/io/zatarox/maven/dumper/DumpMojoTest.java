@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.model.Build;
 
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
