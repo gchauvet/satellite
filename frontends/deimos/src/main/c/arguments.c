@@ -394,7 +394,7 @@ static arg_data *parse(int argc, char *argv[])
         }
     }
 
-    if (args->jar == NULL) {
+    if (args->jar == NULL && !(args->shutdown | args->pause | args->resume)) {
         log_error("No main jar specified");
         return NULL;
     }
