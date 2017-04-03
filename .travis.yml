@@ -23,4 +23,4 @@ install:
   - "mvn install -DskipTests=true -DskipPkg=true -Dsatellite.arch=$TRGT_ARCH"
 
 script:
-  - "mvn clean test -Dhatellite.arch=$TRGT_ARCH -pl :satellite-impl -am"
+  - "mvn clean test -Dsatellite.arch=$TRGT_ARCH -pl :satellite-impl -am"
