@@ -160,9 +160,6 @@ static arg_data *parse(int argc, char *argv[])
     args->pause   = false;        /* Pause the running deimos */
     args->resume  = false;        /* Continue the running deimos */
     args->wait    = 0;            /* Wait until deimos has started the JVM */
-    args->install = false;        /* Don't install as a service */
-    args->remove  = false;        /* Don't remove the installed service */
-    args->service = false;        /* Don't run as a service */
     args->name    = NULL;         /* No VM version name */
     args->home    = NULL;         /* No default JAVA_HOME */
     args->onum    = 0;            /* Zero arguments, but let's have some room */
@@ -289,13 +286,13 @@ static arg_data *parse(int argc, char *argv[])
                 return NULL;
             }
         }
-        else if (!strcmp(argv[x], "-shutdown")) {
+        else if (!strcmp(argv[x], "shutdown")) {
             args->shutdown = true;
         }
-        else if (!strcmp(argv[x], "-pause")) {
+        else if (!strcmp(argv[x], "pause")) {
             args->pause = true;
         }
-        else if (!strcmp(argv[x], "-resume")) {
+        else if (!strcmp(argv[x], "resume")) {
             args->resume = true;
         }
         else if (!strcmp(argv[x], "-check")) {
@@ -470,9 +467,6 @@ arg_data *arguments(int argc, char *argv[])
         log_debug("| Pause:           %s", IsTrueFalse(args->pause));
         log_debug("| Resume :         %s", IsTrueFalse(args->resume));
         log_debug("| Wait:            %d", args->wait);
-        log_debug("| Run as service:  %s", IsYesNo(args->service));
-        log_debug("| Install service: %s", IsYesNo(args->install));
-        log_debug("| Remove service:  %s", IsYesNo(args->remove));
         log_debug("| JVM Name:        \"%s\"", PRINT_NULL(args->name));
         log_debug("| Java Home:       \"%s\"", PRINT_NULL(args->home));
         log_debug("| PID File:        \"%s\"", PRINT_NULL(args->pidf));
