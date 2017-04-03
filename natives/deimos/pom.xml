@@ -77,6 +77,7 @@
                                         <argument>-G</argument>
                                         <argument>Unix Makefiles</argument>
                                         <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
+                                        <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/target</argument>
                                         <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                         <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
                                         <argument>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</argument>
