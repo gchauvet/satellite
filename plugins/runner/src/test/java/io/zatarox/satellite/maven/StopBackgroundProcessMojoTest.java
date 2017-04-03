@@ -77,7 +77,7 @@ public final class StopBackgroundProcessMojoTest {
         assertNotNull(mojo);
         mojo.execute();
         verify(instance, times(1)).pause();
-        verify(instance, times(1)).destroy();
+        verify(instance, times(1)).shutdown();
     }
 
     @Test(expected = MojoExecutionException.class)

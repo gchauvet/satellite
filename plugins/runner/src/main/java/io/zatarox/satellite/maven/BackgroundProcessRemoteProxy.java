@@ -36,7 +36,7 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
     @Override
     public void init(BackgroundContext dc) throws RemoteException {
         try {
-            instance.init(dc);
+            instance.initialize(dc);
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage(), ex);
         }
@@ -62,7 +62,7 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
 
     @Override
     public void destroy() {
-        instance.destroy();
+        instance.shutdown();
     }
 
 }

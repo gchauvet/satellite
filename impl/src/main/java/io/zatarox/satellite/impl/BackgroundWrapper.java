@@ -32,7 +32,6 @@ import io.zatarox.satellite.*;
  */
 public final class BackgroundWrapper {
 
-    // N.B. These static mutable variables need to be accessed using synch.
     private Controller controller = null;
     private Object instance = null;
     private final ClassLoader loader;
@@ -42,14 +41,6 @@ public final class BackgroundWrapper {
             throw new IllegalArgumentException("No embedded classloader provided");
         }
         this.loader = loader;
-    }
-
-    public void version() {
-        System.out.println(String.format("java version \"%s\"", System.getProperty("java.version")));
-        System.out.println(String.format("%s (build %s)", System.getProperty("java.runtime.name"), System.getProperty("java.runtime.version")));
-        System.out.println(String.format("%s (build %s, %s)", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")));
-        System.out.println(String.format("Satellite version \"%s\"", System.getProperty("satellite.version")));
-        System.out.println(String.format("Satellite process (id: %s, parent: %s)", System.getProperty("satellite.process.id"), System.getProperty("satellite.process.parent")));
     }
 
     public boolean check(String cn) {
@@ -128,7 +119,7 @@ public final class BackgroundWrapper {
             context.setArguments(args != null ? args : new String[0]);
             context.setController(controller);
 
-            ((BackgroundProcess) instance).init(context);
+            ((BackgroundProcess) instance).initialize(context);
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
             /* BackgroundExceptions can fail with a nicer message */
@@ -190,8 +181,8 @@ public final class BackgroundWrapper {
 
     public boolean destroy() {
         try {
-            /* Attempt to pause the background process */
-            ((BackgroundProcess) instance).destroy();
+            /* Attempt to shutdown the background process */
+            ((BackgroundProcess) instance).shutdown();
 
             instance = null;
             controller = null;

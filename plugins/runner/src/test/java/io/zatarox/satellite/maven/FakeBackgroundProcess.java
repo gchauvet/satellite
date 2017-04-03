@@ -34,7 +34,7 @@ public final class FakeBackgroundProcess implements BackgroundProcess {
     private ServerSocket socket;
 
     @Override
-    public void init(BackgroundContext dc) throws BackgroundException, Exception {
+    public void initialize(BackgroundContext dc) throws BackgroundException, Exception {
         assertArrayEquals(new String[]{"test 1", "test 2"}, dc.getArguments());
         try {
             dc.getController();
@@ -65,7 +65,7 @@ public final class FakeBackgroundProcess implements BackgroundProcess {
     }
 
     @Override
-    public void destroy() {
+    public void shutdown() {
         socket = null;
     }
 

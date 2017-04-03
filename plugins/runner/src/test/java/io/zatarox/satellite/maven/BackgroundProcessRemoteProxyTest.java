@@ -43,13 +43,13 @@ public final class BackgroundProcessRemoteProxyTest {
     public void initSuccess() throws Exception {
         final BackgroundContext context = mock(BackgroundContext.class);
         proxy.init(context);
-        verify(instance, times(1)).init(eq(context));
+        verify(instance, times(1)).initialize(eq(context));
     }
 
     @Test(expected = RemoteException.class)
     public void initError() throws Exception {
         final BackgroundContext context = mock(BackgroundContext.class);
-        doThrow(new BackgroundException(null)).when(instance).init(same(context));
+        doThrow(new BackgroundException(null)).when(instance).initialize(same(context));
         proxy.init(context);
         fail();
     }
@@ -81,12 +81,12 @@ public final class BackgroundProcessRemoteProxyTest {
     @Test
     public void destroySuccess() throws Exception {
         proxy.destroy();
-        verify(instance, times(1)).destroy();
+        verify(instance, times(1)).shutdown();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void destroyError() throws Exception {
-        doThrow(UnsupportedOperationException.class).when(instance).destroy();
+        doThrow(UnsupportedOperationException.class).when(instance).shutdown();
         proxy.destroy();
     }
 
