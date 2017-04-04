@@ -21,12 +21,6 @@
 
 #include <jni.h>
 
-#ifndef JNI_VERSION_1_2
-#error -------------------------------------------------------
-#error JAVA 1.1 IS NO LONGER SUPPORTED
-#error -------------------------------------------------------
-#endif
-
 #ifdef JNI_VERSION_1_4
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_4
 #else
@@ -303,7 +297,8 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
     return TRUE;
 }
 
-static BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
+static
+BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
                                  WPARAM wParam, LPARAM lParam)
 {
     LPAPXJAVAVM lpJava;
@@ -338,15 +333,24 @@ static BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
     return TRUE;
 }
 
-static __inline const char *__apxJvmGetClassName(LPAPXJAVAVM lpJava, jobject obj)
+static LPVOID
+apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
 {
-    jclass cls = JNICALL_1(GetObjectClass, obj);
-    jmethodID mid = JNICALL_3(GetMethodID, cls, "getClass", "()Ljava/lang/Class;");
-    jobject clsObj = JNICALL_2(CallObjectMethod, obj, mid);
-    cls = JNICALL_1(GetObjectClass, clsObj);
-    mid = JNICALL_3(GetMethodID, cls, "getName", "()Ljava/lang/String;");
-    jstring strObj = (jstring) JNICALL_2(CallObjectMethod, clsObj, mid);
-    return JNICALL_2(GetStringUTFChars, strObj, NULL);
+    LPAPXJAVAVM     lpJava;
+    jstring str;
+
+    if (hJava->dwType != APXHANDLE_TYPE_JVM)
+        return NULL;
+    lpJava = APXHANDLE_DATA(hJava);
+
+    str = JNICALL_1(NewStringUTF, szString);
+    if (str == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
+        JVM_EXCEPTION_CLEAR(lpJava);
+        apxLogWrite(APXLOG_MARK_ERROR "Could not create string for %s", szString);
+        return NULL;
+    }
+
+    return str;
 }
 
 APXHANDLE
@@ -372,6 +376,7 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
                             __apxJavaJniCallback);
     if (IS_INVALID_HANDLE(hJava))
         return NULL;
+    
     hJava->dwType = APXHANDLE_TYPE_JVM;
     lpJava = APXHANDLE_DATA(hJava);
     lpJava->lpJvm = lpJvm;
@@ -620,9 +625,11 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
     JavaVMOption    *lpJvmOptions;
     DWORD           i, nOptions, sOptions = 0;
     BOOL            rv = FALSE;
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return FALSE;
 
+    apxLogWrite(APXLOG_MARK_DEBUG "hJava->dwType = 0x%X", hJava->dwType);
+    if (hJava == NULL || hJava->dwType != APXHANDLE_TYPE_JVM)
+        return FALSE;
+    
     lpJava = APXHANDLE_DATA(hJava);
 
     if (lpJava->iVmCount) {
@@ -722,10 +729,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         apxFree(szCp);
         apxFree(lpJvmOptions);
     }
-    if (rv)
-        return TRUE;
-    else
-        return FALSE;
+    return rv;
 }
 
 static BOOL
@@ -742,7 +746,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
         return FALSE;
-    
+
     nArgs = apxMultiSzToArrayW(hJava->hPool, lpArguments, &lpArgs);
     jArgs = JNICALL_3(NewObjectArray, nArgs, JNICALL_1(FindClass, "java/lang/String"), NULL);
     if (nArgs) {
@@ -759,7 +763,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
         apxLogWrite(APXLOG_MARK_ERROR, "Cannot find \"load\" entry point");
         return FALSE;
     }
-    return JNICALL_4(CallBooleanMethod, lpJava->jWrapper, method, JNICALL_1(NewStringUTF, szJarName), jArgs) == JNI_TRUE ? TRUE : FALSE;
+    return JNICALL_4(CallBooleanMethod, lpJava->jWrapper, method, (apxJavaCreateStringA(hJava, szJarName)), jArgs) == JNI_TRUE ? TRUE : FALSE;
 }
 
 static DWORD
@@ -849,27 +853,6 @@ apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName,
     va_end(args);
 
     return rv;
-}
-
-static LPVOID
-apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
-{
-    LPAPXJAVAVM     lpJava;
-    jstring str;
-
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return NULL;
-    lpJava = APXHANDLE_DATA(hJava);
-
-    str = JNICALL_1(NewStringUTF, szString);
-    if (str == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
-        JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "Could not create string for %s",
-                    szString);
-        return NULL;
-    }
-
-    return str;
 }
 
 static LPVOID
@@ -1055,23 +1038,21 @@ BOOL
 apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
 {
     const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
+
     if (!lpJava)
         return FALSE;
     
-    if (!apxJavaInitialize(instance,
-                           options->szClassPath,
-                           options->lpOptions,
-                           options->dwMs, options->dwMx, options->dwSs,
-                           options->bJniVfprintf)) {
+    if (!apxJavaInitialize(instance, options->szClassPath, options->lpOptions, options->dwMs, options->dwMx, options->dwSs, options->bJniVfprintf))
         return FALSE;
-    }
-
+    
     if (options->szLibraryPath && *options->szLibraryPath) {
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         DYNLOAD_CALL(SetDllDirectoryW)(options->szLibraryPath);
-        apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'",
-                    options->szLibraryPath);
+        apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'", options->szLibraryPath);
     }
+    
+    apxJavaSetOut(instance, TRUE,  options->szStdErrFilename);
+    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
     
     // Load our embedded classloader and embedded jar
     HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_CL), RT_RCDATA);
@@ -1082,6 +1063,7 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
     // Load the embedded daemon single jar
     DWORD szJar = SizeofResource(NULL, hresJar);
     HGLOBAL resJar = LoadResource(NULL, hresJar);
+
     jbyteArray array = (*((lpJava)->lpEnv))->NewByteArray((lpJava)->lpEnv, szJar);
     (*((lpJava)->lpEnv))->SetByteArrayRegion(
         (lpJava)->lpEnv,
@@ -1090,7 +1072,7 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
         szJar,
         LockResource(resJar)
     );
-
+    
     // Call createBootstrap to get our wrapper implementation.
     lpJava->jWrapper = JNICALL_1(NewGlobalRef,
         JNICALL_3(
@@ -1105,15 +1087,8 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
             array
         )
     );
-    
-    if (!apxJavaLoadMainClass(instance,
-                              options->szJarName,
-                              options->lpArguments)) {
-        return FALSE;
-    }
-    apxJavaSetOut(instance, TRUE,  options->szStdErrFilename);
-    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
-    return TRUE;
+
+    return apxJavaLoadMainClass(instance, options->szJarName, options->lpArguments) ? TRUE : FALSE;
 }
 
 BOOL

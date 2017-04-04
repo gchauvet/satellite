@@ -530,8 +530,7 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     /* Replace not needed quotes */
     apxStrQuoteInplaceW(szImage);
     /* Add run-service command line option */
-    wcsncat(szImage, L" ", SIZ_HUGLEN);
-    wcsncpy(szName, L"//RS//", SIZ_BUFLEN);
+    wcsncat(szImage, L" start ", SIZ_HUGLEN);
     wcsncat(szName, lpCmdline->szApplication, SIZ_BUFLEN);
     apxStrQuoteInplaceW(szName);
     wcsncat(szImage, szName, SIZ_HUGLEN);
@@ -710,8 +709,7 @@ static BOOL reportServiceStatusE(DWORD dwCurrentState,
    static DWORD dwCheckPoint = 1;
    BOOL fResult = TRUE;
 
-   apxLogWrite(APXLOG_MARK_DEBUG "reportServiceStatusE: %d, %d, %d, %d",
-               dwCurrentState, dwWin32ExitCode, dwWaitHint, dwServiceSpecificExitCode);
+   apxLogWrite(APXLOG_MARK_DEBUG "reportServiceStatusE: %d, %d, %d, %d", dwCurrentState, dwWin32ExitCode, dwWaitHint, dwServiceSpecificExitCode);
 
    if (_service_mode && _service_status_handle) {
        switch(dwCurrentState) {
@@ -793,7 +791,7 @@ static DWORD WINAPI serviceDestroy()
 }
 
 /* Executed when initialize the service */
-static BOOL serviceInit()
+static int serviceInit()
 {
     DWORD  rv = 0;
     FILETIME fts;
@@ -857,39 +855,38 @@ static BOOL serviceInit()
     return rv;
 }
 
-/* Executed when the service receives start event */
-static DWORD serviceStart()
+static
+DWORD callServiceMethod(const char *method)
 {
     DWORD  rv = 0;
-    
-    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
-
-    /* Register onexit hook
-     */
-    if (!apxJavaCall(gWorker, "start")) {
+    if (!apxJavaCall(gWorker, method)) {
         rv = 4;
-        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
+        apxLogWrite(APXLOG_MARK_ERROR "Failed calling method '%s'", method);
         if (!IS_INVALID_HANDLE(gWorker))
             apxCloseHandle(gWorker);    /* Close the worker handle */
         gWorker = NULL;
     }
-    apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
     return rv;
+}
+
+/* Executed when the service receives start event */
+static DWORD serviceStart()
+{
+    DWORD result;
+    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
+    if((result = callServiceMethod("start")) != 0)
+        apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
+    return result;
 }
 
 /* Executed when the service receives stop event */
 static DWORD WINAPI serviceStop()
 {
-    DWORD  rv = 0;
-
-    apxLogWrite(APXLOG_MARK_DEBUG "Send stop signal");
-    if (!apxJavaCall(gWorker, "stop")) {
-        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
-        rv = 3;
-    } else {
+    DWORD result;
+    apxLogWrite(APXLOG_MARK_INFO "Send stop signal...");
+    if((result = callServiceMethod("stop")) != 0)
         apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
-    }
-    return rv;
+    return result;
 }
 
 /* Service control handler
@@ -948,7 +945,8 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
     _jni_jvmoptions = MzWideToANSI(SO_JVMOPTIONS);
 
     apxLogWrite(APXLOG_MARK_DEBUG "Waiting for service initialization...");
-    if (serviceInit() == FALSE) {
+    const int result = serviceInit();
+    if (result == 0) {
         apxLogWrite(APXLOG_MARK_DEBUG "Initialization service finished.");
         
         if (_service_mode) {
@@ -988,6 +986,8 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
             apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
             apxHandleWait(gWorker, INFINITE, FALSE);
         }
+    } else {
+        exit(reportServiceStatusStopped(result)); // TODO: Stop service gracefully
     }
 }
 
