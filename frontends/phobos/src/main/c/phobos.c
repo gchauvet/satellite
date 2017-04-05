@@ -63,7 +63,7 @@ static DWORD        timeout = 0;
 
 /* Allowed commands */
 static LPCWSTR _commands[] = {
-    L"RS",      /* 1 Run Service */
+    L"LS",      /* 1 launch Service */
     L"US",      /* 2 Update Service parameters */
     L"IS",      /* 3 Install Service */
     L"DS",      /* 4 Delete Service */
@@ -73,7 +73,7 @@ static LPCWSTR _commands[] = {
 };
 
 static LPCWSTR _altcmds[] = {
-    L"service",     /* 1 Run Service */
+    L"launch",     /* 1 Run Service */
     L"update",      /* 2 Update Service parameters */
     L"install",     /* 3 Install Service */
     L"delete",      /* 4 Delete Service */
@@ -315,7 +315,7 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
     fwprintf(stderr, L"  install [ServiceName]  Install Service\n");
     fwprintf(stderr, L"  update  [ServiceName]  Update Service parameters\n");
     fwprintf(stderr, L"  delete  [ServiceName]  Delete Service\n");
-    fwprintf(stderr, L"  start   [ServiceName]  Start Service (used by Microsoft Service Control Manager)\n");
+    fwprintf(stderr, L"  service   [ServiceName]  Start Service (used by Microsoft Service Control Manager)\n");
     fwprintf(stderr, L"  version                Display version\n");
     fwprintf(stderr, L"  Options:\n");
     while (_options[i].szName) {
@@ -508,7 +508,7 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     /* Replace not needed quotes */
     apxStrQuoteInplaceW(szImage);
     /* Add run-service command line option */
-    wcsncat(szImage, L" start ", SIZ_HUGLEN);
+    wcsncat(szImage, L" launch ", SIZ_HUGLEN);
     wcsncat(szName, lpCmdline->szApplication, SIZ_BUFLEN);
     apxStrQuoteInplaceW(szName);
     wcsncat(szImage, szName, SIZ_HUGLEN);
