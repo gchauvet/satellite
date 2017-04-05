@@ -107,42 +107,6 @@ APXHANDLE   apxHandleCreate(APXHANDLE hPool, DWORD dwOptions,
  *  Calls the callback function and frees the memory
  */
 BOOL        apxCloseHandle(APXHANDLE hObject);
-/** Get The internal user data
- */
-LPVOID      apxHandleGetUserData(APXHANDLE hObject);
-/** Set The internal user data
- *  params:
- *        lpData     user supplied Data
- *        dwDataSize user data size, combined with create options
- *                   the lpData is either copied to the internal storage
- *                   or assigned.
- */
-LPVOID      apxHandleSetUserData(APXHANDLE hObject, LPVOID lpData,
-                                 DWORD dwDataSize);
-/** Send the message to the handle 
- *  Callback function is executed with WM_COMMAND uMsg
- */
-BOOL        apxHandleSendMessage(APXHANDLE hObject, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam);
-
-/** Post the message to the handle 
- *  function returns imediately.
- */
-BOOL        apxHandlePostMessage(APXHANDLE hObject, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam);
-/** Lock or unlock the handle
- * If bLock is true lock the handle, otherwise unlock.
- */
-BOOL        apxHandleLock(APXHANDLE hObject, BOOL bLock);
-
-/** Add the callback to the handles hook chain
- * 
- */
-BOOL        apxHandleAddHook(APXHANDLE hObject, DWORD dwWhere,
-                             LPAPXFNCALLBACK fnCallback);
-
-DWORD       apxHandleWait(APXHANDLE hHandle, DWORD dwMilliseconds,
-                          BOOL bKill);
 
 /** General pool memory allocation functions
  */
