@@ -16,7 +16,7 @@
 
 #include "apxwin.h"
 #include "handles.h"
-#include "javajni.h"
+#include "java.h"
 #include "private.h"
 
 #include <jni.h>
@@ -102,29 +102,9 @@ typedef struct {
     HANDLE          hWorkerThread;
     DWORD           iWorkerThread;
     DWORD           dwWorkerStatus;
-    SIZE_T          szStackSize;
     HANDLE          hWorkerSync;
     HANDLE          hWorkerInit;
 } APXJAVAVM, *LPAPXJAVAVM;
-
-/* This is no longer exported in jni.h
- * However java uses it internally to get
- * the default stack size
- */
-typedef struct APX_JDK1_1InitArgs {
-    jint version;
-
-    char **properties;
-    jint checkSource;
-    jint nativeStackSize;
-    jint javaStackSize;
-    jint minHeapSize;
-    jint maxHeapSize;
-    jint verifyMode;
-    char *classpath;
-
-    char padding[128];
-} APX_JDK1_1InitArgs;
 
 #define JAVA_CLASSPATH      "-Djava.class.path="
 #define JAVA_CLASSPATH_W    L"-Djava.class.path="
@@ -339,8 +319,6 @@ apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
     LPAPXJAVAVM     lpJava;
     jstring str;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return NULL;
     lpJava = APXHANDLE_DATA(hJava);
 
     str = JNICALL_1(NewStringUTF, szString);
@@ -360,7 +338,6 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
     LPAPXJAVAVM  lpJava;
     jsize        iVmCount;
     JavaVM       *lpJvm = NULL;
-    struct       APX_JDK1_1InitArgs jArgs1_1;
 
     if (!__apxLoadJvmDll(szJvmDllPath))
         return NULL;
@@ -371,9 +348,8 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
     if (iVmCount && !lpJvm)
         return NULL;
 
-    hJava = apxHandleCreate(hPool, 0,
-                            NULL, sizeof(APXJAVAVM),
-                            __apxJavaJniCallback);
+    hJava = apxHandleCreate(hPool, 0, NULL, sizeof(APXJAVAVM), __apxJavaJniCallback);
+    
     if (IS_INVALID_HANDLE(hJava))
         return NULL;
     
@@ -381,15 +357,6 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
     lpJava = APXHANDLE_DATA(hJava);
     lpJava->lpJvm = lpJvm;
     lpJava->iVmCount = iVmCount;
-
-    /* Guess the stack size
-     */
-    memset(&jArgs1_1, 0, sizeof(jArgs1_1));
-    jArgs1_1.version = JNI_VERSION_1_1;
-    DYNLOAD_FPTR(JNI_GetDefaultJavaVMInitArgs)(&jArgs1_1);
-    if (jArgs1_1.javaStackSize < 0 || jArgs1_1.javaStackSize > (2048 * 1024))
-        jArgs1_1.javaStackSize = 0;
-    lpJava->szStackSize = (SIZE_T)jArgs1_1.javaStackSize;
 
     if (!_st_sys_jvm)
         _st_sys_jvm = lpJvm;
@@ -626,10 +593,6 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
     DWORD           i, nOptions, sOptions = 0;
     BOOL            rv = FALSE;
 
-    apxLogWrite(APXLOG_MARK_DEBUG "hJava->dwType = 0x%X", hJava->dwType);
-    if (hJava == NULL || hJava->dwType != APXHANDLE_TYPE_JVM)
-        return FALSE;
-    
     lpJava = APXHANDLE_DATA(hJava);
 
     if (lpJava->iVmCount) {
@@ -656,6 +619,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         LPSTR szCp = NULL;
         lpJava->iVersion = JNI_VERSION_DEFAULT;
 
+        apxLogWrite(APXLOG_MARK_ERROR "Pouette");
         if (dwMs)
             ++sOptions;
         if (dwMx)
@@ -726,9 +690,11 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
             if (!_st_sys_jvm)
                 _st_sys_jvm = lpJava->lpJvm;
         }
+        apxLogWrite(APXLOG_MARK_ERROR "Pouette");
         apxFree(szCp);
         apxFree(lpJvmOptions);
     }
+    apxLogWrite(APXLOG_MARK_ERROR "Pouette");
     return rv;
 }
 
@@ -741,8 +707,6 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
     LPAPXJAVAVM lpJava;
     jmethodID   method;
     
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return FALSE;
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
         return FALSE;
@@ -772,8 +736,6 @@ apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions)
     DWORD dwOrgOptions;
     LPAPXJAVAVM lpJava;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return 0;
     lpJava = APXHANDLE_DATA(hJava);
     dwOrgOptions = lpJava->dwOptions;
     lpJava->dwOptions = dwOptions;
@@ -786,8 +748,6 @@ apxJavaWait(APXHANDLE hJava, DWORD dwMilliseconds, BOOL bKill)
     DWORD rv;
     LPAPXJAVAVM lpJava;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return FALSE;
     lpJava = APXHANDLE_DATA(hJava);
 
     if (!lpJava->dwWorkerStatus && lpJava->hWorkerThread)
@@ -809,8 +769,6 @@ apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
     jmethodID       ccont;
     jobject         cinst;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return NULL;
     lpJava = APXHANDLE_DATA(hJava);
     if (!__apxJvmAttach(lpJava))
         return NULL;
@@ -861,8 +819,6 @@ apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
     LPAPXJAVAVM     lpJava;
     jstring str;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return NULL;
     lpJava = APXHANDLE_DATA(hJava);
 
     str = JNICALL_2(NewString, szString, lstrlenW(szString));
@@ -885,8 +841,7 @@ apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
     jvalue          rv;
     LPCSTR          s = szSignature;
     rv.l = 0;
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
-        return rv;
+
     lpJava = APXHANDLE_DATA(hJava);
 
     while (*s && *s != ')')
@@ -971,8 +926,6 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
     jstring     fn;
     jclass      sys;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM || !szFilename)
-        return FALSE;
     lpJava = APXHANDLE_DATA(hJava);
     if (!__apxJvmAttach(lpJava))
         return FALSE;
@@ -1022,9 +975,7 @@ apxJavaDumpAllStacks(APXHANDLE hJava)
     LPAPXJAVAVM lpJava;
     JNIEnv *lpEnv = NULL;
 
-    if (DYNLOAD_FPTR(JVM_DumpAllStacks) == NULL ||
-        hJava == NULL ||
-        hJava->dwType != APXHANDLE_TYPE_JVM)
+    if (DYNLOAD_FPTR(JVM_DumpAllStacks) == NULL)
         return;
     lpJava = APXHANDLE_DATA(hJava);
     if (__apxJvmAttachEnv(lpJava, &lpEnv, &bAttached)) {
