@@ -40,44 +40,6 @@ static LPVOID           _st_sys_page  = NULL;
 LPWSTR                  *_st_sys_argvw = NULL;
 int                     _st_sys_argc  = 0;
 
-#ifdef _DEBUG
-static INT  _heap_count = 0;
-static INT  _heap_alloc_count = 0;
-static INT  _heap_realloc_count = 0;
-
-HANDLE HeapCREATE(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
-{
-    _heap_count++;
-    return HeapCreate(flOptions, dwInitialSize, dwMaximumSize);
-}
-
-BOOL HeapDESTROY(HANDLE hHeap)
-{
-    _heap_count--;
-    return HeapDestroy(hHeap);
-}
-
-
-LPVOID HeapALLOC(HANDLE hHeap, DWORD dwFlags, SIZE_T nSize)
-{
-    _heap_alloc_count++;
-    return HeapAlloc(hHeap, dwFlags, nSize);
-}
-
-BOOL HeapFREE(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem)
-{
-    _heap_alloc_count--;
-    return HeapFree(hHeap, dwFlags, lpMem);
-}
-
-LPVOID HeapREALLOC(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes)
-{
-
-    _heap_realloc_count++;
-    return HeapReAlloc(hHeap, dwFlags, lpMem, dwBytes);
-}
-#endif
-
 static LPVOID __apxPoolAllocCore(APXHANDLE hPool, 
                                  DWORD dwSize, DWORD dwOptions)
 {
@@ -239,7 +201,6 @@ static BOOL __apxCreateSystemPool()
     HANDLE    hHeap;
 
     GetSystemInfo(&_st_sys_info);
-    apxGetOsLevel();
     /* First create the shared data segment */
     _st_sys_page = VirtualAlloc(NULL, _st_sys_info.dwAllocationGranularity,
                                 MEM_RESERVE, PAGE_NOACCESS);
@@ -295,11 +256,6 @@ apxHandleManagerDestroy()
         GlobalFree(_st_sys_argvw);
         _st_sys_argvw = NULL;
         _st_sys_argc  = 0;
-#ifdef _DEBUG
-        apxLogWrite(APXLOG_MARK_DEBUG "Alloc   Count %d", _heap_alloc_count);
-        apxLogWrite(APXLOG_MARK_DEBUG "Realloc Count %d", _heap_realloc_count);
-        apxLogWrite(APXLOG_MARK_DEBUG "Heap    Count %d", _heap_count);
-#endif
         return TRUE;
     }
     
@@ -475,12 +431,10 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
     if (IS_INVALID_HANDLE(hPool))
         hPool = _st_sys_pool;
     if (hPool->dwType != APXHANDLE_TYPE_POOL) {
-        apxLogWrite(APXLOG_MARK_ERROR "Parent Handle type is not POOL %d",
-                    hPool->dwType);
+        apxLogWrite(APXLOG_MARK_ERROR "Parent Handle type is not POOL %d", hPool->dwType);
         return INVALID_HANDLE_VALUE;
     }
-    hHandle = __apxPoolAllocCore(hPool, APXHANDLE_SZ + dwDataSize,
-                                 HEAP_ZERO_MEMORY);
+    hHandle = __apxPoolAllocCore(hPool, APXHANDLE_SZ + dwDataSize, HEAP_ZERO_MEMORY);
     
     hHandle->hPool             = hPool;
     if (fnCallback)
@@ -674,16 +628,3 @@ BOOL apxHandleAddHook(APXHANDLE hObject, DWORD dwWhere,
     
     return TRUE;
 }
-
-DWORD apxHandleWait(APXHANDLE hHandle, DWORD dwMilliseconds, BOOL bKill)
-{
-    if (IS_INVALID_HANDLE(hHandle))
-        return WAIT_ABANDONED;
-    if (hHandle->dwType == APXHANDLE_TYPE_JVM)
-        return apxJavaWait(hHandle, dwMilliseconds, bKill);
-    else if (hHandle->dwType == APXHANDLE_TYPE_PROCESS)
-        return apxProcessWait(hHandle, dwMilliseconds, bKill);
-    else
-        return WAIT_ABANDONED;
-}
-

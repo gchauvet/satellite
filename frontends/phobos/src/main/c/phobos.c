@@ -823,6 +823,7 @@ static int serviceInit()
     setInprocEnvironment();
     /* Create the JVM global worker */
     gWorker = apxCreateJava(gPool, _jni_jvmpath);
+    
     // Start init entry point
     gArgs.szJarName        = _jni_mainjar;
     gArgs.szClassPath      = _jni_classpath;
@@ -835,7 +836,7 @@ static int serviceInit()
     gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
     gArgs.szLibraryPath    = SO_LIBPATH;
     gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
-    
+ 
     if (!apxJavaInit(gWorker, &gArgs)) {
         apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
         rv = 3;
@@ -983,10 +984,9 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
             }
             /* Service is started */
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
-            apxLogWrite(APXLOG_MARK_DEBUG "Waiting for worker to finish...");
-            apxHandleWait(gWorker, INFINITE, FALSE);
         }
     } else {
+        apxLogWrite(APXLOG_MARK_DEBUG "Failing JVM instantiation");
         exit(reportServiceStatusStopped(result)); // TODO: Stop service gracefully
     }
 }

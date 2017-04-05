@@ -666,7 +666,7 @@ apxServiceBrowse(APXHANDLE hService,
                     if (!fm) {
                         QueryServiceStatus(hSrv, &(stEntry.stServiceStatus));
                         /* WIN2K + extended service info */
-                        if (_st_apx_oslevel >= 4) {
+                        if (apxGetOsLevel() >= 4) {
                             DWORD dwNeed;
                             QueryServiceStatusEx(hSrv, SC_STATUS_PROCESS_INFO,
                                                  (LPBYTE)(&(stEntry.stStatusProcess)),

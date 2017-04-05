@@ -331,6 +331,25 @@ apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
     return str;
 }
 
+
+static LPVOID
+apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
+{
+    LPAPXJAVAVM     lpJava;
+    jstring str;
+
+    lpJava = APXHANDLE_DATA(hJava);
+
+    str = JNICALL_2(NewString, szString, lstrlenW(szString));
+    if (str == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
+        JVM_EXCEPTION_CLEAR(lpJava);
+        apxLogWrite(APXLOG_MARK_ERROR "Could not create string for %S", szString);
+        return NULL;
+    }
+
+    return str;
+}
+
 APXHANDLE
 apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
 {
@@ -342,9 +361,8 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
     if (!__apxLoadJvmDll(szJvmDllPath))
         return NULL;
 
-    if (DYNLOAD_FPTR(JNI_GetCreatedJavaVMs)(&lpJvm, 1, &iVmCount) != JNI_OK) {
+    if (DYNLOAD_FPTR(JNI_GetCreatedJavaVMs)(&lpJvm, 1, &iVmCount) != JNI_OK)
         return NULL;
-    }
     if (iVmCount && !lpJvm)
         return NULL;
 
@@ -593,6 +611,9 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
     DWORD           i, nOptions, sOptions = 0;
     BOOL            rv = FALSE;
 
+    if (hJava->dwType != APXHANDLE_TYPE_JVM)
+        return FALSE;
+    
     lpJava = APXHANDLE_DATA(hJava);
 
     if (lpJava->iVmCount) {
@@ -619,7 +640,6 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         LPSTR szCp = NULL;
         lpJava->iVersion = JNI_VERSION_DEFAULT;
 
-        apxLogWrite(APXLOG_MARK_ERROR "Pouette");
         if (dwMs)
             ++sOptions;
         if (dwMx)
@@ -680,9 +700,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
         vmArgs.version  = lpJava->iVersion;
         vmArgs.ignoreUnrecognized = JNI_FALSE;
         
-        if (DYNLOAD_FPTR(JNI_CreateJavaVM)(&(lpJava->lpJvm),
-                                           (void **)&(lpJava->lpEnv),
-                                           &vmArgs) != JNI_OK) {
+        if (DYNLOAD_FPTR(JNI_CreateJavaVM)(&(lpJava->lpJvm), (void **)&(lpJava->lpEnv), &vmArgs) != JNI_OK) {
             apxLogWrite(APXLOG_MARK_ERROR "CreateJavaVM Failed");
             rv = FALSE;
         } else {
@@ -690,11 +708,9 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
             if (!_st_sys_jvm)
                 _st_sys_jvm = lpJava->lpJvm;
         }
-        apxLogWrite(APXLOG_MARK_ERROR "Pouette");
         apxFree(szCp);
         apxFree(lpJvmOptions);
     }
-    apxLogWrite(APXLOG_MARK_ERROR "Pouette");
     return rv;
 }
 
@@ -783,16 +799,14 @@ apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
     ccont = JNICALL_3(GetMethodID, clazz, "<init>", szSignature);
     if (ccont == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
         JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "Could not find Constructor %s for %s",
-                    szSignature, szClassName);
+        apxLogWrite(APXLOG_MARK_ERROR "Could not find Constructor %s for %s", szSignature, szClassName);
         return NULL;
     }
 
     cinst = JNICALL_3(NewObjectV, clazz, ccont, lpArgs);
     if (cinst == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
         JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "Could not create instance of %s",
-                    szClassName);
+        apxLogWrite(APXLOG_MARK_ERROR "Could not create instance of %s", szClassName);
         return NULL;
     }
 
@@ -800,8 +814,7 @@ apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
 }
 
 static LPVOID
-apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName,
-                   LPCSTR szSignature, ...)
+apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName, LPCSTR szSignature, ...)
 {
     LPVOID rv;
     va_list args;
@@ -811,25 +824,6 @@ apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName,
     va_end(args);
 
     return rv;
-}
-
-static LPVOID
-apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
-{
-    LPAPXJAVAVM     lpJava;
-    jstring str;
-
-    lpJava = APXHANDLE_DATA(hJava);
-
-    str = JNICALL_2(NewString, szString, lstrlenW(szString));
-    if (str == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
-        JVM_EXCEPTION_CLEAR(lpJava);
-        apxLogWrite(APXLOG_MARK_ERROR "Could not create string for %S",
-                    szString);
-        return NULL;
-    }
-
-    return str;
 }
 
 static jvalue
@@ -932,11 +926,9 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
 
     if ((fn = apxJavaCreateStringW(hJava, szFilename)) == NULL)
         return FALSE;
-    if ((fs = apxJavaCreateClass(hJava, "java/io/FileOutputStream",
-                                 "(Ljava/lang/String;Z)V", fn, JNI_TRUE)) == NULL)
+    if ((fs = apxJavaCreateClass(hJava, "java/io/FileOutputStream", "(Ljava/lang/String;Z)V", fn, JNI_TRUE)) == NULL)
         return FALSE;
-    if ((ps = apxJavaCreateClass(hJava, "java/io/PrintStream",
-                                 "(Ljava/io/OutputStream;)V", fs)) == NULL)
+    if ((ps = apxJavaCreateClass(hJava, "java/io/PrintStream", "(Ljava/io/OutputStream;)V", fs)) == NULL)
         return FALSE;
     sys = JNICALL_1(FindClass, "java/lang/System");
     if (sys == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
@@ -992,16 +984,16 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
 
     if (!lpJava)
         return FALSE;
-    
+
     if (!apxJavaInitialize(instance, options->szClassPath, options->lpOptions, options->dwMs, options->dwMx, options->dwSs, options->bJniVfprintf))
         return FALSE;
-    
+
     if (options->szLibraryPath && *options->szLibraryPath) {
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         DYNLOAD_CALL(SetDllDirectoryW)(options->szLibraryPath);
         apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'", options->szLibraryPath);
     }
-    
+
     apxJavaSetOut(instance, TRUE,  options->szStdErrFilename);
     apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
     
