@@ -758,24 +758,6 @@ apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions)
     return dwOrgOptions;
 }
 
-DWORD
-apxJavaWait(APXHANDLE hJava, DWORD dwMilliseconds, BOOL bKill)
-{
-    DWORD rv;
-    LPAPXJAVAVM lpJava;
-
-    lpJava = APXHANDLE_DATA(hJava);
-
-    if (!lpJava->dwWorkerStatus && lpJava->hWorkerThread)
-        return WAIT_OBJECT_0;
-    rv = WaitForSingleObject(lpJava->hWorkerThread, dwMilliseconds);
-    if (rv == WAIT_TIMEOUT && bKill) {
-        __apxJavaJniCallback(hJava, WM_CLOSE, 0, 0);
-    }
-
-    return rv;
-}
-
 LPVOID
 apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
                     LPCSTR szSignature, va_list lpArgs)
