@@ -331,25 +331,6 @@ static void printVersion(void)
     fwprintf(stderr, L"Copyright 2017 Zatarox, based on Apache Commons Daemon");
 }
 
-#ifdef _DEBUG
-/* Display configuration parameters */
-static void dumpCmdline()
-{
-    int i = 0;
-    while (_options[i].szName) {
-        if (_options[i].dwType & APXCMDOPT_INT)
-            fwprintf(stderr, L"--%-16s %d\n", _options[i].szName,
-                     _options[i].dwValue);
-        else if (_options[i].szValue)
-            fwprintf(stderr, L"--%-16s %s\n", _options[i].szName,
-                     _options[i].szValue);
-        else
-            fwprintf(stderr, L"--%-16s <NULL>\n", _options[i].szName);
-        ++i;
-    }
-}
-#endif
-
 static void setInprocEnvironment()
 {
     LPWSTR p, e;
@@ -445,9 +426,6 @@ static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
         ++i;
     }
     apxCloseHandle(hRegistry);
-#ifdef _DEBUG
-    dumpCmdline();
-#endif
     return TRUE;
 }
 
@@ -537,10 +515,6 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     SO_INSTALL = apxPoolStrdupW(gPool, szImage);
     /* Ensure that option gets saved in the registry */
     ST_INSTALL |= APXCMDOPT_FOUND;
-#ifdef _DEBUG
-    /* Display configured options */
-    dumpCmdline();
-#endif
     apxLogWrite(APXLOG_MARK_INFO "Service %S name %S", lpCmdline->szApplication,
                 SO_DISPLAYNAME);
     rv = apxServiceInstall(hService,

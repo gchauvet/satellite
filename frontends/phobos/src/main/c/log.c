@@ -393,13 +393,6 @@ apxLogWrite(
                 APX_LOGUNLOCK(lf->hFile);
             }
         }
-#ifdef _DEBUG_FULL
-        {
-            char tid[1024 + 16];
-            wsprintfA(tid, "[%04d] %s", GetCurrentThreadId(), buffer);
-            OutputDebugStringA(tid);
-        }
-#endif
     }
     APX_LOGLEAVE();
     /* Restore the last Error code */
@@ -483,9 +476,6 @@ apxDisplayError(
         strncat(sysbuf, buffer, SIZ_HUGLEN);
     }
     len = lstrlenA(sysbuf);
-#ifdef _DEBUG_FULL
-    OutputDebugStringA(sysbuf);
-#endif
     if (len > 0) {
         if (bDisplay) {
             nRet = MessageBoxA(NULL, sysbuf,
