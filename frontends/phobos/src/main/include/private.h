@@ -17,24 +17,11 @@
 #ifndef _PRIVATE_H_INCLUDED_
 #define _PRIVATE_H_INCLUDED_
 
-#ifdef _DEBUG
-
-HANDLE  HeapCREATE(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize);
-BOOL    HeapDESTROY(HANDLE hHeap);
-
-LPVOID  HeapALLOC(HANDLE hHeap, DWORD dwFlags, SIZE_T nSize);
-BOOL    HeapFREE(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
-LPVOID  HeapREALLOC(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes);
-
-#else
-
 #define HeapCREATE  HeapCreate
 #define HeapDESTROY HeapDestroy
 #define HeapALLOC   HeapAlloc
 #define HeapFREE    HeapFree
 #define HeapREALLOC HeapReAlloc
-
-#endif
 
 /*
  * Tail queue declarations.
