@@ -98,7 +98,7 @@
 #include "rprocess.h"
 #include "registry.h"
 #include "service.h"
-#include "javajni.h"
+#include "java.h"
 
 __APXBEGIN_DECLS
 
