@@ -94,8 +94,6 @@
 #include "handles.h"
 #include "log.h"
 #include "cmdline.h"
-#include "console.h"
-#include "rprocess.h"
 #include "registry.h"
 #include "service.h"
 #include "java.h"
