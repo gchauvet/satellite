@@ -21,8 +21,8 @@
 
 #include <jni.h>
 
-#ifdef JNI_VERSION_1_4
-#define JNI_VERSION_DEFAULT JNI_VERSION_1_4
+#ifdef JNI_VERSION_1_6
+#define JNI_VERSION_DEFAULT JNI_VERSION_1_6
 #else
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_2
 #endif
@@ -611,8 +611,10 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
     DWORD           i, nOptions, sOptions = 0;
     BOOL            rv = FALSE;
 
-    if (hJava->dwType != APXHANDLE_TYPE_JVM)
+    if (hJava->dwType != APXHANDLE_TYPE_JVM) {
+        apxLogWrite(APXLOG_MARK_ERROR "Expected a JVM handler");
         return FALSE;
+    }
     
     lpJava = APXHANDLE_DATA(hJava);
 
@@ -902,6 +904,9 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
     jstring     fn;
     jclass      sys;
 
+    if (!szFilename)
+        return FALSE;
+    
     lpJava = APXHANDLE_DATA(hJava);
     if (!__apxJvmAttach(lpJava))
         return FALSE;
@@ -976,9 +981,6 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
         apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'", options->szLibraryPath);
     }
 
-    apxJavaSetOut(instance, TRUE,  options->szStdErrFilename);
-    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
-    
     // Load our embedded classloader and embedded jar
     HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_CL), RT_RCDATA);
     HRSRC hresJar = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_JAR), RT_RCDATA);
@@ -1012,6 +1014,9 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
             array
         )
     );
+
+    apxJavaSetOut(instance, TRUE, options->szStdErrFilename);
+    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
 
     return apxJavaLoadMainClass(instance, options->szJarName, options->lpArguments) ? TRUE : FALSE;
 }
