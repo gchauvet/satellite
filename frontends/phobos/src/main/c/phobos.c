@@ -329,7 +329,7 @@ static void printVersion(void)
 {
     fwprintf(stderr, L"Satellite Service Wrapper version %u.%u.%u/Win%d (%S)\n",
             PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
-    fwprintf(stderr, L"Copyright 2017 Zatarox, based on Apache Commons Daemon");
+    fwprintf(stderr, L"Copyright 2017 Zatarox, based on Phobos");
 }
 
 static void setInprocEnvironment()
@@ -1028,11 +1028,11 @@ void __cdecl main(int argc, char **argv)
 
     apxLogOpen(gPool, SO_LOGPATH, SO_LOGPREFIX, SO_LOGROTATE);
     apxLogLevelSetW(NULL, SO_LOGLEVEL);
-    apxLogWrite(APXLOG_MARK_DEBUG "Commons Daemon log initialized");
+    apxLogWrite(APXLOG_MARK_DEBUG "Phobos log initialized");
     if (SO_LOGROTATE)
         apxLogWrite(APXLOG_MARK_DEBUG "Log will rotate each %d seconds.", SO_LOGROTATE);
 
-    apxLogWrite(APXLOG_MARK_INFO "Commons Daemon (%u.%u.%u %d-bit) started",
+    apxLogWrite(APXLOG_MARK_INFO "Phobos (%u.%u.%u %d-bit) started",
                 PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
 
     memset(&gStdwrap, 0, sizeof(APX_STDWRAP));
@@ -1048,11 +1048,11 @@ void __cdecl main(int argc, char **argv)
         SYSTEMTIME t;
         GetLocalTime(&t);
         fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
-                        "Commons Daemon stdout initialized\n",
+                        "Phobos stdout initialized\n",
                         t.wYear, t.wMonth, t.wDay,
                         t.wHour, t.wMinute, t.wSecond);
         fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
-                        "Commons Daemon stderr initialized\n",
+                        "Phobos stderr initialized\n",
                         t.wYear, t.wMonth, t.wDay,
                         t.wHour, t.wMinute, t.wSecond);
     }
