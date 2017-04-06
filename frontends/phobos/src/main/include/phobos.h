@@ -14,6 +14,7 @@
  * limitations under the License.
  * 
  * Contributed by Mladen Turk <mturk@apache.org> 05 Aug 2003
+ * Contributed by Guillaume Chauvet <gchauvet@zatarox.com> 10 Nov 2016
  */
 
 #ifndef _PHOBOS_H

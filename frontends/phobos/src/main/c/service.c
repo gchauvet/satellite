@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Contributed by Guillaume Chauvet <gchauvet@zatarox.com> 10 Nov 2016
  */
 
 #include "apxwin.h"

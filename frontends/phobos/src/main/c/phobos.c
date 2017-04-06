@@ -14,6 +14,7 @@
  * limitations under the License.
  * 
  * Contributed by Mladen Turk <mturk@apache.org> 05 Aug 2003
+ * Contributed by Guillaume Chauvet <gchauvet@zatarox.com> 10 Nov 2016
  */
 
 /* Force the JNI vprintf functions */
@@ -1092,7 +1093,7 @@ cleanup:
         int ix = 0;
         if (rv > 0 && rv < 10)
             ix = rv;
-        apxLogWrite(APXLOG_MARK_ERROR "Commons Daemon failed "
+        apxLogWrite(APXLOG_MARK_ERROR "Phobos failed "
                                       "with exit value: %d (Failed to %s)",
                                       rv, gSzProc[ix]);
         if (ix > 2 && !_service_mode) {
@@ -1101,7 +1102,7 @@ cleanup:
         }
     }
     else
-        apxLogWrite(APXLOG_MARK_INFO "Commons Daemon finished");
+        apxLogWrite(APXLOG_MARK_INFO "Phobos finished");
     if (lpCmdline)
         apxCmdlineFree(lpCmdline);
     _service_status_handle = NULL;
