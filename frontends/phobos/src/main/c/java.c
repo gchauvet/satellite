@@ -111,8 +111,6 @@ typedef struct {
 #define JAVA_CLASSSTRING    "java/lang/String"
 #define MSVCRT71_DLLNAME    L"\\msvcrt71.dll"
 
-static DWORD vmExitCode = 0;
-
 static __inline BOOL __apxJvmAttachEnv(LPAPXJAVAVM lpJava, JNIEnv **lpEnv,
                                        LPBOOL lpAttached)
 {
@@ -388,31 +386,6 @@ static DWORD WINAPI __apxJavaDestroyThread(LPVOID lpParameter)
     return 0;
 }
 
-BOOL
-apxDestroyJvm(DWORD dwTimeout)
-{
-    if (_st_sys_jvm) {
-        DWORD  tid;
-        HANDLE hWaiter;
-        BOOL   rv = FALSE;
-        JavaVM *lpJvm = _st_sys_jvm;
-
-        _st_sys_jvm = NULL;
-        (*lpJvm)->DetachCurrentThread(lpJvm);
-        hWaiter = CreateThread(NULL, 0, __apxJavaDestroyThread, (void *)lpJvm, 0, &tid);
-        if (IS_INVALID_HANDLE(hWaiter)) {
-            apxLogWrite(APXLOG_MARK_SYSERR);
-            return FALSE;
-        }
-        if (WaitForSingleObject(hWaiter, dwTimeout) == WAIT_OBJECT_0)
-            rv = TRUE;
-        CloseHandle(hWaiter);
-        return rv;
-    }
-    else
-        return FALSE;
-}
-
 static DWORD __apxMultiSzToJvmOptions(APXHANDLE hPool,
                                       LPCSTR lpString,
                                       JavaVMOption **lppArray,
@@ -453,13 +426,6 @@ static jint JNICALL __apxJniVfprintf(FILE *fp, const char *format, va_list args)
     if (apxLogWrite(APXLOG_MARK_INFO "%s", sBuf) == 0)
         fputs(sBuf, stdout);
     return rv;
-}
-
-static void JNICALL __apxJniExit(jint exitCode)
-{
-    apxLogWrite(APXLOG_MARK_DEBUG "Exit hook with exit code %d", exitCode);
-    vmExitCode = exitCode;
-    return;
 }
 
 static LPSTR __apxStrIndexA(LPCSTR szStr, int nCh)
@@ -650,8 +616,6 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
         if (szClassPath && *szClassPath)
             ++sOptions;
 
-        sOptions++; /* unconditionally set for extraInfo exit */
-
         nOptions = __apxMultiSzToJvmOptions(hJava->hPool, lpOptions, &lpJvmOptions, sOptions);
         if (szClassPath && *szClassPath) {
             szCp = __apxEvalClasspath(hJava->hPool, szClassPath);
@@ -668,11 +632,6 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
             lpJvmOptions[nOptions - sOptions].extraInfo    = __apxJniVfprintf;
             --sOptions;
         }
-
-        /* unconditionally add hook for System.exit() in order to store exit code */
-        lpJvmOptions[nOptions - sOptions].optionString = "exit";
-        lpJvmOptions[nOptions - sOptions].extraInfo    = __apxJniExit;
-        --sOptions;
 
         if (dwMs) {
             wsprintfA(iB[0], "-Xms%dm", dwMs);
@@ -934,15 +893,6 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
         return TRUE;
 }
 
-DWORD apxGetVmExitCode(void) {
-    return vmExitCode;
-}
-
-void apxSetVmExitCode(DWORD exitCode) {
-    vmExitCode = exitCode;
-    return;
-}
-
 void
 apxJavaDumpAllStacks(APXHANDLE hJava)
 {
@@ -1039,16 +989,19 @@ apxJavaCall(APXHANDLE instance, LPCSTR szMethod)
 {
     const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
     jmethodID method;
+    
     if (!lpJava)
         return FALSE;
+    
     if (!__apxJvmAttach(lpJava))
         return FALSE;
-    
+
     method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), szMethod, "()Z");
-    JNICALL_2(CallVoidMethod, lpJava->jWrapper, method);
+    if(!method)
+        return FALSE;
+    JNICALL_2(CallBooleanMethod, lpJava->jWrapper, method);
     if (JVM_EXCEPTION_CHECK(lpJava)) {
         apxLogWrite(APXLOG_MARK_DEBUG "Exception has been thrown");
-        vmExitCode = 1;
         (*((lpJava)->lpEnv))->ExceptionDescribe((lpJava)->lpEnv);
         __apxJvmDetach(lpJava);
         return FALSE;

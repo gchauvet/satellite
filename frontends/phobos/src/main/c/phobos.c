@@ -709,18 +709,16 @@ static BOOL reportServiceStatusStopped(DWORD exitCode)
 }
 
 /* Executed when the service receives stop event */
-static DWORD WINAPI serviceDestroy()
+static DWORD WINAPI serviceShutdown()
 {
     DWORD  rv = 0;
 
-    apxLogWrite(APXLOG_MARK_INFO "Destroying service...");
-
-    if (!apxJavaCall(gWorker, "destroy")) {
-        apxLogWrite(APXLOG_MARK_ERROR "Failed starting java");
+    apxLogWrite(APXLOG_MARK_INFO "Shutdown background process...");
+    if (apxJavaCall(gWorker, "shutdown") == FALSE) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed to shutdown");
         rv = 3;
     }
-    
-    apxLogWrite(APXLOG_MARK_INFO "Service destroy thread completed.");
+    apxLogWrite(APXLOG_MARK_INFO "Shutdown completed.");
     return rv;
 }
 
@@ -728,7 +726,7 @@ static
 DWORD callServiceMethod(const char *method)
 {
     DWORD  rv = 0;
-    if (!apxJavaCall(gWorker, method)) {
+    if (apxJavaCall(gWorker, method) == FALSE) {
         rv = 4;
         apxLogWrite(APXLOG_MARK_ERROR "Failed calling method '%s'", method);
         if (!IS_INVALID_HANDLE(gWorker))
@@ -743,9 +741,9 @@ DWORD callServiceMethod(const char *method)
 static DWORD serviceStart()
 {
     DWORD result;
-    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
-    if((result = callServiceMethod("start")) != 0)
-        apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
+    apxLogWrite(APXLOG_MARK_INFO "Resume background process...");
+    if((result = callServiceMethod("resume")) == 0)
+        apxLogWrite(APXLOG_MARK_DEBUG "Background process started");
     return result;
 }
 
@@ -753,20 +751,20 @@ static DWORD serviceStart()
 static DWORD WINAPI serviceStop()
 {
     DWORD result;
-    apxLogWrite(APXLOG_MARK_INFO "Send stop signal...");
-    if((result = callServiceMethod("stop")) != 0)
-        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
+    apxLogWrite(APXLOG_MARK_INFO "Send pause signal to background process...");
+    if((result = callServiceMethod("pause")) == 0)
+        apxLogWrite(APXLOG_MARK_DEBUG "Background process stopped.");
     return result;
 }
 
 static void shutdown(JNIEnv *env, jobject source, jboolean reload)
 {
-    apxLogWrite(APXLOG_MARK_DEBUG "Shutdown requested (reload is %d)", reload);
+    apxLogWrite(APXLOG_MARK_DEBUG "Shutdown requested (reload is %s)", reload == JNI_TRUE ? "enabled" : "disabled");
     serviceStop();
     if (reload == TRUE)
         serviceStart();
     else
-        serviceDestroy();
+        serviceShutdown();
 }
 
 static void failed(JNIEnv *env, jobject source, jstring message)
@@ -856,6 +854,9 @@ static
 void WINAPI service_ctrl_handler(DWORD dwCtrlCode)
 {
     switch (dwCtrlCode) {
+        case SERVICE_CONTROL_INTERROGATE:
+            reportServiceStatus(_service_status.dwCurrentState, _service_status.dwWin32ExitCode, _service_status.dwWaitHint);
+            break;
         case SERVICE_CONTROL_PAUSE:
             apxLogWrite(APXLOG_MARK_INFO "Service PAUSE signalled");
             reportServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR, timeout);
@@ -868,18 +869,17 @@ void WINAPI service_ctrl_handler(DWORD dwCtrlCode)
             serviceStart();
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
             break;
-        case SERVICE_CONTROL_SHUTDOWN:
         case SERVICE_CONTROL_STOP:
             apxLogWrite(APXLOG_MARK_INFO "Service STOP signalled");
-            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, dwCtrlCode != SERVICE_CONTROL_SHUTDOWN ? timeout : MIN(timeout, apxGetMaxServiceTimeout(gPool)));
+            goto perform_stop;
+        case SERVICE_CONTROL_SHUTDOWN:
+            apxLogWrite(APXLOG_MARK_INFO "Service SHUTDOWN signalled");
+perform_stop:
+            reportServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, timeout);
             serviceStop();
-            reportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
-            serviceDestroy();
-            break;
-        case SERVICE_CONTROL_INTERROGATE:
-            reportServiceStatus(_service_status.dwCurrentState,
-                                _service_status.dwWin32ExitCode,
-                                _service_status.dwWaitHint);
+            reportServiceStatus(SERVICE_STOPPED, NO_ERROR, timeout);
+            apxLogWrite(APXLOG_MARK_INFO "Service SHUTDOWN signalled");
+            serviceShutdown();
             break;
    }
 }

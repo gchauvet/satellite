@@ -49,12 +49,6 @@ BOOL        apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options);
 
 BOOL        apxJavaCall(APXHANDLE instance, LPCSTR szMethod);
 
-BOOL        apxDestroyJvm(DWORD dwTimeout);
-
-DWORD       apxGetVmExitCode();
-
-void        apxSetVmExitCode(DWORD exitCode);
-
 void        apxJavaDumpAllStacks(APXHANDLE hJava);
 
 __APXEND_DECLS
