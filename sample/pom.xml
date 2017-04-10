@@ -15,7 +15,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-dependencies</id>
+                        <id>copy-jars</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
@@ -23,6 +23,17 @@
                         <configuration>
                             <includeScope>runtime</includeScope>
                             <outputDirectory>target/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-frontends</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>io.zatarox.satellite.frontends</includeGroupIds>
+                            <outputDirectory>target</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
