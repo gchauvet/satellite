@@ -206,12 +206,6 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
 
     /* Allocate console if we have none
      */
-    if (GetConsoleWindow() == NULL) {
-        HWND hc;
-        AllocConsole();
-        if ((hc = GetConsoleWindow()) != NULL)
-            ShowWindow(hc, SW_HIDE);
-    }
     /* redirect to file or console */
     if (lpWrapper->szStdOutFilename) {
         if (lstrcmpiW(lpWrapper->szStdOutFilename, PRSRV_AUTO) == 0) {
