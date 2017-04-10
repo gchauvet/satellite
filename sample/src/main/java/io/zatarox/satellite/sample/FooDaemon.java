@@ -22,6 +22,7 @@
 package io.zatarox.satellite.sample;
 
 import fi.iki.elonen.NanoHTTPD;
+import static fi.iki.elonen.NanoHTTPD.*;
 import io.zatarox.satellite.*;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public final class FooDaemon implements BackgroundProcess {
     public void initialize(BackgroundContext dc) throws BackgroundException, Exception {
         instance = new NanoHTTPD(8085) {
             @Override
-            public NanoHTTPD.Response serve(NanoHTTPD.IHTTPSession session) {
+            public Response serve(IHTTPSession session) {
                 String msg = "<html><body><h1>Hello server</h1>\n";
                 final Map<String, String> parms = session.getParms();
                 if (parms.get("username") == null) {
