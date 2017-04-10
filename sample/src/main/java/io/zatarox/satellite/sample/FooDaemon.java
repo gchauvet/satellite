@@ -59,10 +59,8 @@ public final class FooDaemon implements BackgroundProcess {
 
     @Override
     public void shutdown() {
-        if (instance.wasStarted()) {
-            instance.stop();
-        }
-        instance = null;
+        instance.closeAllConnections();
+        instance.stop();
     }
 
 }
