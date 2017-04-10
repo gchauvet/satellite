@@ -17,8 +17,6 @@
 #include "apxwin.h"
 #include "private.h"
 
-#define ALLOCBLOCK_INVALID      0xdeadbeef
-
 typedef struct APXPOOL      APXPOOL;
 typedef APXPOOL*            LPAPXPOOL;
 
@@ -178,20 +176,6 @@ static BOOL __apxHandleCallback(APXHANDLE hObject, UINT uMsg,
     }
     /* Invalidate the handle */
     hObject->dwType = APXHANDLE_TYPE_INVALID;
-
-    if (hObject->dwFlags & APXHANDLE_HAS_EVENT) {
-        DWORD dwState;
-        /* Signal the EventThread to exit */
-        SetEvent(hObject->hEventHandle);
-        /* Wait for EventThread to Exit */
-        dwState = WaitForSingleObject(hObject->hEventThread, 1000);
-        SAFE_CLOSE_HANDLE(hObject->hEventHandle);
-        if (dwState == WAIT_TIMEOUT)
-            TerminateThread(hObject->hEventThread, 0);
-        SAFE_CLOSE_HANDLE(hObject->hEventThread);
-        /* Reset the evant flag */
-        hObject->dwFlags &= ~APXHANDLE_HAS_EVENT;
-    }
     return rv;
 }
 
@@ -458,18 +442,6 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
         hHandle->dwSize = dwDataSize;
     }
 
-    if (dwFlags & APXHANDLE_HAS_EVENT) {
-        /* Create the message event and message wathcing thread */
-        hHandle->hEventHandle = CreateEvent(NULL, TRUE, FALSE, NULL);
-        hHandle->hEventThread = CreateThread(NULL, 0, __apxHandleEventThread,
-                                            hHandle, 0,
-                                            &(hHandle->hEventThreadId));
-        if (IS_INVALID_HANDLE(hHandle->hEventThread)) {
-            SAFE_CLOSE_HANDLE(hHandle->hEventHandle);
-        }
-        else
-            hHandle->dwFlags |= APXHANDLE_HAS_EVENT;
-    }
     TAILQ_INIT(&hHandle->lCallbacks);
     /* Add the handle to the pool's object list */
     lpPool = APXHANDLE_DATA(hPool);
@@ -499,18 +471,6 @@ apxCloseHandle(APXHANDLE hObject)
     }
 
     hObject->dwType = APXHANDLE_TYPE_INVALID;
-    if (hObject->dwFlags & APXHANDLE_HAS_EVENT) {
-        DWORD dwState;
-
-        SetEvent(hObject->hEventHandle);
-        dwState = WaitForSingleObject(hObject->hEventThread, 1000);
-        SAFE_CLOSE_HANDLE(hObject->hEventHandle);
-        if (dwState == WAIT_TIMEOUT)
-            TerminateThread(hObject->hEventThread, 0);
-        SAFE_CLOSE_HANDLE(hObject->hEventThread);
-
-        hObject->dwFlags &= ~APXHANDLE_HAS_EVENT;
-    }
 
     /* finaly remove the object from the pool's object list */
     if (!IS_INVALID_HANDLE(hObject->hPool)) {
