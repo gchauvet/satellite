@@ -131,65 +131,65 @@ typedef enum {
         APX_WINVER_XP =       60
 } APX_OSLEVEL;
 
-APX_OSLEVEL apxGetOsLevel();
-LPWSTR      AsciiToWide(LPCSTR s, LPWSTR ws);
-LPSTR       WideToAscii(LPCWSTR ws, LPSTR s);
-LPSTR       WideToANSI(LPCWSTR ws);
-LPSTR       MzWideToANSI(LPCWSTR ws);
+extern APX_OSLEVEL apxGetOsLevel();
+extern LPWSTR      AsciiToWide(LPCSTR s, LPWSTR ws);
+extern LPSTR       WideToAscii(LPCWSTR ws, LPSTR s);
+extern LPSTR       WideToANSI(LPCWSTR ws);
+extern LPSTR       MzWideToANSI(LPCWSTR ws);
 
 typedef struct APXMULTISZ APXMULTISZ;
 typedef APXMULTISZ*       LPAPXMULTISZ;
 
-DWORD   apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray);
-DWORD   apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray);
-LPWSTR  apxMultiSzCombine(APXHANDLE hPool, LPCWSTR lpStrA, LPCWSTR lpStrB,
+extern DWORD   apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray);
+extern DWORD   apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray);
+extern LPWSTR  apxMultiSzCombine(APXHANDLE hPool, LPCWSTR lpStrA, LPCWSTR lpStrB,
                           LPDWORD lpdwLength);
 
-LPAPXMULTISZ    apxMultiSzStrdup(LPCTSTR szSrc);
-LPTSTR          apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc);
-LPCTSTR         apxMultiSzGet(LPAPXMULTISZ lpmSz);
+extern LPAPXMULTISZ    apxMultiSzStrdup(LPCTSTR szSrc);
+extern LPTSTR          apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc);
+extern LPCTSTR         apxMultiSzGet(LPAPXMULTISZ lpmSz);
 /** Remove the specified character from the string
  * Replacement is done in-place.
  */
-LPTSTR          apxStrCharRemove(LPTSTR szString, TCHAR chSkip);
-DWORD           apxStrUnQuoteInplaceA(LPSTR szString);
-DWORD           apxStrUnQuoteInplaceW(LPWSTR szString);
+extern LPTSTR          apxStrCharRemove(LPTSTR szString, TCHAR chSkip);
+extern DWORD           apxStrUnQuoteInplaceA(LPSTR szString);
+extern DWORD           apxStrUnQuoteInplaceW(LPWSTR szString);
 
-BOOL            apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength);
-BOOL            apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength);
-ULONG           apxStrToul(LPCTSTR szNum);
-ULONG           apxStrToulW(LPCWSTR szNum);
-ULONG           apxAtoulW(LPCWSTR szNum);
+extern BOOL            apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength);
+extern BOOL            apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength);
+extern ULONG           apxStrToul(LPCTSTR szNum);
+extern ULONG           apxStrToulW(LPCWSTR szNum);
+extern ULONG           apxAtoulW(LPCWSTR szNum);
 
-BOOL            apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff,
+extern BOOL            apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff,
                                     DWORD dwBuffLength);
 
-INT             apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase);
-INT             apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase);
-INT             apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
+extern INT             apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase);
+extern INT             apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase);
+extern INT             apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
                                   WCHAR chSeparator, BOOL bIgnoreCase);
-LPSTR           apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs);
-void            apxStrQuoteInplaceW(LPWSTR szString);
-LPWSTR          apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr);
-LPWSTR          apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes);
-LPSTR           apxExpandStrA(APXHANDLE hPool, LPCSTR szString);
-LPWSTR          apxExpandStrW(APXHANDLE hPool, LPCWSTR szString);
-void            apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith);
-void            apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith);
-BOOL            apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd);
+extern LPSTR           apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs);
+extern void            apxStrQuoteInplaceW(LPWSTR szString);
+extern LPWSTR          apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr);
+extern LPWSTR          apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes);
+extern LPSTR           apxExpandStrA(APXHANDLE hPool, LPCSTR szString);
+extern LPWSTR          apxExpandStrW(APXHANDLE hPool, LPCWSTR szString);
+extern void            apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith);
+extern void            apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith);
+extern BOOL            apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd);
 
 /*
  * Find the first occurrence of lpFind in lpMem.
  * dwLen:   The length of lpFind
  * dwSize:  The length of lpMem
  */
-LPBYTE  ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize);
-LPSTR   AplRindexA(LPCSTR lpStr, int ch);
+extern LPBYTE  ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize);
+extern LPSTR   AplRindexA(LPCSTR lpStr, int ch);
 
 #define AplMoveMemory   memcpy
 
-PSECURITY_ATTRIBUTES GetNullACL();
-void CleanNullACL(void *sa);
+extern PSECURITY_ATTRIBUTES GetNullACL();
+extern void CleanNullACL(void *sa);
 
 __APXEND_DECLS  
 

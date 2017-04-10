@@ -29,10 +29,10 @@ __APXBEGIN_DECLS
 
 /** Create or open the process registry keys
  */
-APXHANDLE apxCreateRegistryA(APXHANDLE hPool, REGSAM samDesired,
+extern APXHANDLE apxCreateRegistryA(APXHANDLE hPool, REGSAM samDesired,
                              LPCSTR szRoot, LPCSTR szKeyName,
                              DWORD dwOptions);
-APXHANDLE apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
+extern APXHANDLE apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
                              LPCWSTR szRoot, LPCWSTR szKeyName,
                              DWORD dwOptions);
 
@@ -45,10 +45,10 @@ APXHANDLE apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
 /** Delete the process registry keys
  *  samDesired only needs to be KREG_WOW6432 or 0
  */
-BOOL      apxDeleteRegistryA(LPCSTR szRoot, LPCSTR szKeyName,
+extern BOOL      apxDeleteRegistryA(LPCSTR szRoot, LPCSTR szKeyName,
                             REGSAM samDesired, BOOL bDeleteEmptyRoot);
 
-BOOL      apxDeleteRegistryW(LPCWSTR szRoot, LPCWSTR szKeyName,
+extern BOOL      apxDeleteRegistryW(LPCWSTR szRoot, LPCWSTR szKeyName,
                             REGSAM samDesired, BOOL bDeleteEmptyRoot);
 
 #ifdef _UNICODE
@@ -61,16 +61,16 @@ BOOL      apxDeleteRegistryW(LPCWSTR szRoot, LPCWSTR szKeyName,
  * and set the JAVA_HOME environment variable if not found
  * If bPreferJre is set use the JRE's path as JAVA_HOME
  */
-LPWSTR    apxGetJavaSoftHome(APXHANDLE hPool, BOOL bPreferJre);
+extern LPWSTR    apxGetJavaSoftHome(APXHANDLE hPool, BOOL bPreferJre);
 
 /** Get the Java RuntimeLib from registry (jvm.dll)
  */
-LPWSTR    apxGetJavaSoftRuntimeLib(APXHANDLE hPool);
+extern LPWSTR    apxGetJavaSoftRuntimeLib(APXHANDLE hPool);
 
-LPSTR     apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
+extern LPSTR     apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
                                 LPCSTR szSubkey, LPCSTR szValueName);
 
-LPWSTR    apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
+extern LPWSTR    apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
                                 LPCWSTR szSubkey, LPCWSTR szValueName);
 
 #ifdef _UNICODE
@@ -79,11 +79,11 @@ LPWSTR    apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
 #define apxRegistryGetString    apxRegistryGetStringA
 #endif
 
-LPBYTE    apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
+extern LPBYTE    apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
                                 LPCSTR szSubkey, LPCSTR szValueName,
                                 LPBYTE lpData, LPDWORD lpdwLength);
 
-LPBYTE    apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
+extern LPBYTE    apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
                                 LPCWSTR szSubkey, LPCWSTR szValueName,
                                 LPBYTE lpData, LPDWORD lpdwLength);
 
@@ -93,27 +93,27 @@ LPBYTE    apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
 #define apxRegistryGetBinary    apxRegistryGetBinaryA
 #endif
 
-BOOL    apxRegistrySetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
                               LPCSTR szSubkey, LPCSTR szValueName,
                               const LPBYTE lpData, DWORD dwLength);
 
-BOOL    apxRegistrySetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
                               LPCWSTR szSubkey, LPCWSTR szValueName,
                               const LPBYTE lpData, DWORD dwLength);
 
-LPWSTR  apxRegistryGetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
+extern LPWSTR  apxRegistryGetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
                              LPCWSTR szSubkey, LPCWSTR szValueName,
                              LPWSTR lpData, LPDWORD lpdwLength);
 
-BOOL    apxRegistrySetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
                              LPCWSTR szSubkey, LPCWSTR szValueName,
                              LPCWSTR lpData, DWORD dwLength);
 
-BOOL    apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
                            LPCSTR szSubkey, LPCSTR szValueName,
                            LPCSTR szValue);
 
-BOOL    apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
                            LPCWSTR szSubkey, LPCWSTR szValueName,
                            LPCWSTR szValue);
 
@@ -124,15 +124,15 @@ BOOL    apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
 #define apxRegistrySetStr    apxRegistrySetStrA
 #endif
 
-BOOL    apxRegistrySetNumW(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistrySetNumW(APXHANDLE hRegistry, DWORD dwFrom,
                            LPCWSTR szSubkey, LPCWSTR szValueName,
                            DWORD dwValue);
 
-DWORD   apxRegistryGetNumberW(APXHANDLE hRegistry, DWORD dwFrom,
+extern DWORD   apxRegistryGetNumberW(APXHANDLE hRegistry, DWORD dwFrom,
                               LPCWSTR szSubkey, LPCWSTR szValueName);
 
 
-BOOL    apxRegistryDeleteW(APXHANDLE hRegistry, DWORD dwFrom,
+extern BOOL    apxRegistryDeleteW(APXHANDLE hRegistry, DWORD dwFrom,
                            LPCWSTR szSubkey, LPCWSTR szValueName);
 
 #ifdef _UNICODE

@@ -233,16 +233,16 @@ typedef struct APXREGENUM {
 
 } APXREGENUM, *LPAPXREGENUM;
 
-BOOL    apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry);
-BOOL    apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
+extern BOOL    apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry);
+extern BOOL    apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
                                   DWORD dwDescriptionLength);
-BOOL    apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
+extern BOOL    apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
                            DWORD dwUserLength);
 
-DWORD   __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount);
-DWORD   __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount);
-LPSTR   __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName);
-LPWSTR  __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName);
+extern DWORD   __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount);
+extern DWORD   __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount);
+extern LPSTR   __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName);
+extern LPWSTR  __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName);
 
 #ifndef  MIN
 #define  MIN(a,b)    (((a)<(b)) ? (a) : (b))
