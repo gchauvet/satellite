@@ -399,8 +399,7 @@ apxDestroyJvm(DWORD dwTimeout)
 
         _st_sys_jvm = NULL;
         (*lpJvm)->DetachCurrentThread(lpJvm);
-        hWaiter = CreateThread(NULL, 0, __apxJavaDestroyThread,
-                               (void *)lpJvm, 0, &tid);
+        hWaiter = CreateThread(NULL, 0, __apxJavaDestroyThread, (void *)lpJvm, 0, &tid);
         if (IS_INVALID_HANDLE(hWaiter)) {
             apxLogWrite(APXLOG_MARK_SYSERR);
             return FALSE;
@@ -601,9 +600,7 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
 
 /* ANSI version only */
 static BOOL
-apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
-                  LPCVOID lpOptions, DWORD dwMs, DWORD dwMx,
-                  DWORD dwSs, DWORD bJniVfprintf)
+apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD dwMs, DWORD dwMx, DWORD dwSs, DWORD bJniVfprintf)
 {
     LPAPXJAVAVM     lpJava;
     JavaVMInitArgs  vmArgs;
@@ -655,8 +652,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath,
 
         sOptions++; /* unconditionally set for extraInfo exit */
 
-        nOptions = __apxMultiSzToJvmOptions(hJava->hPool, lpOptions,
-                                            &lpJvmOptions, sOptions);
+        nOptions = __apxMultiSzToJvmOptions(hJava->hPool, lpOptions, &lpJvmOptions, sOptions);
         if (szClassPath && *szClassPath) {
             szCp = __apxEvalClasspath(hJava->hPool, szClassPath);
             if (szCp == NULL) {
@@ -968,18 +964,21 @@ BOOL
 apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
 {
     const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
-
+    
     if (!lpJava)
         return FALSE;
-
+    
     if (!apxJavaInitialize(instance, options->szClassPath, options->lpOptions, options->dwMs, options->dwMx, options->dwSs, options->bJniVfprintf))
         return FALSE;
-
+    
     if (options->szLibraryPath && *options->szLibraryPath) {
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         DYNLOAD_CALL(SetDllDirectoryW)(options->szLibraryPath);
         apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'", options->szLibraryPath);
     }
+    
+    apxJavaSetOut(instance, TRUE, options->szStdErrFilename);
+    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
 
     // Load our embedded classloader and embedded jar
     HRSRC hresCl = FindResource(NULL, MAKEINTRESOURCE(IDD_HALL_CL), RT_RCDATA);
@@ -1014,11 +1013,25 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
             array
         )
     );
+    
+    // Initialize natives methods
+    JNINativeMethod nativemethods[2];
+    BOOL result = FALSE;
+    
+    nativemethods[0].name = "shutdown";
+    nativemethods[0].signature = "(Z)V";
+    nativemethods[0].fnPtr = options->shutdown;
+    nativemethods[1].name = "failed";
+    nativemethods[1].signature = "(Ljava/lang/String;)V";
+    nativemethods[1].fnPtr = options->failed;
 
-    apxJavaSetOut(instance, TRUE, options->szStdErrFilename);
-    apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
-
-    return apxJavaLoadMainClass(instance, options->szJarName, options->lpArguments) ? TRUE : FALSE;
+    if ((*lpJava->lpEnv)->RegisterNatives(lpJava->lpEnv, (*lpJava->lpEnv)->GetObjectClass(lpJava->lpEnv, lpJava->jWrapper), nativemethods, 2) != 0) {
+        apxLogWrite(APXLOG_MARK_ERROR "Cannot register native methods");
+    } else {
+        apxLogWrite(APXLOG_MARK_DEBUG "Native methods registered");
+        result = apxJavaLoadMainClass(instance, options->szJarName, options->lpArguments) ? TRUE : FALSE;
+    }
+    return result;
 }
 
 BOOL

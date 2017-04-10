@@ -39,6 +39,8 @@ typedef struct {
     LPCWSTR     szStdOutFilename;
     LPCWSTR     szLibraryPath;
     DWORD       bJniVfprintf;
+    LPVOID      failed;
+    LPVOID      shutdown;
 } APXJAVA_INIT, *LAPXJAVA_INIT;
 
 APXHANDLE   apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath);
