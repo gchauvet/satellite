@@ -31,18 +31,18 @@ import io.zatarox.satellite.*;
  * Wrapper to manage the BackgroundProcess instance.
  */
 public final class BackgroundWrapper {
-
+    
     private Controller controller = null;
     private Object instance = null;
     private final ClassLoader loader;
-
+    
     public BackgroundWrapper(ClassLoader loader) {
         if (loader == null) {
             throw new IllegalArgumentException("No embedded classloader provided");
         }
         this.loader = loader;
     }
-
+    
     public boolean check(String cn) {
         try {
             /* Check the class name */
@@ -60,7 +60,7 @@ public final class BackgroundWrapper {
 
             /* Create a new instance of the background process */
             c.newInstance();
-
+            
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
@@ -82,11 +82,12 @@ public final class BackgroundWrapper {
      * @return true if loaded.
      */
     public boolean load(final String jarName, final String args[]) {
+        boolean result = false;
         try {
             if (jarName == null) {
                 throw new IllegalArgumentException("No main jar provided");
             }
-
+            
             final File jar = new File(jarName);
             final ZipFile archive = new ZipFile(jar);
             final List<URL> urls = new LinkedList<URL>();
@@ -106,7 +107,7 @@ public final class BackgroundWrapper {
                 } catch (IOException ex) {
                 }
             }
-
+            
             final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), this.loader);
             final Class<?> c = Class.forName(manifest.getMainAttributes().getValue("Background-Process-Class"), true, loader);
             instance = c.newInstance();
@@ -118,28 +119,26 @@ public final class BackgroundWrapper {
             final Context context = new Context();
             context.setArguments(args != null ? args : new String[0]);
             context.setController(controller);
-
             ((BackgroundProcess) instance).initialize(context);
+            result = true;
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
             /* BackgroundExceptions can fail with a nicer message */
             if (thrown instanceof BackgroundException) {
                 failed(((BackgroundException) thrown).getMessageWithCause());
             } else {
-                thrown.printStackTrace(System.err);
+                controller.fail(e);
             }
-            return false;
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
              */
-            t.printStackTrace(System.err);
-            return false;
+            controller.fail(new RuntimeException(t));
         }
         /* The class was loaded and instantiated correctly, we can return */
-        return true;
+        return result;
     }
-
+    
     public boolean resume() {
         try {
             /* Attempt to resume the background process */
@@ -149,7 +148,7 @@ public final class BackgroundWrapper {
             if (controller != null) {
                 controller.setAvailable(true);
             }
-
+            
         } catch (Throwable t) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
@@ -159,7 +158,7 @@ public final class BackgroundWrapper {
         }
         return true;
     }
-
+    
     public boolean pause() {
         try {
             /* Set the availability flag in the controller */
@@ -178,12 +177,12 @@ public final class BackgroundWrapper {
         }
         return true;
     }
-
-    public boolean destroy() {
+    
+    public boolean shutdown() {
         try {
             /* Attempt to shutdown the background process */
             ((BackgroundProcess) instance).shutdown();
-
+            
             instance = null;
             controller = null;
         } catch (Throwable t) {
@@ -195,34 +194,33 @@ public final class BackgroundWrapper {
         }
         return true;
     }
-
+    
     private native void shutdown(boolean reload);
-
+    
     private native void failed(String message);
-
+    
     private final class Controller implements BackgroundController {
-
+        
         private boolean available = false;
-
+        
         private Controller() {
             super();
             this.setAvailable(false);
         }
-
+        
         private boolean isAvailable() {
             synchronized (this) {
                 return this.available;
             }
         }
-
+        
         private void setAvailable(boolean available) {
             synchronized (this) {
                 this.available = available;
             }
         }
-
-        public void shutdown()
-                throws IllegalStateException {
+        
+        public void shutdown() throws IllegalStateException {
             synchronized (this) {
                 if (!this.isAvailable()) {
                     throw new IllegalStateException();
@@ -231,7 +229,7 @@ public final class BackgroundWrapper {
                 BackgroundWrapper.this.shutdown(false);
             }
         }
-
+        
         public void reload()
                 throws IllegalStateException {
             synchronized (this) {
@@ -242,19 +240,19 @@ public final class BackgroundWrapper {
                 BackgroundWrapper.this.shutdown(true);
             }
         }
-
+        
         public void fail() {
             fail(null, null);
         }
-
+        
         public void fail(String message) {
             fail(message, null);
         }
-
+        
         public void fail(Exception exception) {
             fail(null, exception);
         }
-
+        
         public void fail(String message, Exception exception) {
             synchronized (this) {
                 this.setAvailable(false);
@@ -269,27 +267,27 @@ public final class BackgroundWrapper {
                 BackgroundWrapper.this.failed(msg);
             }
         }
-
+        
     }
-
+    
     private final class Context implements BackgroundContext {
-
+        
         private BackgroundController controller = null;
-
+        
         private String[] args = null;
-
+        
         public BackgroundController getController() {
             return controller;
         }
-
+        
         public void setController(BackgroundController controller) {
             this.controller = controller;
         }
-
+        
         public String[] getArguments() {
             return args;
         }
-
+        
         public void setArguments(String[] args) {
             this.args = args;
         }

@@ -91,7 +91,7 @@ public final class BackgroundWrapperTest {
 
     @Test
     public void destroy() {
-        assertTrue(instance.destroy());
+        assertTrue(instance.shutdown());
     }
 
     public static final class FakeBackgroundProcessImpl implements BackgroundProcess {
