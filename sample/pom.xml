@@ -56,39 +56,63 @@
             <artifactId>nanohttpd</artifactId>
             <version>2.2.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.zatarox.satellite.frontends</groupId>
-            <artifactId>phobos</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <classifier>x86</classifier>
-            <type>exe</type>
-        </dependency>
-        <dependency>
-            <groupId>io.zatarox.satellite.frontends</groupId>
-            <artifactId>phobos</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <classifier>x86_64</classifier>
-            <type>exe</type>
-        </dependency>
-        <dependency>
-            <groupId>io.zatarox.satellite.frontends</groupId>
-            <artifactId>deimos</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <classifier>x86</classifier>
-            <type>elf</type>
-        </dependency>
-        <dependency>
-            <groupId>io.zatarox.satellite.frontends</groupId>
-            <artifactId>deimos</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <classifier>x86_64</classifier>
-            <type>elf</type>
-        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
     </properties>
+    <profiles>
+        <profile>
+            <id>x86</id>
+            <activation>
+                <property>
+                    <name>TRGT_ARCH</name>
+                    <value>x86</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.zatarox.satellite.frontends</groupId>
+                    <artifactId>phobos</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <classifier>x86</classifier>
+                    <type>exe</type>
+                </dependency>
+                <dependency>
+                    <groupId>io.zatarox.satellite.frontends</groupId>
+                    <artifactId>deimos</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <classifier>x86</classifier>
+                    <type>elf</type>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>x86_64</id>
+            <activation>
+                <property>
+                    <name>TRGT_ARCH</name>
+                    <value>x86_64</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.zatarox.satellite.frontends</groupId>
+                    <artifactId>phobos</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <classifier>x86_64</classifier>
+                    <type>exe</type>
+                </dependency>
+                <dependency>
+                    <groupId>io.zatarox.satellite.frontends</groupId>
+                    <artifactId>deimos</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <classifier>x86_64</classifier>
+                    <type>elf</type>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <name>Satellite :: Sample</name>
 </project>
