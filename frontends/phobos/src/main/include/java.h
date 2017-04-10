@@ -43,13 +43,13 @@ typedef struct {
     LPVOID      shutdown;
 } APXJAVA_INIT, *LAPXJAVA_INIT;
 
-APXHANDLE   apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath);
+extern APXHANDLE   apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath);
 
-BOOL        apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options);
+extern BOOL        apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options);
 
-BOOL        apxJavaCall(APXHANDLE instance, LPCSTR szMethod);
+extern BOOL        apxJavaCall(APXHANDLE instance, LPCSTR szMethod);
 
-void        apxJavaDumpAllStacks(APXHANDLE hJava);
+extern void        apxJavaDumpAllStacks(APXHANDLE hJava);
 
 __APXEND_DECLS
 
