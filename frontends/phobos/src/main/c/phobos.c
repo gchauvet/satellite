@@ -28,6 +28,8 @@
 #include <fcntl.h>
 #include <io.h>         /* _open_osfhandle */
 
+#include <jni.h>
+
 #ifndef  MIN
 #define  MIN(a,b)    (((a)<(b)) ? (a) : (b))
 #endif
@@ -191,40 +193,6 @@ static LPSTR    _jni_jvmoptions           = NULL;   /* Path to jvm options */
 static LPSTR    _jni_classpath            = NULL;
 static LPSTR    _jni_mainjar              = NULL;
 static LPCWSTR  _jni_rparam               = NULL;    /* Startup  arguments */
-static HANDLE gSignalEvent   = NULL;
-static HANDLE gSignalThread  = NULL;
-static BOOL   gSignalValid   = TRUE;
-
-static
-DWORD WINAPI eventThread(LPVOID lpParam)
-{
-    DWORD dwRotateCnt = SO_LOGROTATE;
-
-    for (;;) {
-        const DWORD dw = WaitForSingleObject(gSignalEvent, 1000);
-        if (dw == WAIT_TIMEOUT) {
-            /* Do process maintenance */
-            if (SO_LOGROTATE != 0 && --dwRotateCnt == 0) {
-                /* Perform log rotation. */
-
-                 dwRotateCnt = SO_LOGROTATE;
-            }
-            continue;
-        }
-        if (dw == WAIT_OBJECT_0 && gSignalValid) {
-            if (!GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, 0)) {
-                /* Invoke Thread dump */
-                if (gWorker)
-                    apxJavaDumpAllStacks(gWorker);
-            }
-            ResetEvent(gSignalEvent);
-            continue;
-        }
-        break;
-    }
-    ExitThread(0);
-    return 0;
-}
 
 /* redirect console stdout/stderr to files
  * so that java messages can get logged
@@ -751,18 +719,67 @@ static DWORD WINAPI serviceDestroy()
         apxLogWrite(APXLOG_MARK_ERROR "Failed starting java");
         rv = 3;
     }
-
-    if (gSignalEvent) {
-        gSignalValid = FALSE;
-        SetEvent(gSignalEvent);
-        WaitForSingleObject(gSignalThread, 1000);
-        CloseHandle(gSignalEvent);
-        CloseHandle(gSignalThread);
-        gSignalEvent = NULL;
-    }
     
     apxLogWrite(APXLOG_MARK_INFO "Service destroy thread completed.");
     return rv;
+}
+
+static
+DWORD callServiceMethod(const char *method)
+{
+    DWORD  rv = 0;
+    if (!apxJavaCall(gWorker, method)) {
+        rv = 4;
+        apxLogWrite(APXLOG_MARK_ERROR "Failed calling method '%s'", method);
+        if (!IS_INVALID_HANDLE(gWorker))
+            apxCloseHandle(gWorker);    /* Close the worker handle */
+        gWorker = NULL;
+    }
+    return rv;
+}
+
+
+/* Executed when the service receives start event */
+static DWORD serviceStart()
+{
+    DWORD result;
+    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
+    if((result = callServiceMethod("start")) != 0)
+        apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
+    return result;
+}
+
+/* Executed when the service receives stop event */
+static DWORD WINAPI serviceStop()
+{
+    DWORD result;
+    apxLogWrite(APXLOG_MARK_INFO "Send stop signal...");
+    if((result = callServiceMethod("stop")) != 0)
+        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
+    return result;
+}
+
+static void shutdown(JNIEnv *env, jobject source, jboolean reload)
+{
+    apxLogWrite(APXLOG_MARK_DEBUG "Shutdown requested (reload is %d)", reload);
+    serviceStop();
+    if (reload == TRUE)
+        serviceStart();
+    else
+        serviceDestroy();
+}
+
+static void failed(JNIEnv *env, jobject source, jstring message)
+{
+    if (message) {
+        const char *msg = (*env)->GetStringUTFChars(env, message, NULL);
+        apxLogWrite(APXLOG_MARK_ERROR "Failed %s", msg ? msg : "(null)");
+        if (msg)
+            (*env)->ReleaseStringUTFChars(env, message, msg);
+    }
+    else
+        apxLogWrite(APXLOG_MARK_ERROR "Failed requested");
+    serviceStop();
 }
 
 /* Executed when initialize the service */
@@ -811,6 +828,8 @@ static int serviceInit()
     gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
     gArgs.szLibraryPath    = SO_LIBPATH;
     gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
+    gArgs.failed           = &failed;
+    gArgs.shutdown         = &shutdown;
  
     if (!apxJavaInit(gWorker, &gArgs)) {
         apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
@@ -829,40 +848,6 @@ static int serviceInit()
         apxLogWrite(APXLOG_MARK_INFO "Service started in %d ms.", nms);
     }
     return rv;
-}
-
-static
-DWORD callServiceMethod(const char *method)
-{
-    DWORD  rv = 0;
-    if (!apxJavaCall(gWorker, method)) {
-        rv = 4;
-        apxLogWrite(APXLOG_MARK_ERROR "Failed calling method '%s'", method);
-        if (!IS_INVALID_HANDLE(gWorker))
-            apxCloseHandle(gWorker);    /* Close the worker handle */
-        gWorker = NULL;
-    }
-    return rv;
-}
-
-/* Executed when the service receives start event */
-static DWORD serviceStart()
-{
-    DWORD result;
-    apxLogWrite(APXLOG_MARK_INFO "Starting service...");
-    if((result = callServiceMethod("start")) != 0)
-        apxLogWrite(APXLOG_MARK_DEBUG "Java started daemon");
-    return result;
-}
-
-/* Executed when the service receives stop event */
-static DWORD WINAPI serviceStop()
-{
-    DWORD result;
-    apxLogWrite(APXLOG_MARK_INFO "Send stop signal...");
-    if((result = callServiceMethod("stop")) != 0)
-        apxLogWrite(APXLOG_MARK_DEBUG "Java jni stop finished.");
-    return result;
 }
 
 /* Service control handler
@@ -949,13 +934,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
                     else
                         en[i] = towupper(en[i]);
                 }
-                gSignalEvent = CreateEventW(sa, TRUE, FALSE, en);
                 CleanNullACL((void *)sa);
-
-                if (gSignalEvent) {
-                    DWORD tid;
-                    gSignalThread = CreateThread(NULL, 0, eventThread, NULL, 0, &tid);
-                }
             }
             /* Service is started */
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
@@ -1004,11 +983,11 @@ void __cdecl main(int argc, char **argv)
     UINT rv = 0;
 
     LPAPXCMDLINE lpCmdline;
-
+    
     apxHandleManagerInitialize();
     /* Create the main Pool */
     gPool = apxPoolCreate(NULL, 0);
-
+    
     /* Parse the command line */
     if ((lpCmdline = apxCmdlineParse(gPool, _options, _commands, _altcmds)) == NULL) {
         apxLogWrite(APXLOG_MARK_ERROR "Invalid command line arguments");
