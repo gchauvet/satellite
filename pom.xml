@@ -83,5 +83,6 @@
         <module>impl</module>
         <module>plugins</module>
         <module>frontends</module>
+        <module>sample</module>
     </modules>
 </project>
