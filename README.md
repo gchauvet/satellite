@@ -110,7 +110,7 @@ sudo deimos shutdown
 #### Windows
 * To install
 ```batch
-phobos.exe //IS/{service name} --MainJar={filname}.jar ...
+phobos.exe install {service name} --MainJar={filname}.jar ...
 ```
 * To start the background process :
 ```sh
