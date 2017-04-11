@@ -171,8 +171,6 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
          * Check if provided argument is valid
          */
         if (GetFileAttributesW(dllJvmPath) == INVALID_FILE_ATTRIBUTES) {
-            /* DAEMON-247: Invalid RuntimeLib explicitly specified is error.
-             */
             apxLogWrite(APXLOG_MARK_DEBUG "Invalid RuntimeLib specified '%S'", dllJvmPath);
             return FALSE;
         }
@@ -183,9 +181,6 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
             return FALSE;
     }
     if (GetFileAttributesW(dllJvmPath) == INVALID_FILE_ATTRIBUTES) {
-        /* DAEMON-184: RuntimeLib registry key is invalid.
-         * Check from Jre JavaHome directly
-         */
         LPWSTR szJreHome = apxGetJavaSoftHome(NULL, TRUE);
         apxLogWrite(APXLOG_MARK_DEBUG "Invalid RuntimeLib '%S'", dllJvmPath);
         if (szJreHome) {
@@ -217,10 +212,7 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
                 wcsncat(crtBinPath, MSVCRT71_DLLNAME, SIZ_PATHLEN);
                 if (GetFileAttributesW(crtBinPath) != INVALID_FILE_ATTRIBUTES) {
                     if (LoadLibraryW(crtBinPath)) {
-                        /* Found MSVCRTxx.dll
-                         */
-                        apxLogWrite(APXLOG_MARK_DEBUG "preloaded '%S'",
-                                    crtBinPath);
+                        apxLogWrite(APXLOG_MARK_DEBUG "preloaded '%S'", crtBinPath);
                         break;
                     }
                 }
