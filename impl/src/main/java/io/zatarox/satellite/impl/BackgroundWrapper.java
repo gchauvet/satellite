@@ -249,6 +249,9 @@ public final class BackgroundWrapper {
         private BackgroundController controller = null;
         
         private String[] args = null;
+
+        private Context() {
+        }
         
         public BackgroundController getController() {
             return controller;
