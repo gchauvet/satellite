@@ -32,6 +32,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public final class BackgroundExceptionTest {
 
     @Test
+    public void createSimpleException() {
+        final BackgroundException exception = new BackgroundException("test");
+        assertEquals("test", exception.getMessageWithCause());
+    }
+    
+    @Test
     public void getMessageWithCause() {
         final BackgroundException exception = new BackgroundException("test", new IllegalArgumentException("A test"));
         assertEquals("test: java.lang.IllegalArgumentException: A test", exception.getMessageWithCause().split("\r\n")[0]);
