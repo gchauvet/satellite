@@ -28,12 +28,6 @@ static LPCWSTR REGDESCRIPTION   = L"Description";
 static LPCWSTR REGSEPARATOR     = L"\\";
 static LPCWSTR REGPROJECT_ROOT   = L"Zatarox";
 /* predefined java keys */
-static LPCWSTR JRE_REGKEY       = L"SOFTWARE\\JavaSoft\\Java Runtime Environment\\";
-static LPCWSTR JDK_REGKEY       = L"SOFTWARE\\JavaSoft\\Java Development Kit\\";
-static LPCWSTR JAVA_CURRENT     = L"CurrentVersion";
-static LPCWSTR JAVA_RUNTIME     = L"RuntimeLib";
-static LPCWSTR JAVA_HOME        = L"JAVA_HOME";
-static LPCWSTR JAVAHOME         = L"JavaHome";
 static LPCWSTR CONTROL_REGKEY   = L"SYSTEM\\CurrentControlSet\\Control";
 static LPCWSTR REGTIMEOUT       = L"WaitToKillServiceTimeout";
 
@@ -921,82 +915,6 @@ apxDeleteRegistryA(LPCSTR szRoot,
     AsciiToWide(szKeyName, wcKey);
 
     return apxDeleteRegistryW(wsRoot, wcKey, samDesired, bDeleteEmptyRoot);
-}
-
-
-LPWSTR apxGetJavaSoftHome(APXHANDLE hPool, BOOL bPreferJre)
-{
-    LPWSTR  wsJhome, off;
-    DWORD   err, dwLen;
-    HKEY    hKey;
-    WCHAR   wsBuf[SIZ_BUFLEN];
-    WCHAR   wsKey[SIZ_RESLEN];
-#if 1 /* XXX: Add that customizable using function call arg */
-    if (!bPreferJre && (wsJhome = __apxGetEnvironmentVariableW(hPool, JAVA_HOME)))
-        return wsJhome;
-#endif
-    lstrcpyW(wsKey, JAVA_CURRENT);
-    if (bPreferJre)
-        lstrcpyW(wsBuf, JRE_REGKEY);
-    else
-        lstrcpyW(wsBuf, JDK_REGKEY);
-    dwLen = lstrlenW(wsBuf);
-    off = &wsBuf[dwLen];
-    dwLen = SIZ_RESMAX;
-    if ((err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, wsBuf,
-                             0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
-        return NULL;
-    }
-    if ((err = RegQueryValueExW(hKey, JAVA_CURRENT, NULL, NULL,
-                                (LPBYTE)off,
-                                &dwLen)) != ERROR_SUCCESS) {
-        RegCloseKey(hKey);
-        return NULL;
-    }
-    RegCloseKey(hKey);
-    if ((err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, wsBuf,
-                             0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
-        return NULL;
-    }
-    wsJhome = __apxGetRegistrySzW(hPool, hKey, JAVAHOME);
-    if (wsJhome)
-        SetEnvironmentVariableW(JAVA_HOME, wsJhome);
-    RegCloseKey(hKey);
-
-    return wsJhome;
-}
-
-LPWSTR apxGetJavaSoftRuntimeLib(APXHANDLE hPool)
-{
-    LPWSTR  wsRtlib, off;
-    DWORD   err, dwLen = SIZ_RESLEN;
-    HKEY    hKey;
-    WCHAR   wsBuf[SIZ_BUFLEN];
-
-    lstrcpyW(wsBuf, JRE_REGKEY);
-
-    dwLen = lstrlenW(wsBuf);
-    off = &wsBuf[dwLen];
-    dwLen = SIZ_RESLEN;
-    if ((err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, wsBuf,
-                             0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
-        return NULL;
-    }
-    if ((err = RegQueryValueExW(hKey, JAVA_CURRENT, NULL, NULL,
-                                (LPBYTE)off,
-                                &dwLen)) != ERROR_SUCCESS) {
-        RegCloseKey(hKey);
-        return NULL;
-    }
-    RegCloseKey(hKey);
-    if ((err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, wsBuf,
-                             0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
-        return NULL;
-    }
-    wsRtlib = __apxGetRegistrySzW(hPool, hKey, JAVA_RUNTIME);
-    RegCloseKey(hKey);
-
-    return wsRtlib;
 }
 
 /* Service Registry helper functions */
