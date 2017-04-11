@@ -988,7 +988,7 @@ void __cdecl main(int argc, char **argv)
     }
     apxCmdlineLoadEnvVars(lpCmdline);
 
-    if (lpCmdline->dwCmdIndex < 5) {
+    if (lpCmdline->dwCmdIndex < 5 && lpCmdline->dwCmdIndex != 3) {
         if (!loadConfiguration(lpCmdline) &&
             lpCmdline->dwCmdIndex < 2) {
             apxLogWrite(APXLOG_MARK_ERROR "Load configuration failed");
