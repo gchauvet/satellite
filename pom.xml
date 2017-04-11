@@ -31,7 +31,7 @@
     <name>Satellite :: Project</name>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
-    <description>Satellite software provides an alternative invocation mechanism for unix-daemon-like Java code.
+    <description>Satellite toolkit provides an homogeneous invocation mechanism for Windows and Unix background process
     </description>
     <url>https://github.com/gchauvet/satellite</url>
 
