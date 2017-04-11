@@ -470,7 +470,7 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     apxStrQuoteInplaceW(szImage);
     /* Add run-service command line option */
     wcsncat(szImage, L" launch ", SIZ_HUGLEN);
-    wcsncat(szName, lpCmdline->szApplication, SIZ_BUFLEN);
+    wcsncpy(szName, lpCmdline->szApplication, SIZ_BUFLEN);
     apxStrQuoteInplaceW(szName);
     wcsncat(szImage, szName, SIZ_HUGLEN);
     SO_INSTALL = apxPoolStrdupW(gPool, szImage);
