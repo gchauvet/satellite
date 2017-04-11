@@ -15,6 +15,8 @@
  */
 package io.zatarox.satellite;
 
+import java.io.*;
+
 /**
  * Throw this during init if you can't initialise yourself for some expected
  * reason. Using this exception will cause the exception's message to come out
@@ -22,24 +24,22 @@ package io.zatarox.satellite;
  */
 public final class BackgroundException extends Exception {
 
-    private static final long serialVersionUID = 5665891535067213551L;
-
-    // don't rely on Throwable#getCause (jdk1.4)
-    private final Throwable cause;
-
     public BackgroundException(String message) {
         super(message);
-        this.cause = null;
     }
 
     public BackgroundException(String message, Throwable cause) {
-        super(message);
-        this.cause = cause;
+        super(message, cause);
     }
 
     public String getMessageWithCause() {
-        String extra = this.cause == null ? "" : ": " + this.cause.getMessage();
-        return getMessage() + extra;
+        String result = getMessage();
+        if (getCause() != null) {
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            getCause().printStackTrace(new PrintStream(bos));
+            result += ": " + new String(bos.toByteArray());
+        }
+        return result;
     }
 
 }
