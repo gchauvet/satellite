@@ -1012,21 +1012,22 @@ void __cdecl main(int argc, char **argv)
     gStdwrap.szStdOutFilename = SO_STDOUTPUT;
     gStdwrap.szStdErrFilename = SO_STDERROR;
     redirectStdStreams(&gStdwrap, lpCmdline);
-    SYSTEMTIME t;
-    GetLocalTime(&t);
-    fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
-                    "Phobos stdout initialized\n",
-                    t.wYear, t.wMonth, t.wDay,
-                    t.wHour, t.wMinute, t.wSecond);
-    fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
-                    "Phobos stderr initialized\n",
-                    t.wYear, t.wMonth, t.wDay,
-                    t.wHour, t.wMinute, t.wSecond);
 
     switch (lpCmdline->dwCmdIndex) {
-        case 1: /* Run Service */
+        case 1: {/* Run Service */
+            SYSTEMTIME t;
+            GetLocalTime(&t);
+            fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
+                            "Phobos stdout initialized\n",
+                            t.wYear, t.wMonth, t.wDay,
+                            t.wHour, t.wMinute, t.wSecond);
+            fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
+                            "Phobos stderr initialized\n",
+                            t.wYear, t.wMonth, t.wDay,
+                            t.wHour, t.wMinute, t.wSecond);
             if (!docmdRunService(lpCmdline))
                 rv = 2;
+        }
         break;
         case 2: /* Update Service parameters */
             if (!docmdUpdateService(lpCmdline))
