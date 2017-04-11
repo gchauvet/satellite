@@ -56,9 +56,9 @@ typedef struct APX_STDWRAP {
 } APX_STDWRAP;
 
 /* Use static variables instead of #defines */
-static LPCWSTR  PRSRV_AUTO        = L"auto";
-static LPCWSTR  PRSRV_MANUAL      = L"manual";
-static LPCWSTR  PRSRV_SIGNAL      = L"SIGNAL";
+static LPCWSTR  BPSRV_AUTO        = L"auto";
+static LPCWSTR  BPSRV_MANUAL      = L"manual";
+static LPCWSTR  BPSRV_SIGNAL      = L"SIGNAL";
 static LPCWSTR  STYPE_INTERACTIVE = L"interactive";
 
 static LPWSTR       _service_name = NULL;
@@ -208,7 +208,7 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
      */
     /* redirect to file or console */
     if (lpWrapper->szStdOutFilename) {
-        if (lstrcmpiW(lpWrapper->szStdOutFilename, PRSRV_AUTO) == 0) {
+        if (lstrcmpiW(lpWrapper->szStdOutFilename, BPSRV_AUTO) == 0) {
             WCHAR lsn[1024];
             aOut = TRUE;
             wcsncpy(lsn, lpCmdline->szApplication, 1020);
@@ -234,7 +234,7 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
             lpWrapper->szStdOutFilename = NULL;
     }
     if (lpWrapper->szStdErrFilename) {
-        if (lstrcmpiW(lpWrapper->szStdErrFilename, PRSRV_AUTO) == 0) {
+        if (lstrcmpiW(lpWrapper->szStdErrFilename, BPSRV_AUTO) == 0) {
             WCHAR lsn[1024];
             aErr = TRUE;
             wcsncpy(lsn, lpCmdline->szApplication, 1020);
@@ -450,7 +450,7 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     }
     /* Check the startup mode */
     if ((ST_STARTUP & APXCMDOPT_FOUND) &&
-        lstrcmpiW(SO_STARTUP, PRSRV_AUTO) == 0)
+        lstrcmpiW(SO_STARTUP, BPSRV_AUTO) == 0)
         dwStart = SERVICE_AUTO_START;
     /* Check the service type */
     if ((ST_TYPE & APXCMDOPT_FOUND) &&
@@ -605,9 +605,9 @@ static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline)
                                        sp));
         /* Update the --Startup mode */
         if (ST_STARTUP & APXCMDOPT_FOUND) {
-            if (!lstrcmpiW(SO_STARTUP, PRSRV_AUTO))
+            if (!lstrcmpiW(SO_STARTUP, BPSRV_AUTO))
                 dwStart = SERVICE_AUTO_START;
-            else if (!lstrcmpiW(SO_STARTUP, PRSRV_MANUAL))
+            else if (!lstrcmpiW(SO_STARTUP, BPSRV_MANUAL))
                 dwStart = SERVICE_DEMAND_START;
         }
         if (ST_TYPE & APXCMDOPT_FOUND) {
@@ -919,7 +919,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
                 PSECURITY_ATTRIBUTES sa = GetNullACL();
                 wcsncpy(en, L"Global\\", SIZ_DESLEN);
                 wcsncat(en, _service_name, SIZ_DESLEN);
-                wcsncat(en, PRSRV_SIGNAL, SIZ_DESLEN);
+                wcsncat(en, BPSRV_SIGNAL, SIZ_DESLEN);
                 for (i = 7; i < lstrlenW(en); i++) {
                     if (en[i] == L' ')
                         en[i] = L'_';
