@@ -110,7 +110,7 @@ sudo deimos shutdown
 #### Windows
 * To install
 ```batch
-phobos.exe install {service name} --MainJar={filname}.jar ...
+phobos.exe install {service name} --MainJar {filname}.jar --Jvm %JAVA_HOME%/bin/server/jvm.dll
 ```
 * To start the background process :
 ```sh
