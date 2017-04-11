@@ -27,7 +27,12 @@ import java.util.zip.ZipOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(EmbeddedClassLoader.class)
 public final class EmbeddedClassLoaderTest {
 
     private EmbeddedClassLoader instance;
@@ -37,8 +42,10 @@ public final class EmbeddedClassLoaderTest {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ZipOutputStream zos = new ZipOutputStream(baos);
         ZipEntry entry = new ZipEntry("io/zatarox/satellite/impl/embedded.txt");
-
         zos.putNextEntry(entry);
+        entry = new ZipEntry(this.getClass().getName().replaceAll(".", "/") + ".class");
+        zos.putNextEntry(entry);
+        
         zos.closeEntry();
         instance = new EmbeddedClassLoader(baos.toByteArray());
     }
@@ -47,6 +54,32 @@ public final class EmbeddedClassLoaderTest {
     public void getResourceAsStream() {
         assertNull(instance.getResourceAsStream("undefined.properties"));
         assertNotNull(instance.getResourceAsStream("io/zatarox/satellite/impl/embedded.txt"));
+    }
+    
+    
+    @Test
+    public void findClass() throws ClassNotFoundException{
+        Class<?> obj = instance.findClass(this.getClass().getName());
+        assertNotSame(EmbeddedClassLoaderTest.class, obj);
+        assertEquals(EmbeddedClassLoaderTest.class.getName(), obj.getName());
+    }
+    
+    @Test(expected = ClassNotFoundException.class)
+    public void findUndefinedClass() throws ClassNotFoundException{
+        instance.findClass("io.zatarox.satellite.impl.undefined");
+        fail();
+    }
+    
+    @Test
+    public void createBootstrap() throws Exception {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ZipOutputStream zos = new ZipOutputStream(baos);
+        ZipEntry entry = new ZipEntry(BackgroundWrapper.class.getName().replaceAll(".", "/") + ".class");
+        zos.putNextEntry(entry);
+        
+        zos.closeEntry();
+        final Object wrapper = EmbeddedClassLoader.createBootstrap(baos.toByteArray());
+        assertEquals(BackgroundWrapper.class.getName(), wrapper.getClass().getName());
     }
 
 }
