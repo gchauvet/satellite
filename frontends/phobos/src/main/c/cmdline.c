@@ -259,8 +259,8 @@ void apxCmdlineFree(
 
 /*
  * Environment variables parsing
- * Each variable is prfixed with PR_
- * for example 'set PR_JVM=auto' has a same meaning as providing '--Jvm auto'
+ * Each variable is prfixed with BP_
+ * for example 'set BP_JVM=auto' has a same meaning as providing '--Jvm auto'
  * on the command line.
  * Multistring variables are added to the present conf.
  */
@@ -275,7 +275,7 @@ void apxCmdlineLoadEnvVars(
     while (lpCmdline->lpOptions[i].szName) {
         DWORD l;
         WCHAR szVar[SIZ_HUGLEN];
-        wcsncpy(szEnv, L"PR_", 64);
+        wcsncpy(szEnv, L"BP_", 64);
         wcsncat(szEnv, lpCmdline->lpOptions[i].szName, 64);
         l = GetEnvironmentVariableW(szEnv, szVar, SIZ_HUGMAX);
         if (l == 0 || l >= SIZ_HUGMAX) {
