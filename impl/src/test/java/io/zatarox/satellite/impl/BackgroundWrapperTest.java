@@ -21,9 +21,7 @@
  */
 package io.zatarox.satellite.impl;
 
-import io.zatarox.satellite.BackgroundContext;
-import io.zatarox.satellite.BackgroundException;
-import io.zatarox.satellite.BackgroundProcess;
+import io.zatarox.satellite.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,16 +31,19 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(BackgroundWrapper.class)
 public final class BackgroundWrapperTest {
 
     private BackgroundWrapper instance;
     private static File filename;
+    private static boolean raiseException;
 
     @BeforeClass
     public static void setBefore() throws Exception {
@@ -70,13 +71,26 @@ public final class BackgroundWrapperTest {
     @Before
     public void setUp() {
         instance = new BackgroundWrapper(BackgroundWrapper.class.getClassLoader());
+        raiseException = false;
         assertTrue(instance.load(filename.getPath(), null));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void noClassloaderProvided() {
+        instance = new BackgroundWrapper(null);
+        fail();
     }
 
     @Test
     public void check() {
         assertTrue(instance.check(FakeBackgroundProcessImpl.class.getName()));
         assertFalse(instance.check("io.zatarox.satellite.undefined"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void checkNull() {
+        instance.check(null);
+        fail();
     }
 
     @Test
@@ -94,10 +108,20 @@ public final class BackgroundWrapperTest {
         assertTrue(instance.shutdown());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void exception() {
+        raiseException = true;
+        instance = new BackgroundWrapper(BackgroundWrapper.class.getClassLoader());
+        assertFalse(instance.load(filename.getPath(), null));
+    }
+
     public static final class FakeBackgroundProcessImpl implements BackgroundProcess {
 
         @Override
         public void initialize(BackgroundContext context) throws BackgroundException, Exception {
+            if (raiseException) {
+                throw new BackgroundException("Test", new IllegalArgumentException("tester"));
+            }
         }
 
         @Override
@@ -111,7 +135,6 @@ public final class BackgroundWrapperTest {
         @Override
         public void shutdown() {
         }
-
     }
 
 }
