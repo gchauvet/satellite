@@ -1009,24 +1009,19 @@ void __cdecl main(int argc, char **argv)
     memset(&gStdwrap, 0, sizeof(APX_STDWRAP));
     gStartPath = lpCmdline->szExePath;
     gStdwrap.szLogPath = SO_LOGPATH;
-    /* In debug mode allways use console */
-    if (lpCmdline->dwCmdIndex != 1) {
-        gStdwrap.szStdOutFilename = SO_STDOUTPUT;
-        gStdwrap.szStdErrFilename = SO_STDERROR;
-    }
+    gStdwrap.szStdOutFilename = SO_STDOUTPUT;
+    gStdwrap.szStdErrFilename = SO_STDERROR;
     redirectStdStreams(&gStdwrap, lpCmdline);
-    if (lpCmdline->dwCmdIndex == 2) {
-        SYSTEMTIME t;
-        GetLocalTime(&t);
-        fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
-                        "Phobos stdout initialized\n",
-                        t.wYear, t.wMonth, t.wDay,
-                        t.wHour, t.wMinute, t.wSecond);
-        fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
-                        "Phobos stderr initialized\n",
-                        t.wYear, t.wMonth, t.wDay,
-                        t.wHour, t.wMinute, t.wSecond);
-    }
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+    fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
+                    "Phobos stdout initialized\n",
+                    t.wYear, t.wMonth, t.wDay,
+                    t.wHour, t.wMinute, t.wSecond);
+    fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
+                    "Phobos stderr initialized\n",
+                    t.wYear, t.wMonth, t.wDay,
+                    t.wHour, t.wMinute, t.wSecond);
 
     switch (lpCmdline->dwCmdIndex) {
         case 1: /* Run Service */
