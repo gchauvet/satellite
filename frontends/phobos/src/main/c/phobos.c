@@ -102,26 +102,25 @@ static APXCMDLINEOPT _options[] = {
 /* 10 */    { L"Password",          L"Password",        NULL,           APXCMDOPT_BIN | APXCMDOPT_REG, NULL, 0},
 /* 11 */    { L"LibraryPath",       L"LibraryPath",     NULL,           APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 
-/* 12 */    { L"JavaHome",          L"JavaHome",        L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 13 */    { L"Jvm",               L"Jvm",             L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 14 */    { L"JvmOptions",        L"Options",         L"Java",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 15 */    { L"Classpath",         L"Classpath",       L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 16 */    { L"JvmMs",             L"JvmMs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 17 */    { L"JvmMx",             L"JvmMx",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 18 */    { L"JvmSs",             L"JvmSs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 12 */    { L"Jvm",               L"Jvm",             L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 13 */    { L"JvmOptions",        L"Options",         L"Java",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+/* 14 */    { L"Classpath",         L"Classpath",       L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 15 */    { L"JvmMs",             L"JvmMs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 16 */    { L"JvmMx",             L"JvmMx",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 17 */    { L"JvmSs",             L"JvmSs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
 
-/* 19 */    { L"StopTimeout",       L"Timeout",         L"Conf",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 20 */    { L"StartPath",         L"WorkingPath",     L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 21 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 22 */    { L"Arguments",         L"Params",          L"Conf",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+/* 18 */    { L"StopTimeout",       L"Timeout",         L"Conf",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 19 */    { L"StartPath",         L"WorkingPath",     L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 20 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 21 */    { L"Arguments",         L"Params",          L"Conf",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
 
-/* 23 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 24 */    { L"LogPrefix",         L"Prefix",          L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 25 */    { L"LogLevel",          L"Level",           L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 26 */    { L"StdError",          L"StdError",        L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 27 */    { L"StdOutput",         L"StdOutput",       L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 28 */    { L"LogJniMessages",    L"LogJniMessages",  L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
-/* 29 */    { L"Rotate",            L"Rotate",          L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+/* 22 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 23 */    { L"LogPrefix",         L"Prefix",          L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 24 */    { L"LogLevel",          L"Level",           L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+/* 25 */    { L"StdError",          L"StdError",        L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 26 */    { L"StdOutput",         L"StdOutput",       L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 27 */    { L"LogJniMessages",    L"LogJniMessages",  L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
+/* 28 */    { L"Rotate",            L"Rotate",          L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
             /* NULL terminate the array */
             { NULL }
 };
@@ -153,28 +152,27 @@ static APXCMDLINEOPT _options[] = {
 #define SO_PASSWORD         GET_OPT_V(10)
 #define SO_LIBPATH          GET_OPT_V(11)
 
-#define SO_JAVAHOME         GET_OPT_V(12)
-#define SO_JVM              GET_OPT_V(13)
-#define SO_JVMOPTIONS       GET_OPT_V(14)
-#define SO_CLASSPATH        GET_OPT_V(15)
-#define SO_JVMMS            GET_OPT_I(16)
-#define SO_JVMMX            GET_OPT_I(17)
-#define SO_JVMSS            GET_OPT_I(18)
+#define SO_JVM              GET_OPT_V(12)
+#define SO_JVMOPTIONS       GET_OPT_V(13)
+#define SO_CLASSPATH        GET_OPT_V(14)
+#define SO_JVMMS            GET_OPT_I(15)
+#define SO_JVMMX            GET_OPT_I(16)
+#define SO_JVMSS            GET_OPT_I(17)
 
-#define SO_STOPTIMEOUT      GET_OPT_I(19)
+#define SO_STOPTIMEOUT      GET_OPT_I(18)
 
-#define SO_STARTPATH        GET_OPT_V(20)
-#define SO_MAINJAR          GET_OPT_V(21)
-#define SO_ARGUMENTS        GET_OPT_V(22)
+#define SO_STARTPATH        GET_OPT_V(19)
+#define SO_MAINJAR          GET_OPT_V(20)
+#define SO_ARGUMENTS        GET_OPT_V(21)
 
-#define SO_LOGPATH          GET_OPT_V(23)
-#define SO_LOGPREFIX        GET_OPT_V(24)
-#define SO_LOGLEVEL         GET_OPT_V(25)
+#define SO_LOGPATH          GET_OPT_V(22)
+#define SO_LOGPREFIX        GET_OPT_V(23)
+#define SO_LOGLEVEL         GET_OPT_V(24)
 
-#define SO_STDERROR         GET_OPT_V(26)
-#define SO_STDOUTPUT        GET_OPT_V(27)
-#define SO_JNIVFPRINTF      GET_OPT_I(28)
-#define SO_LOGROTATE        GET_OPT_I(29)
+#define SO_STDERROR         GET_OPT_V(25)
+#define SO_STDOUTPUT        GET_OPT_V(26)
+#define SO_JNIVFPRINTF      GET_OPT_I(27)
+#define SO_LOGROTATE        GET_OPT_I(28)
 
 static SERVICE_STATUS        _service_status;
 static SERVICE_STATUS_HANDLE _service_status_handle = NULL;

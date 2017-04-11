@@ -93,43 +93,6 @@ static void __apxPoolFreeCore(LPVOID lpMem)
         return;
     HeapFREE(hPool->hHeap, 0, lpBlock);
 }
-/*
- *
- */
-static DWORD WINAPI __apxHandleEventThread(LPVOID lpParameter)
-{
-    APXHANDLE hHandle = (APXHANDLE)lpParameter;
-    DWORD rv = 0;
-    while (hHandle->dwType != APXHANDLE_TYPE_INVALID) {
-        DWORD dwState;
-        dwState = WaitForSingleObject(hHandle->hEventHandle, INFINITE);
-        /* the flags can be changed to invalid meaning we are killing
-         * this event.
-         */
-        if (dwState == WAIT_OBJECT_0 &&
-            hHandle->dwType != APXHANDLE_TYPE_INVALID) {
-            if (hHandle->uMsg && (hHandle->wParam || hHandle->lParam)) {
-                APXCALLHOOK *lpCall;
-                rv = (*hHandle->fnCallback)(hHandle, hHandle->uMsg,
-                                            hHandle->wParam, hHandle->lParam);
-                TAILQ_FOREACH(lpCall, &hHandle->lCallbacks, queue) {
-                    (*lpCall->fnCallback)(hHandle, hHandle->uMsg,
-                                          hHandle->wParam, hHandle->lParam);
-                }
-                hHandle->uMsg = 0;
-                if (!rv)
-                    break;
-            }
-            ResetEvent(hHandle->hEventHandle);
-            SwitchToThread();
-        }
-        else
-            break;
-    }
-    ResetEvent(hHandle->hEventHandle);
-    /* This will rise the Thread waiting function */
-    return 0;
-}
 
 static BOOL __apxPoolCallback(APXHANDLE hObject, UINT uMsg,
                               WPARAM wParam, LPARAM lParam)

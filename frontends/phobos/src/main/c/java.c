@@ -159,44 +159,31 @@ static __inline BOOL __apxJvmDetach(LPAPXJAVAVM lpJava)
 static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
 {
     UINT errMode;
-    WCHAR  jreAltPath[SIZ_PATHLEN];
-    LPWSTR dllJvmPath = (LPWSTR)szJvmDllPath;
     DYNLOAD_FPTR_DECLARE(SetDllDirectoryW);
 
     if (!IS_INVALID_HANDLE(_st_sys_jvmDllHandle))
         return TRUE;    /* jvm.dll is already loaded */
 
-    if (dllJvmPath && *dllJvmPath) {
+    if (szJvmDllPath && *szJvmDllPath) {
         /* Explicit JVM path.
          * Check if provided argument is valid
          */
-        if (GetFileAttributesW(dllJvmPath) == INVALID_FILE_ATTRIBUTES) {
-            apxLogWrite(APXLOG_MARK_DEBUG "Invalid RuntimeLib specified '%S'", dllJvmPath);
+        if (GetFileAttributesW(szJvmDllPath) == INVALID_FILE_ATTRIBUTES) {
+            apxLogWrite(APXLOG_MARK_ERROR "Invalid RuntimeLib specified '%S'", szJvmDllPath);
             return FALSE;
         }
     }
     else {
-        dllJvmPath = apxGetJavaSoftRuntimeLib(NULL);
-        if (!dllJvmPath)
-            return FALSE;
-    }
-    if (GetFileAttributesW(dllJvmPath) == INVALID_FILE_ATTRIBUTES) {
-        LPWSTR szJreHome = apxGetJavaSoftHome(NULL, TRUE);
-        apxLogWrite(APXLOG_MARK_DEBUG "Invalid RuntimeLib '%S'", dllJvmPath);
-        if (szJreHome) {
-            apxLogWrite(APXLOG_MARK_DEBUG "Using Jre JavaHome '%S'", szJreHome);
-            wcsncpy(jreAltPath, szJreHome, SIZ_PATHLEN);
-            wcsncat(jreAltPath, L"\\bin\\server\\jvm.dll", SIZ_PATHLEN);
-            dllJvmPath = jreAltPath;
-        }
+        apxLogWrite(APXLOG_MARK_DEBUG "No JVM shared library specified");
+        return FALSE;
     }
     /* Suppress the not found system popup message */
     errMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 
-    apxLogWrite(APXLOG_MARK_DEBUG "loading jvm '%S'", dllJvmPath);
-    _st_sys_jvmDllHandle = LoadLibraryExW(dllJvmPath, NULL, 0);
+    apxLogWrite(APXLOG_MARK_DEBUG "loading jvm '%S'", szJvmDllPath);
+    _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, 0);
     if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle) &&
-        GetFileAttributesW(dllJvmPath) != INVALID_FILE_ATTRIBUTES) {
+        GetFileAttributesW(szJvmDllPath) != INVALID_FILE_ATTRIBUTES) {
         /* There is a file but cannot be loaded.
          * Try to load the MSVCRTxx.dll before JVM.dll
          */
@@ -204,7 +191,7 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         WCHAR  crtBinPath[SIZ_PATHLEN];
         DWORD  i, l = 0;
 
-        wcsncpy(jreBinPath, dllJvmPath, SIZ_PATHLEN);
+        wcsncpy(jreBinPath, szJvmDllPath, SIZ_PATHLEN);
         for (i = lstrlenW(jreBinPath); i > 0, l < 2; i--) {
             if (jreBinPath[i] == L'\\' || jreBinPath[i] == L'/') {
                 jreBinPath[i] = L'\0';
@@ -222,28 +209,25 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
     }
     /* This shuldn't happen, but try to search in %PATH% */
     if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle))
-        _st_sys_jvmDllHandle = LoadLibraryExW(dllJvmPath, NULL,
-                                              LOAD_WITH_ALTERED_SEARCH_PATH);
+        _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle)) {
         WCHAR  jreBinPath[SIZ_PATHLEN];
         DWORD  i, l = 0;
 
-        wcsncpy(jreBinPath, dllJvmPath, SIZ_PATHLEN);
+        wcsncpy(jreBinPath, szJvmDllPath, SIZ_PATHLEN);
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         for (i = lstrlenW(jreBinPath); i > 0, l < 2; i--) {
             if (jreBinPath[i] == L'\\' || jreBinPath[i] == L'/') {
                 jreBinPath[i] = L'\0';
                 DYNLOAD_CALL(SetDllDirectoryW)(jreBinPath);
-                apxLogWrite(APXLOG_MARK_DEBUG "Setting DLL search path to '%S'",
-                            jreBinPath);
+                apxLogWrite(APXLOG_MARK_DEBUG "Setting DLL search path to '%S'", jreBinPath);
                 l++;
             }
         }
-        _st_sys_jvmDllHandle = LoadLibraryExW(dllJvmPath, NULL, 0);
+        _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, 0);
         if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle))
-            _st_sys_jvmDllHandle = LoadLibraryExW(dllJvmPath, NULL,
-                                                  LOAD_WITH_ALTERED_SEARCH_PATH);
+            _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     }
     /* Restore the error mode signalization */
     SetErrorMode(errMode);

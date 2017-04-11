@@ -57,16 +57,6 @@ extern BOOL      apxDeleteRegistryW(LPCWSTR szRoot, LPCWSTR szKeyName,
 #define apxDeleteRegistry   apxDeleteRegistryA
 #endif
 
-/** Get the JavaHome path from registry
- * and set the JAVA_HOME environment variable if not found
- * If bPreferJre is set use the JRE's path as JAVA_HOME
- */
-extern LPWSTR    apxGetJavaSoftHome(APXHANDLE hPool, BOOL bPreferJre);
-
-/** Get the Java RuntimeLib from registry (jvm.dll)
- */
-extern LPWSTR    apxGetJavaSoftRuntimeLib(APXHANDLE hPool);
-
 extern LPSTR     apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
                                 LPCSTR szSubkey, LPCSTR szValueName);
 
