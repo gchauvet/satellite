@@ -225,8 +225,7 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
          */
         if (!aOut)
             DeleteFileW(lpWrapper->szStdOutFilename);
-        if ((lpWrapper->fpStdOutFile = _wfopen(lpWrapper->szStdOutFilename,
-                                               L"a"))) {
+        if ((lpWrapper->fpStdOutFile = _wfopen(lpWrapper->szStdOutFilename, L"a"))) {
             _dup2(_fileno(lpWrapper->fpStdOutFile), 1);
             *stdout = *lpWrapper->fpStdOutFile;
             setvbuf(stdout, NULL, _IONBF, 0);
@@ -270,19 +269,18 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
 static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
 {
     int i = 0;
-    fwprintf(stderr, L"Usage: %s command [ServiceName] [--options]\n",
-             lpCmdline->szExecutable);
-    fwprintf(stderr, L"  Commands:\n");
+    fwprintf(stderr, L"Usage:\n\t%s command [ServiceName] [--options]\n", lpCmdline->szExecutable);
+    fwprintf(stderr, L"\nCommands:\n");
     if (isHelp)
-        fwprintf(stderr, L"  help                   This page\n");
-    fwprintf(stderr, L"  install [ServiceName]  Install Service\n");
-    fwprintf(stderr, L"  update  [ServiceName]  Update Service parameters\n");
-    fwprintf(stderr, L"  delete  [ServiceName]  Delete Service\n");
-    fwprintf(stderr, L"  service   [ServiceName]  Start Service (used by Microsoft Service Control Manager)\n");
-    fwprintf(stderr, L"  version                Display version\n");
-    fwprintf(stderr, L"  Options:\n");
+        fwprintf(stderr, L"\thelp\t\t\tThis page\n");
+    fwprintf(stderr, L"\tinstall\t[ServiceName]\tInstall Service\n");
+    fwprintf(stderr, L"\tupdate\t[ServiceName]\tUpdate Service parameters\n");
+    fwprintf(stderr, L"\tdelete\t[ServiceName]\tDelete Service\n");
+    fwprintf(stderr, L"\tlaunch\t[ServiceName]\tStart Service (used by Microsoft Service Control Manager)\n");
+    fwprintf(stderr, L"\tversion \t\tDisplay version\n");
+    fwprintf(stderr, L"\nOptions:\n");
     while (_options[i].szName) {
-        fwprintf(stderr, L"  --%s\n", _options[i].szName);
+        fwprintf(stderr, L"\t--%s\n", _options[i].szName);
         ++i;
     }
 }
