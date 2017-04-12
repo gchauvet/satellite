@@ -565,19 +565,19 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
 
     if (lpJava->iVmCount) {
         if (!lpJava->lpEnv && !__apxJvmAttach(lpJava)) {
-            if (lpJava->iVersion == JNI_VERSION_1_2) {
+            if (lpJava->iVersion < JNI_VERSION_DEFAULT) {
                 apxLogWrite(APXLOG_MARK_ERROR "Unable To Attach the JVM");
                 return FALSE;
             }
             else
-                lpJava->iVersion = JNI_VERSION_1_2;
+                lpJava->iVersion = JNI_VERSION_DEFAULT;
             if (!__apxJvmAttach(lpJava)) {
                 apxLogWrite(APXLOG_MARK_ERROR "Unable To Attach the JVM");
                 return FALSE;
             }
         }
         lpJava->iVersion = JNICALL_0(GetVersion);
-        if (lpJava->iVersion < JNI_VERSION_1_2) {
+        if (lpJava->iVersion < JNI_VERSION_DEFAULT) {
             apxLogWrite(APXLOG_MARK_ERROR "Unsupported JNI version %#08x", lpJava->iVersion);
             return FALSE;
         }
@@ -670,8 +670,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
     jArgs = JNICALL_3(NewObjectArray, nArgs, JNICALL_1(FindClass, "java/lang/String"), NULL);
     if (nArgs) {
         for (DWORD i = 0; i < nArgs; i++) {
-            jstring arg = JNICALL_2(NewString, lpArgs[i], lstrlenW(lpArgs[i]));
-            JNICALL_3(SetObjectArrayElement, jArgs, i, arg);
+            JNICALL_3(SetObjectArrayElement, jArgs, i, JNICALL_2(NewString, lpArgs[i], lstrlenW(lpArgs[i])));
             apxLogWrite(APXLOG_MARK_DEBUG "argv[%d] = %S", i, lpArgs[i]);
         }
     }
