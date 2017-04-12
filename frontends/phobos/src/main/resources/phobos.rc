@@ -56,7 +56,7 @@ BEGIN
       VALUE "FileDescription", RSTR_PHOBOS "\0"
       VALUE "FileVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
       VALUE "InternalName", RSTR_PHOBOS "\0"
-      VALUE "LegalCopyright", "Copyright (c) 2017 Zatarox.\0"
+      VALUE "LegalCopyright", "Copyright (c) 2017 Zatarox\0"
       VALUE "OriginalFilename", "phobos.exe\0"
       VALUE "ProductName", RSTR_PHOBOS "\0"
       VALUE "ProductVersion", STR(PRG_VERSION_MAJOR) "." STR(PRG_VERSION_MINOR) "." STR(PRG_VERSION_PATCH)
