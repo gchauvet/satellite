@@ -86,51 +86,5 @@ Finally, add a manifest entry in your main jar (and dependency jars OFC).
 </plugin>
 ```
 
-### Usage
-
-#### Linux
-Installation
-```
-See script provided in deimos submodule directory and adapt it to your unix environment
-```
-* To start the background process :
-```sh
-sudo deimos -home $JAVA_HOME {filename}.jar
-```
-* To pause the background process :
-```sh
-sudo deimos pause
-```
-* To resume the background process :
-```sh
-sudo deimos resume
-```
-* To stop the background process :
-```sh
-sudo deimos shutdown
-```
-
-#### Windows
-* To install
-```batch
-phobos.exe install {service name} --MainJar {filname}.jar --Home %JAVA_HOME%
-```
-* To start the background process :
-```sh
-net start {service name}
-```
-* To pause the background process :
-```sh
-net pause {service name}
-```
-* To resume the background process :
-```sh
-net continue {service name}
-```
-* To stop the background process :
-```sh
-net stop {service name}
-```
-
 ## Inspiration
 This project is based on Apache Commons Daemon.
