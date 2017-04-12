@@ -21,7 +21,10 @@ Compilation process is performed under Linux. Cross-compilation fanboy :-)
 * libc6-dev-i386
 
 ## Satellite in action
-Writing an independent OS background process become pretty simple. The first step is to implement a java interface who manage background process behaviors. The second step require `Phobos` or `Deimos` depending if you are under Windows or Linux
+Writing an independent OS background process become pretty simple. The first step is to implement a java interface who manage background process behaviors. The second step require `Phobos` or `Deimos` depending if you are under Windows or Linux. The Daemon behavior has been designed as the same manner as Windows service. Under Windows, only certain service state transitions are valid. The following diagram shows the valid transitions (credits to Microsoft) :
+<p align="center">
+  <img src="https://i-msdn.sec.s-msft.com/dynimg/IC498931.png"/>
+</p>
 
 ### Dependency
 In your Maven POM project, add the Satellite API dependency (check latest version):
