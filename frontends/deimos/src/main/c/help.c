@@ -106,7 +106,7 @@ void help(home_data *data)
     printf("        continue the service using the file given in the -pidfile option\n");
     
     printf("\nDeimos (Satellite Project) " DEIMOS_VERSION_STRING "\n");
-    printf("Copyright 2017 Zatarox.\n");
+    printf("Copyright 2017 Zatarox\n");
 
     printf("\n");
 }

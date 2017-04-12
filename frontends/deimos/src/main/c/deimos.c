@@ -806,7 +806,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
     /* Check wether we need to dump the VM version */
     if (args->vers == true) {
         log_error("Deimos (Satellite Project) " DEIMOS_VERSION_STRING);
-        log_error("Copyright 2017 Zatarox.");
+        log_error("Copyright 2017 Zatarox");
         if (java_version() != true) {
             return -1;
         }
