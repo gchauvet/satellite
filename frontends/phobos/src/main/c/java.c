@@ -661,6 +661,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
     jarray      jArgs;
     LPAPXJAVAVM lpJava;
     jmethodID   method;
+    BOOL result;
     
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
@@ -678,10 +679,16 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
     
     method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), "load", "(Ljava/lang/String;[Ljava/lang/String;)Z");
     if (method == NULL) {
-        apxLogWrite(APXLOG_MARK_ERROR, "Cannot find \"load\" entry point");
+        apxLogWrite(APXLOG_MARK_ERROR "Cannot find \"load\" entry point");
         return FALSE;
     }
-    return JNICALL_4(CallBooleanMethod, lpJava->jWrapper, method, (apxJavaCreateStringA(hJava, szJarName)), jArgs) == JNI_TRUE ? TRUE : FALSE;
+    result = JNICALL_4(CallBooleanMethod, lpJava->jWrapper, method, (apxJavaCreateStringA(hJava, szJarName)), jArgs) == JNI_TRUE ? TRUE : FALSE;
+    if (JVM_EXCEPTION_CHECK(lpJava)) {
+        JVM_EXCEPTION_CLEAR(lpJava);
+        apxLogWrite(APXLOG_MARK_ERROR "A Java exception occurred");
+        result = FALSE;
+    }
+    return result;
 }
 
 static DWORD

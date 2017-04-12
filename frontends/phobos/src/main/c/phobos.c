@@ -924,7 +924,6 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
         }
     } else {
-        apxLogWrite(APXLOG_MARK_DEBUG "Failing JVM instantiation");
         exit(reportServiceStatusStopped(result)); // TODO: Stop service gracefully
     }
 }
