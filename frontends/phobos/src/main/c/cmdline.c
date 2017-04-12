@@ -33,15 +33,14 @@ static WCHAR    _st_sys_appexe[MAX_PATH];
  * argv parsing.
  * Parse the argv[0] and split to ExePath and
  * Executable name. Strip the extension ('.exe').
- * Check for command in argv[1] //CMD//Application
- * Parse the options --option value or --option==value
+ * Check for command in argv[1] [command] [Application]
+ * Parse the options --option value or --option=value
  * break on first argument that doesn't start with '--'
  */
 LPAPXCMDLINE apxCmdlineParse(
     APXHANDLE hPool,
     APXCMDLINEOPT   *lpOptions,
-    LPCWSTR         *lpszCommands,
-    LPCWSTR         *lpszAltcmds)
+    LPCWSTR         *lpszCommands)
 {
 
     LPAPXCMDLINE lpCmdline = NULL;
@@ -90,52 +89,24 @@ LPAPXCMDLINE apxCmdlineParse(
         LPWSTR cn = _st_sys_argc > 2 ? _st_sys_argvw[2] : NULL;
         LPWSTR ca = cp;
         i = 0;
-        if (ca[0] == L'/' && ca[1] == L'/') {
-            ca += 2;
-            if ((cn = wcschr(ca, L'/'))) {
-                *cn++ = L'\0';
-                while (*cn == L'/')
-                    cn++;
-                if (*cn == L'\0')
-                    cn = NULL;
-            }
-            if (cn == NULL)
-                cn = lpCmdline->szExecutable;
-            while (lpszCommands[i]) {
-                if (lstrcmpW(lpszCommands[i++], ca) == 0) {
-                    lpCmdline->dwCmdIndex = i;
-                    break;
-                }
-            }
-            if (lpCmdline->dwCmdIndex) {
-                lpCmdline->szApplication = cn;
-                s = 2;
-            }
-            else {
-                apxLogWrite(APXLOG_MARK_ERROR "Unrecognized cmd option %S", cp);
-                return NULL;
+        while (lpszCommands[i]) {
+            if (lstrcmpW(lpszCommands[i++], ca) == 0) {
+                lpCmdline->dwCmdIndex = i;
+                break;
             }
         }
+        if (lpCmdline->dwCmdIndex) {
+            s = 2;
+            if (cn && iswalnum(*cn)) {
+                s++;
+                lpCmdline->szApplication = cn;
+            }
+            else
+                lpCmdline->szApplication = lpCmdline->szExecutable;
+        }
         else {
-            while (lpszAltcmds[i]) {
-                if (lstrcmpW(lpszAltcmds[i++], ca) == 0) {
-                    lpCmdline->dwCmdIndex = i;
-                    break;
-                }
-            }
-            if (lpCmdline->dwCmdIndex) {
-                s = 2;
-                if (cn && iswalnum(*cn)) {
-                    s++;
-                    lpCmdline->szApplication = cn;
-                }
-                else
-                    lpCmdline->szApplication = lpCmdline->szExecutable;
-            }
-            else {
-                apxLogWrite(APXLOG_MARK_ERROR "Unrecognized cmd option %S", cp);
-                return NULL;
-            }
+            apxLogWrite(APXLOG_MARK_ERROR "Unrecognized cmd option %S", cp);
+            return NULL;
         }
     }
     else {
