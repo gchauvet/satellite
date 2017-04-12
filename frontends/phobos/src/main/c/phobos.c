@@ -18,7 +18,6 @@
  */
 
 /* Force the JNI vprintf functions */
-#define _DEBUG_JNI  1
 #include "apxwin.h"
 #include "phobos.h"
 
@@ -66,16 +65,6 @@ static DWORD        timeout = 0;
 
 /* Allowed commands */
 static LPCWSTR _commands[] = {
-    L"LS",      /* 1 launch Service */
-    L"US",      /* 2 Update Service parameters */
-    L"IS",      /* 3 Install Service */
-    L"DS",      /* 4 Delete Service */
-    L"??",      /* 5 Help */
-    L"VS",      /* 6 Version */
-    NULL
-};
-
-static LPCWSTR _altcmds[] = {
     L"launch",     /* 1 Run Service */
     L"update",      /* 2 Update Service parameters */
     L"install",     /* 3 Install Service */
@@ -775,7 +764,6 @@ static int serviceInit()
 {
     DWORD  rv = 0;
     FILETIME fts;
-    APXJAVA_INIT gArgs;
     
     if (!IS_INVALID_HANDLE(gWorker)) {
         apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
@@ -803,37 +791,43 @@ static int serviceInit()
     setInprocEnvironment();
     /* Create the JVM global worker */
     gWorker = apxCreateJava(gPool, _jni_jvmpath);
-    
-    // Start init entry point
-    gArgs.szJarName        = _jni_mainjar;
-    gArgs.szClassPath      = _jni_classpath;
-    gArgs.lpOptions        = _jni_jvmoptions;
-    gArgs.lpArguments      = _jni_rparam;
-    gArgs.dwMs             = SO_JVMMS;
-    gArgs.dwMx             = SO_JVMMX;
-    gArgs.dwSs             = SO_JVMSS;
-    gArgs.szStdErrFilename = gStdwrap.szStdErrFilename;
-    gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
-    gArgs.szLibraryPath    = SO_LIBPATH;
-    gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
-    gArgs.failed           = &failed;
-    gArgs.shutdown         = &shutdown;
- 
-    if (!apxJavaInit(gWorker, &gArgs)) {
-        apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
+    if (IS_INVALID_HANDLE(gWorker)) {
+        apxLogWrite(APXLOG_MARK_ERROR "Failed to create a JVM instance");
         rv = 3;
-    } else {
-        FILETIME fte;
-        ULARGE_INTEGER s, e;
-        DWORD    nms;
+    } else{
+        APXJAVA_INIT gArgs;
 
-        GetSystemTimeAsFileTime(&fte);
-        s.LowPart  = fts.dwLowDateTime;
-        s.HighPart = fts.dwHighDateTime;
-        e.LowPart  = fte.dwLowDateTime;
-        e.HighPart = fte.dwHighDateTime;
-        nms = (DWORD)((e.QuadPart - s.QuadPart) / 10000);
-        apxLogWrite(APXLOG_MARK_INFO "Service started in %d ms.", nms);
+        // Start init entry point
+        gArgs.szJarName        = _jni_mainjar;
+        gArgs.szClassPath      = _jni_classpath;
+        gArgs.lpOptions        = _jni_jvmoptions;
+        gArgs.lpArguments      = _jni_rparam;
+        gArgs.dwMs             = SO_JVMMS;
+        gArgs.dwMx             = SO_JVMMX;
+        gArgs.dwSs             = SO_JVMSS;
+        gArgs.szStdErrFilename = gStdwrap.szStdErrFilename;
+        gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
+        gArgs.szLibraryPath    = SO_LIBPATH;
+        gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
+        gArgs.failed           = &failed;
+        gArgs.shutdown         = &shutdown;
+
+        if (!apxJavaInit(gWorker, &gArgs)) {
+            apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
+            rv = 3;
+        } else {
+            FILETIME fte;
+            ULARGE_INTEGER s, e;
+            DWORD    nms;
+
+            GetSystemTimeAsFileTime(&fte);
+            s.LowPart  = fts.dwLowDateTime;
+            s.HighPart = fts.dwHighDateTime;
+            e.LowPart  = fte.dwLowDateTime;
+            e.HighPart = fte.dwHighDateTime;
+            nms = (DWORD)((e.QuadPart - s.QuadPart) / 10000);
+            apxLogWrite(APXLOG_MARK_INFO "Service started in %d ms.", nms);
+        }
     }
     return rv;
 }
@@ -979,7 +973,7 @@ void __cdecl main(int argc, char **argv)
     gPool = apxPoolCreate(NULL, 0);
     
     /* Parse the command line */
-    if ((lpCmdline = apxCmdlineParse(gPool, _options, _commands, _altcmds)) == NULL) {
+    if ((lpCmdline = apxCmdlineParse(gPool, _options, _commands)) == NULL) {
         apxLogWrite(APXLOG_MARK_ERROR "Invalid command line arguments");
         rv = 1;
         goto cleanup;
