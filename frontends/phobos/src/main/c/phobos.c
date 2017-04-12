@@ -91,7 +91,7 @@ static APXCMDLINEOPT _options[] = {
 /* 10 */    { L"Password",          L"Password",        NULL,           APXCMDOPT_BIN | APXCMDOPT_REG, NULL, 0},
 /* 11 */    { L"LibraryPath",       L"LibraryPath",     NULL,           APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 
-/* 12 */    { L"Jvm",               L"Jvm",             L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+/* 12 */    { L"Home",              L"Home",            L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 /* 13 */    { L"JvmOptions",        L"Options",         L"Java",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
 /* 14 */    { L"Classpath",         L"Classpath",       L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 /* 15 */    { L"JvmMs",             L"JvmMs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
@@ -141,7 +141,7 @@ static APXCMDLINEOPT _options[] = {
 #define SO_PASSWORD         GET_OPT_V(10)
 #define SO_LIBPATH          GET_OPT_V(11)
 
-#define SO_JVM              GET_OPT_V(12)
+#define SO_JAVAHOME         GET_OPT_V(12)
 #define SO_JVMOPTIONS       GET_OPT_V(13)
 #define SO_CLASSPATH        GET_OPT_V(14)
 #define SO_JVMMS            GET_OPT_I(15)
@@ -883,7 +883,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
     apxLogWrite(APXLOG_MARK_DEBUG "Inside ServiceMain...");
 
     /* Find the classpath */
-    _jni_jvmpath = SO_JVM;
+    _jni_jvmpath = SO_JAVAHOME;
     _jni_rparam = SO_ARGUMENTS;
     _jni_classpath = WideToANSI(SO_CLASSPATH);
     _jni_mainjar = WideToANSI(SO_MAINJAR);

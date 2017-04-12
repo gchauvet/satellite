@@ -327,13 +327,17 @@ apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
 }
 
 APXHANDLE
-apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmDllPath)
+apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath)
 {
     APXHANDLE    hJava;
     LPAPXJAVAVM  lpJava;
     jsize        iVmCount;
     JavaVM       *lpJvm = NULL;
+    WCHAR        szJvmDllPath[SIZ_PATHLEN];
 
+    wcsncpy(szJvmDllPath, szJvmPath, SIZ_PATHLEN);
+    wcsncat(szJvmDllPath, L"\\bin\\server\\jvm.dll", SIZ_PATHLEN);
+    
     if (!__apxLoadJvmDll(szJvmDllPath))
         return NULL;
 
@@ -869,23 +873,6 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
     }
     else
         return TRUE;
-}
-
-void
-apxJavaDumpAllStacks(APXHANDLE hJava)
-{
-    BOOL bAttached;
-    LPAPXJAVAVM lpJava;
-    JNIEnv *lpEnv = NULL;
-
-    if (DYNLOAD_FPTR(JVM_DumpAllStacks) == NULL)
-        return;
-    lpJava = APXHANDLE_DATA(hJava);
-    if (__apxJvmAttachEnv(lpJava, &lpEnv, &bAttached)) {
-        DYNLOAD_FPTR(JVM_DumpAllStacks)(lpEnv, NULL);
-        if (bAttached)
-            (*(lpJava->lpJvm))->DetachCurrentThread(lpJava->lpJvm);
-    }
 }
 
 BOOL
