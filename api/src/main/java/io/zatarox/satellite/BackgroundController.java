@@ -47,13 +47,13 @@ public interface BackgroundController {
     /**
      * Shuts down the background process and logs failed message.
      */
-    public void fail(Exception exception)
+    public void fail(Throwable exception)
             throws IllegalStateException;
 
     /**
      * Shuts down the background process and logs failed message.
      */
-    public void fail(String message, Exception exception)
+    public void fail(String message, Throwable exception)
             throws IllegalStateException;
 
 }

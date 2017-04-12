@@ -82,6 +82,14 @@ public final class BackgroundWrapper {
             if (jarName == null) {
                 throw new IllegalArgumentException("No main jar provided");
             }
+
+            controller = new Controller();
+            /* Set the availability flag in the controller */
+            controller.setAvailable(false);
+            
+            final Context context = new Context();
+            context.setArguments(args != null ? args : new String[0]);
+            context.setController(controller);
             
             final File jar = new File(jarName);
             final ZipFile archive = new ZipFile(jar);
@@ -106,28 +114,20 @@ public final class BackgroundWrapper {
             final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), this.loader);
             final Class<?> c = Class.forName(manifest.getMainAttributes().getValue("Background-Process-Class"), true, loader);
             instance = c.newInstance();
-            controller = new Controller();
-            /* Set the availability flag in the controller */
-            controller.setAvailable(false);
-
-            /* Create context */
-            final Context context = new Context();
-            context.setArguments(args != null ? args : new String[0]);
-            context.setController(controller);
             ((BackgroundProcess) instance).initialize(context);
             result = true;
         } catch (InvocationTargetException e) {
-            Throwable thrown = e.getTargetException();
+            final Throwable thrown = e.getTargetException();
             /* BackgroundExceptions can fail with a nicer message */
             if (thrown instanceof BackgroundException) {
                 failed(((BackgroundException) thrown).getMessageWithCause());
             } else {
                 controller.fail(e);
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             /* In case we encounter ANY error, we dump the stack trace and
-             * return false (load, resume and pause won't be called).
-             */
+            * return false (load, resume and pause won't be called).
+            */
             controller.fail(ex);
         }
         /* The class was loaded and instantiated correctly, we can return */
@@ -137,11 +137,12 @@ public final class BackgroundWrapper {
     public boolean resume() {
         try {
             /* Attempt to resume the background process */
-            ((BackgroundProcess) instance).resume();
+            if(instance != null)
+                ((BackgroundProcess) instance).resume();
             /* Set the availability flag in the controller */
             if (controller != null)
                 controller.setAvailable(true);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
              */
@@ -157,8 +158,9 @@ public final class BackgroundWrapper {
             if (controller != null)
                 controller.setAvailable(false);
             /* Attempt to pause the background process */
-            ((BackgroundProcess) instance).pause();
-        } catch (Exception ex) {
+            if(instance != null)
+                ((BackgroundProcess) instance).pause();
+        } catch (Throwable ex) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
              */
@@ -171,10 +173,11 @@ public final class BackgroundWrapper {
     public boolean shutdown() {
         try {
             /* Attempt to shutdown the background process */
-            ((BackgroundProcess) instance).shutdown();
+            if(instance != null)
+                ((BackgroundProcess) instance).shutdown();
             instance = null;
             controller = null;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             /* In case we encounter ANY error, we dump the stack trace and
              * return false (load, resume and pause won't be called).
              */
@@ -225,21 +228,13 @@ public final class BackgroundWrapper {
             fail(message, null);
         }
         
-        public void fail(Exception exception) {
+        public void fail(Throwable exception) {
             fail(null, exception);
         }
         
-        public synchronized void fail(String message, Exception exception) {
+        public synchronized void fail(String message, Throwable exception) {
             this.setAvailable(false);
-            String msg = message;
-            if (exception != null) {
-                if (msg != null) {
-                    msg = msg + ": " + exception.toString();
-                } else {
-                    msg = exception.toString();
-                }
-            }
-            BackgroundWrapper.this.failed(msg);
+            BackgroundWrapper.this.failed(new BackgroundException(message, exception).getMessageWithCause());
         }
         
     }
