@@ -40,7 +40,7 @@ public final class BackgroundExceptionTest {
     @Test
     public void getMessageWithCause() {
         final BackgroundException exception = new BackgroundException("test", new IllegalArgumentException("A test"));
-        assertEquals("test: java.lang.IllegalArgumentException: A test", exception.getMessageWithCause().split("\r\n")[0]);
+        assertTrue(exception.getMessageWithCause().startsWith("test: java.lang.IllegalArgumentException: A test"));
     }
 
 }
