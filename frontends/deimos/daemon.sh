@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 # Your service name
 SERVICE_NAME=test
 # Your daemon base directory
