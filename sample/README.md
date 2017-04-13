@@ -13,7 +13,7 @@ mvn clean package -Px86,x86_64 # if you want x86 and x86_64 frontends
 ```
 
 Your Maven target folder contains :
-* The main jar (satellite-sample-*.jar);
+* The main jar (satellite-sample*.jar);
 * A lib directory who containing required dependencies;
 * one or more frontends depending your previous chose building time (see previous step)
 
@@ -26,11 +26,10 @@ When service is running on your localhost, you can access to the service with th
 
 #### Linux
 The easy way is to adapt our shell script provided in the deimos root folder and edit them at your convenience.
-
-The hard way can be done like this :
+The hard way can be done like this (change directory to frontend folder) :
 * To start the background process :
 ```sh
-sudo deimos -home $JAVA_HOME {filename}.jar
+sudo deimos -home $JAVA_HOME satellite-sample*.jar
 ```
 * To pause the background process :
 ```sh
@@ -51,7 +50,7 @@ To manage multiple services, you must provide your own pid filename.
 
 * To install
 ```batch
-phobos.exe install "service name" --Home %JAVA_HOME% --MainJar {filename}.jar
+phobos.exe install "service name" --Home %JAVA_HOME% --MainJar satellite-sample-*.jar
 ```
 * To start the background process :
 ```sh
