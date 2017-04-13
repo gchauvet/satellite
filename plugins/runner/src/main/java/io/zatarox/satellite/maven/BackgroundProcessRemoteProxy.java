@@ -28,9 +28,23 @@ import java.rmi.RemoteException;
 public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemote {
 
     private final BackgroundProcess instance;
+    private final Thread guard;
 
     public BackgroundProcessRemoteProxy(BackgroundProcess instance) {
+        this(instance, new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.currentThread().join();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }));
+    }
+
+    public BackgroundProcessRemoteProxy(BackgroundProcess instance, Thread guard) {
         this.instance = instance;
+        this.guard = guard;
     }
 
     @Override
@@ -46,6 +60,10 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
     public void start() throws RemoteException {
         try {
             instance.resume();
+            if (guard != null) {
+                guard.start();
+                guard.join();
+            }
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage(), ex);
         }
@@ -63,6 +81,9 @@ public final class BackgroundProcessRemoteProxy implements BackgroundProcessRemo
     @Override
     public void destroy() {
         instance.shutdown();
+        if (guard != null) {
+            guard.stop();
+        }
     }
 
 }

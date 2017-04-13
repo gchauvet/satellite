@@ -71,3 +71,14 @@ net continue "service name"
 ```sh
 net stop "service name}"
 ```
+
+### Maven
+To launch your background process from Maven (initialize & resume methods) :
+```sh
+mvn io.zatarox.satellite:satellite-maven-plugin:start
+```
+
+To launch your background process from Maven (pause & shutdown methods) :
+```sh
+mvn io.zatarox.satellite:satellite-maven-plugin:stop
+```
