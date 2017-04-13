@@ -69,7 +69,7 @@ net continue "service name"
 ```
 * To stop the background process :
 ```sh
-net stop "service name}"
+net stop "service name"
 ```
 
 ### Maven
