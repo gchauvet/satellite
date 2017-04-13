@@ -23,11 +23,7 @@
 
 #include <jni.h>
 
-#ifdef JNI_VERSION_1_6
 #define JNI_VERSION_DEFAULT JNI_VERSION_1_6
-#else
-#define JNI_VERSION_DEFAULT JNI_VERSION_1_2
-#endif
 
 /* Standard jvm.dll prototypes
  * since only single jvm can exist per process
