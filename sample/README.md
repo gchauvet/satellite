@@ -25,8 +25,6 @@ When service is running on your localhost, you can access to the service with th
 * Stopping service (service shutdown) exit gracefully the JVM.
 
 #### Linux
-Installation
-
 The easy way is to adapt our shell script provided in the deimos root folder and edit them at your convenience.
 
 The hard way can be done like this :
