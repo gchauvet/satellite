@@ -10,6 +10,7 @@ This sample project demonstrate how to use our Satellite toolkit both on Windows
 ```sh
 cd sample
 mvn clean package -Px86,x86_64 # if you want x86 and x86_64 frontends
+cd target
 ```
 
 Your Maven target folder contains :
@@ -25,8 +26,7 @@ When service is running on your localhost, you can access to the service with th
 * Stopping service (service shutdown) exit gracefully the JVM.
 
 #### Linux
-The easy way is to adapt our shell script provided in the deimos root folder and edit them at your convenience.
-The hard way can be done like this (change directory to frontend folder) :
+The easy way is to adapt our shell script provided in the deimos root folder and edit them at your convenience. The hard way can be done like this :
 * To start the background process :
 ```sh
 sudo deimos -home $JAVA_HOME satellite-sample*.jar
