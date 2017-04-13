@@ -20,7 +20,7 @@ env:
   - TRGT_ARCH=x86_64
 
 install:
-  - "mvn install -DskipTests=true -DskipPkg=true -Dsatellite.arch=$TRGT_ARCH"
+  - "mvn install -DskipTests=true -DskipPkg=true -Dsatellite.arch=$TRGT_ARCH -pl :satellite-frontends -am"
 
 script:
-  - "mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report -Dsatellite.arch=$TRGT_ARCH -pl :satellite-impl -am"
+  - "mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report"

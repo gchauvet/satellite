@@ -1,3 +1,5 @@
 /**/nb-configuration.xml
 /**/target/
 **/nbactions.xml
+/settings.xml
+/frontends/bin/

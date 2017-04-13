@@ -27,7 +27,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.zatarox.satellite.natives</groupId>
+    <groupId>io.zatarox.satellite.frontends</groupId>
     <artifactId>phobos</artifactId>
     <packaging>pom</packaging>
     <name>Satellite :: Frontends :: Phobos</name>
@@ -52,7 +52,7 @@
                                 <argument>${cmake.generator}</argument>
                                 <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
-                                <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/target</argument>
+                                <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/..</argument>
                                 <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
                                 <argument>-DPRG_VERSION_MINOR=${parsedVersion.minorVersion}</argument>
                                 <argument>-DPRG_VERSION_PATCH=${parsedVersion.incrementalVersion}</argument>
@@ -70,30 +70,8 @@
                             <executable>make</executable>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                             <arguments>
-                                <argument>CFLAGS+=-Wunused-result</argument>
                                 <argument>install/strip</argument>
                             </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-install-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>install</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>io.zatarox.satellite.frontends</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <file>target/phobos.exe</file>
-                            <version>${project.version}</version>
-                            <packaging>exe</packaging>
-                            <classifier>${satellite.arch}</classifier>
-                            <createChecksum>true</createChecksum>
                         </configuration>
                     </execution>
                 </executions>
@@ -122,7 +100,6 @@
             </activation>
             <properties>
                 <cmake.toolchain.path>${basedir}/../src/cmake/windows</cmake.toolchain.path>
-                <cmake.generator>MinGW Makefiles</cmake.generator>
             </properties>
         </profile>
     </profiles>

@@ -43,9 +43,21 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.12</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>parse-version</id>
@@ -55,12 +67,62 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>bin/deimos-x86</file>
+                                    <type>elf</type>
+                                    <classifier>x86</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>bin/deimos-x86_64</file>
+                                    <type>elf</type>
+                                    <classifier>x86_64</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>bin/phobos-x86.exe</file>
+                                    <type>exe</type>
+                                    <classifier>x86</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>bin/phobos-x86_64.exe</file>
+                                    <type>exe</type>
+                                    <classifier>x86_64</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    <modules>
-        <module>phobos</module>
-        <module>deimos</module>
-    </modules>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>satellite.arch</name>
+                </property>
+            </activation>
+            <modules>
+                <module>phobos</module>
+                <module>deimos</module>
+            </modules>
+        </profile>
+    </profiles>
+    <properties>
+        <cmake.generator>Unix Makefiles</cmake.generator>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>io.zatarox.satellite</groupId>

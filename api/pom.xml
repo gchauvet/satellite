@@ -30,5 +30,4 @@
     <artifactId>satellite-api</artifactId>
     <name>Satellite :: API</name>
     <description>API for Satellite software provides to building unix-like Daemon application.</description>
-
 </project>
