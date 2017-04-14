@@ -67,48 +67,61 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>bin/deimos-x86</file>
-                                    <type>elf</type>
-                                    <classifier>x86</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>bin/deimos-x86_64</file>
-                                    <type>elf</type>
-                                    <classifier>x86_64</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>bin/phobos-x86.exe</file>
-                                    <type>exe</type>
-                                    <classifier>x86</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>bin/phobos-x86_64.exe</file>
-                                    <type>exe</type>
-                                    <classifier>x86_64</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <profiles>
         <profile>
+            <id>deploy-process</id>
+            <activation>
+                <property>
+                    <name>gpg.passphrase</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>bin/deimos-x86</file>
+                                            <type>elf</type>
+                                            <classifier>x86</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>bin/deimos-x86_64</file>
+                                            <type>elf</type>
+                                            <classifier>x86_64</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>bin/phobos-x86.exe</file>
+                                            <type>exe</type>
+                                            <classifier>x86</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>bin/phobos-x86_64.exe</file>
+                                            <type>exe</type>
+                                            <classifier>x86_64</classifier>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>build-process</id>
             <activation>
                 <property>
                     <name>satellite.arch</name>
