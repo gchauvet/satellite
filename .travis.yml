@@ -23,4 +23,4 @@ install:
   - "mvn install -DskipTests=true -DskipPkg=true -Dsatellite.arch=$TRGT_ARCH -pl :satellite-frontends -am"
 
 script:
-  - "mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report"
+  - "mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report -pl :satellite-plugin-parent -am"

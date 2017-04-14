@@ -27,7 +27,6 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.zatarox.satellite.frontends</groupId>
     <artifactId>phobos</artifactId>
     <packaging>pom</packaging>
     <name>Satellite :: Frontends :: Phobos</name>
