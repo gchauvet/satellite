@@ -82,4 +82,8 @@ public final class StartBackgroundProcessMojo extends AbstractBackgroundProcessM
             throw new MojoExecutionException(ex.getMessage(), ex);
         }
     }
+
+    void setProject(MavenProject project) {
+        this.project = project;
+    }
 }

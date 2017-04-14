@@ -30,8 +30,10 @@ import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @RunWith(MockitoJUnitRunner.class)
+@PrepareForTest(BackgroundProcessRemoteProxy.class)
 public final class BackgroundProcessRemoteProxyTest {
 
     @Mock
