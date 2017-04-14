@@ -22,28 +22,51 @@
 package io.zatarox.satellite.maven;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.project.MavenProject;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @RunWith(MockitoJUnitRunner.class)
+@PrepareForTest(StartBackgroundProcessMojo.class)
 public final class StartBackgroundProcessMojoTest {
 
+    @Mock
+    private MavenProject project;
     @Rule
     public MojoRule rule = new MojoRule();
 
     @Test
-    @Ignore // NPE because MavenProject not yet injected
     public void start() throws Exception {
         final File pom = new File(getClass().getResource("/start.xml").toURI());
         assertTrue(pom.exists());
         final Mojo mojo = rule.lookupMojo("start", pom);
         assertNotNull(mojo);
-        mojo.execute();
+        ((StartBackgroundProcessMojo) mojo).setProject(project);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mojo.execute();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        assertFalse(executor.awaitTermination(3, TimeUnit.SECONDS));
     }
 
     @Test(expected = MojoExecutionException.class)

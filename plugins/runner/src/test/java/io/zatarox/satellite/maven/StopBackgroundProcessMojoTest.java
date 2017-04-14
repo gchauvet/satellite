@@ -37,8 +37,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @RunWith(MockitoJUnitRunner.class)
+@PrepareForTest(StopBackgroundProcessMojo.class)
 public final class StopBackgroundProcessMojoTest {
 
     @Rule
