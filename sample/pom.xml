@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.zatarox.satellite</groupId>
     <artifactId>satellite-sample</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -16,7 +16,7 @@
             <plugin>
                 <groupId>io.zatarox.satellite</groupId>
                 <artifactId>satellite-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1-SNAPSHOT</version>
                 <configuration>
                     <entryPoint>${satellite.entrypoint}</entryPoint>
                 </configuration>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>io.zatarox.satellite</groupId>
             <artifactId>satellite-api</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -110,14 +110,14 @@
                 <dependency>
                     <groupId>io.zatarox.satellite</groupId>
                     <artifactId>satellite-frontends</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
                     <groupId>io.zatarox.satellite</groupId>
                     <artifactId>satellite-frontends</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
                     <type>elf</type>
                 </dependency>
@@ -135,14 +135,14 @@
                 <dependency>
                     <groupId>io.zatarox.satellite</groupId>
                     <artifactId>satellite-frontends</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
                     <groupId>io.zatarox.satellite</groupId>
                     <artifactId>satellite-frontends</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>
                     <type>elf</type>
                 </dependency>
