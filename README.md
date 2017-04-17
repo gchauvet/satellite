@@ -8,6 +8,7 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 
 [![Build Status](https://travis-ci.org/gchauvet/satellite.png)](https://travis-ci.org/gchauvet/satellite)
 [![Coverage Status](https://coveralls.io/repos/github/gchauvet/satellite/badge.svg?branch=master)](https://coveralls.io/github/gchauvet/satellite?branch=master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.zatarox.satellite/satellite-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.zatarox.satellite/satellite-api)
 
 ## Requirements
 Compilation process is performed under Linux. Cross-compilation fanboy :-)
