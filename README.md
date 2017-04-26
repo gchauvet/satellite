@@ -87,5 +87,8 @@ Finally, add a manifest entry in your main jar (and dependency jars OFC).
 </plugin>
 ```
 
+### Sample
+To a look to the sample project submodule to see how to get binary frontends from Maven
+
 ## Inspiration
 This project is based on Apache Commons Daemon.
