@@ -22,15 +22,15 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.satellite</groupId>
-        <artifactId>satellite-frontends</artifactId>
+        <groupId>org.jcp</groupId>
+        <artifactId>jsr-96-frontends</artifactId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>phobos</artifactId>
+    <artifactId>javad</artifactId>
     <packaging>pom</packaging>
-    <name>Satellite :: Frontends :: Phobos</name>
-    <description>Satellite Windows native frontend program</description>
+    <name>JSR :: Daemon :: Frontends :: Phobos</name>
+    <description>JSR-96 Windows native frontend program</description>
     <build>
         <plugins>
             <plugin>
@@ -49,7 +49,7 @@
                             <arguments>
                                 <argument>-G</argument>
                                 <argument>${cmake.generator}</argument>
-                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
+                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${program.arch}.cmake</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                 <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/..</argument>
                                 <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>

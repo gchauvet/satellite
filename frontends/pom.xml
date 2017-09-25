@@ -22,15 +22,15 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.satellite</groupId>
-        <artifactId>satellite-parent</artifactId>
+        <groupId>org.jcp</groupId>
+        <artifactId>jsr-96</artifactId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>satellite-frontends</artifactId>
+    <artifactId>daemon-frontends</artifactId>
     <packaging>pom</packaging>
-    <name>Satellite :: Frontends</name>
-    <description>Satellite natives frontends softwares to interact with the host OS</description>
+    <name>JSR :: Daemon :: Frontends</name>
+    <description>JSR-96 frontends softwares to interact with the host OS</description>
     <build>
         <pluginManagement>
             <plugins>
@@ -42,18 +42,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <skipSource>true</skipSource>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -72,11 +60,6 @@
     <profiles>
         <profile>
             <id>deploy-process</id>
-            <activation>
-                <property>
-                    <name>gpg.passphrase</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -93,22 +76,22 @@
                                 <configuration>
                                     <artifacts>
                                         <artifact>
-                                            <file>bin/deimos-x86</file>
+                                            <file>bin/javad-x86</file>
                                             <type>elf</type>
                                             <classifier>x86</classifier>
                                         </artifact>
                                         <artifact>
-                                            <file>bin/deimos-x86_64</file>
+                                            <file>bin/javad-x86_64</file>
                                             <type>elf</type>
                                             <classifier>x86_64</classifier>
                                         </artifact>
                                         <artifact>
-                                            <file>bin/phobos-x86.exe</file>
+                                            <file>bin/javad-x86.exe</file>
                                             <type>exe</type>
                                             <classifier>x86</classifier>
                                         </artifact>
                                         <artifact>
-                                            <file>bin/phobos-x86_64.exe</file>
+                                            <file>bin/javad-x86_64.exe</file>
                                             <type>exe</type>
                                             <classifier>x86_64</classifier>
                                         </artifact>
@@ -124,7 +107,7 @@
             <id>build-process</id>
             <activation>
                 <property>
-                    <name>satellite.arch</name>
+                    <name>program.arch</name>
                 </property>
             </activation>
             <modules>
@@ -138,8 +121,8 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>io.zatarox.satellite</groupId>
-            <artifactId>satellite-impl</artifactId>
+            <groupId>org.jcp</groupId>
+            <artifactId>program-impl</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

@@ -22,12 +22,12 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.satellite</groupId>
-        <artifactId>satellite-parent</artifactId>
+        <groupId>org.jcp</groupId>
+        <artifactId>jsr-96</artifactId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>satellite-api</artifactId>
-    <name>Satellite :: API</name>
-    <description>API for Satellite software provides to building unix-like Daemon application.</description>
+    <artifactId>jsr-96-api</artifactId>
+    <name>JSR :: Daemon :: API</name>
+    <description>API for JSR-96 to building unix-like Daemon application.</description>
 </project>

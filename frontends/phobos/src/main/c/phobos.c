@@ -274,9 +274,7 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
 
 static void printVersion(void)
 {
-    fwprintf(stderr, L"Satellite Service Wrapper version %u.%u.%u/Win%d (%S)\n",
-            PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
-    fwprintf(stderr, L"Copyright 2017 Zatarox, based on Commons Daemon");
+    fwprintf(stderr, L"JSR-96 Service Wrapper version %u.%u.%u/Win%d (%S)\n", PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
 }
 
 static void setInprocEnvironment()

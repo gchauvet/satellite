@@ -22,36 +22,17 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.satellite</groupId>
-        <artifactId>satellite-frontends</artifactId>
+        <groupId>org.jcp</groupId>
+        <artifactId>jsr-96-frontends</artifactId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>deimos</artifactId>
+    <artifactId>javad</artifactId>
     <packaging>pom</packaging>
-    <name>Satellite :: Frontends :: Deimos</name>
-    <description>Satellite Unix-like native frontend program</description>
+    <name>JSR :: Daemon :: Frontends :: Deimos</name>
+    <description>JSR-96 Unix-like native frontend program</description>
     <build>
         <plugins>
-            <plugin>
-                <groupId>io.zatarox.satellite</groupId>
-                <artifactId>dumper-maven-plugin</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>dump</goal>
-                        </goals>
-                        <configuration>
-                            <fileName>embedded</fileName>
-                            <dumps>
-                                <dump>${basedir}/../../impl/target/classes/io/zatarox/satellite/impl/EmbeddedClassLoader.class</dump>
-                                <dump>${basedir}/../../impl/target/satellite-embedded.jar</dump>
-                            </dumps>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -69,7 +50,7 @@
                                 <argument>-G</argument>
                                 <argument>${cmake.generator}</argument>
                                 <argument>-DCMAKE_C_FLAGS=${compiler.flags}</argument>
-                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${satellite.arch}.cmake</argument>
+                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${program.arch}.cmake</argument>
                                 <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/..</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                 <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
@@ -105,7 +86,7 @@
             <id>x86</id>
             <activation>
                 <property>
-                    <name>satellite.arch</name>
+                    <name>program.arch</name>
                     <value>x86</value>
                 </property>
             </activation>
@@ -117,7 +98,7 @@
             <id>x86_64</id>
             <activation>
                 <property>
-                    <name>satellite.arch</name>
+                    <name>program.arch</name>
                     <value>x86_64</value>
                 </property>
             </activation>

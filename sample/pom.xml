@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.zatarox.satellite</groupId>
-    <artifactId>satellite-sample</artifactId>
+    <groupId>org.jcp</groupId>
+    <artifactId>jsr-96-sample</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <build>
@@ -11,14 +11,6 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.zatarox.satellite</groupId>
-                <artifactId>satellite-maven-plugin</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
-                <configuration>
-                    <entryPoint>${satellite.entrypoint}</entryPoint>
                 </configuration>
             </plugin>
             <plugin>
@@ -42,8 +34,8 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>io.zatarox.satellite</includeGroupIds>
-                            <artifactId>satellite-frontends</artifactId>
+                            <includeGroupIds>org.jcp</includeGroupIds>
+                            <artifactId>jsr-96-frontends</artifactId>
                             <outputDirectory>target</outputDirectory>
                         </configuration>
                     </execution>
@@ -59,7 +51,7 @@
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
                         <manifestEntries>
-                            <Background-Process-Class>${satellite.entrypoint}</Background-Process-Class>
+                            <Background-Process-Class>${daemon.entrypoint}</Background-Process-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -68,8 +60,8 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>io.zatarox.satellite</groupId>
-            <artifactId>satellite-api</artifactId>
+            <groupId>org.jcp</groupId>
+            <artifactId>jsr-96-api</artifactId>
             <version>1.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
@@ -83,20 +75,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <satellite.entrypoint>io.zatarox.satellite.sample.FooDaemon</satellite.entrypoint>
+        <daemon.entrypoint>org.jcp.sample.FooDaemon</daemon.entrypoint>
     </properties>
-    <repositories>
-        <repository>
-            <id>snapshots-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/staging</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <profiles>
         <profile>
             <id>x86</id>
@@ -108,15 +88,15 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>io.zatarox.satellite</groupId>
-                    <artifactId>satellite-frontends</artifactId>
+                    <groupId>org.jcp</groupId>
+                    <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
-                    <groupId>io.zatarox.satellite</groupId>
-                    <artifactId>satellite-frontends</artifactId>
+                    <groupId>org.jcp</groupId>
+                    <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
                     <type>elf</type>
@@ -133,15 +113,15 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>io.zatarox.satellite</groupId>
-                    <artifactId>satellite-frontends</artifactId>
+                    <groupId>org.jcp</groupId>
+                    <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
-                    <groupId>io.zatarox.satellite</groupId>
-                    <artifactId>satellite-frontends</artifactId>
+                    <groupId>org.jcp</groupId>
+                    <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>
                     <type>elf</type>
@@ -149,5 +129,5 @@
             </dependencies>
         </profile>
     </profiles>
-    <name>Satellite :: Sample</name>
+    <name>JSR :: Daemon :: Sample</name>
 </project>

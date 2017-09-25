@@ -15,7 +15,6 @@
  */
 
 #include "deimos.h"
-#include "embedded.h"
 
 #include <unistd.h>
 #include <jni.h>

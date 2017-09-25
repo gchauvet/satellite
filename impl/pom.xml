@@ -22,32 +22,17 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.zatarox.satellite</groupId>
-        <artifactId>satellite-parent</artifactId>
+        <groupId>org.jcp</groupId>
+        <artifactId>jsr-96</artifactId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>satellite-impl</artifactId>
-    <name>Satellite :: Implementation</name>
-    <description>Implementation of Satellite software to building Unix-like Daemon application.</description>
+    <artifactId>jsr-96-impl</artifactId>
+    <name>JSR :: Daemon :: Implementation</name>
+    <description>Implementation of JSR-96 to building Unix-like Daemon application.</description>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <format>xml</format>
-                    <maxmem>256m</maxmem>
-                    <aggregate>true</aggregate>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -64,24 +49,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>satellite-embedded</finalName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/EmbeddedClassLoader.*</exclude>
-                            </excludes>
+                            <finalName>jsr-96</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -91,7 +59,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>satellite-api</artifactId>
+            <artifactId>jsr-96-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

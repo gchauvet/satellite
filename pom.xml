@@ -25,13 +25,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.zatarox.satellite</groupId>
-    <artifactId>satellite-parent</artifactId>
+    <groupId>org.jcp</groupId>
+    <artifactId>jsr-96</artifactId>
     <version>1.0.1-SNAPSHOT</version>
-    <name>Satellite :: Project</name>
+    <name>JSR :: Daemon</name>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
-    <description>Satellite toolkit provides an homogeneous invocation mechanism for Windows and Unix background process
+    <description>JSR-96 provides an homogeneous invocation mechanism for Windows and Unix background process
     </description>
     <url>https://github.com/gchauvet/satellite</url>
     <licenses>
@@ -59,18 +59,6 @@
         <developerConnection>scm:git:git@github.com:gchauvet/satellite.git</developerConnection>
         <url>https://github.com/gchauvet/satellite.git</url>
     </scm>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <name>Sonatype Nexus snapshot repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <name>Sonatype Nexus release repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <build>
         <plugins>
             <plugin>
@@ -98,17 +86,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -130,46 +107,9 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <profiles>
-        <profile>
-            <activation>
-                <property>
-                    <name>gpg.passphrase</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <modules>
         <module>api</module>
         <module>impl</module>
-        <module>plugins</module>
         <module>frontends</module>
         <module>sample</module>
     </modules>
