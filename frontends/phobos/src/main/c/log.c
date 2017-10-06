@@ -31,23 +31,22 @@ static LPCSTR _log_level[] = {
 };
 
 typedef struct apx_logfile_st {
-    HANDLE      hFile;
-    DWORD       dwLogLevel;
-    DWORD       dwRotate;
-    SYSTEMTIME  sysTime;
-    WCHAR       szPath[SIZ_PATHLEN];
-    WCHAR       szPrefix[MAX_PATH];
-    WCHAR       szFile[MAX_PATH];
+    HANDLE hFile;
+    DWORD dwLogLevel;
+    DWORD dwRotate;
+    SYSTEMTIME sysTime;
+    WCHAR szPath[SIZ_PATHLEN];
+    WCHAR szPrefix[MAX_PATH];
+    WCHAR szFile[MAX_PATH];
 } apx_logfile_st;
 
 /* Per-application master log file */
-static apx_logfile_st   *_st_sys_loghandle = NULL;
-static CRITICAL_SECTION  _st_sys_loglock;
+static apx_logfile_st *_st_sys_loghandle = NULL;
+static CRITICAL_SECTION _st_sys_loglock;
 static CRITICAL_SECTION *_pt_sys_loglock = NULL;
-static apx_logfile_st    _st_sys_errhandle = { NULL, APXLOG_LEVEL_WARN, FALSE};
+static apx_logfile_st _st_sys_errhandle = {NULL, APXLOG_LEVEL_WARN, FALSE};
 
-static void logRotate(apx_logfile_st *lf, LPSYSTEMTIME t)
-{
+static void logRotate(apx_logfile_st *lf, LPSYSTEMTIME t) {
     WCHAR sName[SIZ_PATHLEN];
     ULARGE_INTEGER cft;
     ULARGE_INTEGER lft;
@@ -56,35 +55,35 @@ static void logRotate(apx_logfile_st *lf, LPSYSTEMTIME t)
     if (lf->dwRotate == 0)
         return;
 
-    SystemTimeToFileTime(&lf->sysTime, (LPFILETIME)&lft);
-    SystemTimeToFileTime(t, (LPFILETIME)&cft);
+    SystemTimeToFileTime(&lf->sysTime, (LPFILETIME) & lft);
+    SystemTimeToFileTime(t, (LPFILETIME) & cft);
     if (cft.QuadPart < (lft.QuadPart + lf->dwRotate * 10000000ULL))
         return;
     /* Rotate time */
     lf->sysTime = *t;
     if (lf->dwRotate < 86400)
-        wsprintfW(sName, L"\\%s"  LOGF_EXR,
-                  lf->szPrefix,
-                  lf->sysTime.wYear,
-                  lf->sysTime.wMonth,
-                  lf->sysTime.wDay,
-                  lf->sysTime.wHour,
-                  lf->sysTime.wMinute,
-                  lf->sysTime.wSecond);
+        wsprintfW(sName, L"\\%s" LOGF_EXR,
+            lf->szPrefix,
+            lf->sysTime.wYear,
+            lf->sysTime.wMonth,
+            lf->sysTime.wDay,
+            lf->sysTime.wHour,
+            lf->sysTime.wMinute,
+            lf->sysTime.wSecond);
     else
-        wsprintfW(sName, L"\\%s"  LOGF_EXT,
-                  lf->szPrefix,
-                  lf->sysTime.wYear,
-                  lf->sysTime.wMonth,
-                  lf->sysTime.wDay);
+        wsprintfW(sName, L"\\%s" LOGF_EXT,
+            lf->szPrefix,
+            lf->sysTime.wYear,
+            lf->sysTime.wMonth,
+            lf->sysTime.wDay);
     wcsncpy(lf->szFile, lf->szPath, MAX_PATH);
     wcsncat(lf->szFile, sName, MAX_PATH);
-    h =  CreateFileW(lf->szFile,
-                     GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                     NULL,
-                     OPEN_ALWAYS,
-                     FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_SEQUENTIAL_SCAN,
-                     NULL);
+    h = CreateFileW(lf->szFile,
+            GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            OPEN_ALWAYS,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_SEQUENTIAL_SCAN,
+            NULL);
     if (h == INVALID_HANDLE_VALUE) {
         /* TODO: Log something */
         return;
@@ -98,13 +97,12 @@ static void logRotate(apx_logfile_st *lf, LPSYSTEMTIME t)
 }
 
 LPWSTR apxLogFile(
-    APXHANDLE hPool,
-    LPCWSTR szPath,
-    LPCWSTR szPrefix,
-    LPCWSTR szName,
-    BOOL bTimeStamp,
-    DWORD dwRotate)
-{
+        APXHANDLE hPool,
+        LPCWSTR szPath,
+        LPCWSTR szPrefix,
+        LPCWSTR szName,
+        BOOL bTimeStamp,
+        DWORD dwRotate) {
     LPWSTR sRet;
     WCHAR sPath[SIZ_PATHLEN];
     WCHAR sName[SIZ_PATHLEN];
@@ -115,42 +113,40 @@ LPWSTR apxLogFile(
         if (GetSystemDirectoryW(sPath, MAX_PATH) == 0)
             return INVALID_HANDLE_VALUE;
         wcsncat(sPath, L"\\LogFiles\\Zatarox", MAX_PATH);
-    }
-    else {
+    } else {
         wcsncpy(sPath, szPath, MAX_PATH);
     }
     if (!szPrefix)
         szPrefix = L"";
     if (!szName)
-        szName   = L"";
+        szName = L"";
     if (bTimeStamp) {
         if (dwRotate != 0 && dwRotate < 86400)
             wsprintfW(sName,
-                  L"\\%s%s" LOGF_EXR,
-                  szPrefix,
-                  szName,
-                  sysTime.wYear,
-                  sysTime.wMonth,
-                  sysTime.wDay,
-                  0,
-                  0,
-                  0);
+                L"\\%s%s" LOGF_EXR,
+                szPrefix,
+                szName,
+                sysTime.wYear,
+                sysTime.wMonth,
+                sysTime.wDay,
+                0,
+                0,
+                0);
         else
             wsprintfW(sName,
-                      L"\\%s%s" LOGF_EXT,
-                      szPrefix,
-                      szName,
-                      sysTime.wYear,
-                      sysTime.wMonth,
-                      sysTime.wDay);
-    }
-    else {
+                L"\\%s%s" LOGF_EXT,
+                szPrefix,
+                szName,
+                sysTime.wYear,
+                sysTime.wMonth,
+                sysTime.wDay);
+    } else {
         wsprintfW(sName,
-                  L"\\%s%s",
-                  szPrefix,
-                  szName);
+                L"\\%s%s",
+                szPrefix,
+                szName);
     }
-    sRet = apxPoolAlloc(hPool, (SIZ_PATHLEN) * sizeof(WCHAR));
+    sRet = apxPoolAlloc(hPool, (SIZ_PATHLEN) * sizeof (WCHAR));
     /* Set default level to info */
     CreateDirectoryW(sPath, NULL);
 
@@ -164,11 +160,10 @@ LPWSTR apxLogFile(
  * Add the EventLogger
  */
 HANDLE apxLogOpen(
-    APXHANDLE hPool,
-    LPCWSTR szPath,
-    LPCWSTR szPrefix,
-    DWORD dwRotate)
-{
+        APXHANDLE hPool,
+        LPCWSTR szPath,
+        LPCWSTR szPrefix,
+        DWORD dwRotate) {
 
     WCHAR sPath[SIZ_PATHLEN];
     WCHAR sName[SIZ_PATHLEN];
@@ -193,28 +188,27 @@ HANDLE apxLogOpen(
             if (!CreateDirectoryW(sPath, NULL))
                 return INVALID_HANDLE_VALUE;
         }
-    }
-    else {
+    } else {
         wcsncpy(sPath, szPath, MAX_PATH);
     }
     if (!szPrefix)
         szPrefix = L"satellite";
     if (dwRotate != 0 && dwRotate < 86400)
-        wsprintfW(sName, L"\\%s"  LOGF_EXR,
-                  szPrefix,
-                  sysTime.wYear,
-                  sysTime.wMonth,
-                  sysTime.wDay,
-                  0,
-                  0,
-                  0);
+        wsprintfW(sName, L"\\%s" LOGF_EXR,
+            szPrefix,
+            sysTime.wYear,
+            sysTime.wMonth,
+            sysTime.wDay,
+            0,
+            0,
+            0);
     else
-        wsprintfW(sName, L"\\%s"  LOGF_EXT,
-                  szPrefix,
-                  sysTime.wYear,
-                  sysTime.wMonth,
-                  sysTime.wDay);
-    if (!(h = (apx_logfile_st *)apxPoolCalloc(hPool, sizeof(apx_logfile_st))))
+        wsprintfW(sName, L"\\%s" LOGF_EXT,
+            szPrefix,
+            sysTime.wYear,
+            sysTime.wMonth,
+            sysTime.wDay);
+    if (!(h = (apx_logfile_st *) apxPoolCalloc(hPool, sizeof (apx_logfile_st))))
         return INVALID_HANDLE_VALUE;
     /* Set default level to info */
     h->dwLogLevel = APXLOG_LEVEL_INFO;
@@ -226,32 +220,30 @@ HANDLE apxLogOpen(
     wcsncat(h->szFile, sName, MAX_PATH);
     wcsncpy(h->szPrefix, szPrefix, MAX_PATH);
 
-    h->hFile =  CreateFileW(h->szFile,
-                      GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                      NULL,
-                      OPEN_ALWAYS,
-                      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_SEQUENTIAL_SCAN,
-                      NULL);
+    h->hFile = CreateFileW(h->szFile,
+            GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            OPEN_ALWAYS,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_SEQUENTIAL_SCAN,
+            NULL);
     if (h->hFile == INVALID_HANDLE_VALUE) {
         /* Make sure we write somewhere */
         h = &_st_sys_errhandle;
         apxDisplayError(FALSE, NULL, 0,
-                        "Unable to create logger at '%S'\n", h->szFile);
-        return (HANDLE)h;
-    }
-    else {
+                "Unable to create logger at '%S'\n", h->szFile);
+        return (HANDLE) h;
+    } else {
         h->dwRotate = dwRotate;
     }
     /* Set this file as system log file */
     if (!_st_sys_loghandle)
         _st_sys_loghandle = h;
 
-    return (HANDLE)h;
+    return (HANDLE) h;
 }
 
-void apxLogLevelSet(HANDLE hFile, DWORD dwLevel)
-{
-    apx_logfile_st *lf = (apx_logfile_st *)hFile;
+void apxLogLevelSet(HANDLE hFile, DWORD dwLevel) {
+    apx_logfile_st *lf = (apx_logfile_st *) hFile;
     if (IS_INVALID_HANDLE(lf))
         lf = _st_sys_loghandle;
     if (IS_INVALID_HANDLE(lf))
@@ -260,10 +252,9 @@ void apxLogLevelSet(HANDLE hFile, DWORD dwLevel)
         lf->dwLogLevel = dwLevel;
 }
 
-void apxLogLevelSetW(HANDLE  hFile,
-                     LPCWSTR szLevel)
-{
-    apx_logfile_st *lf = (apx_logfile_st *)hFile;
+void apxLogLevelSetW(HANDLE hFile,
+        LPCWSTR szLevel) {
+    apx_logfile_st *lf = (apx_logfile_st *) hFile;
 
     if (IS_INVALID_HANDLE(lf))
         lf = _st_sys_loghandle;
@@ -283,24 +274,23 @@ void apxLogLevelSetW(HANDLE  hFile,
 
 int
 apxLogWrite(
-    HANDLE  hFile,
-    DWORD   dwLevel,
-    BOOL    bTimeStamp,
-    LPCSTR  szFile,
-    DWORD   dwLine,
-    LPCSTR  szFormat,
-    ...)
-{
+        HANDLE hFile,
+        DWORD dwLevel,
+        BOOL bTimeStamp,
+        LPCSTR szFile,
+        DWORD dwLine,
+        LPCSTR szFormat,
+        ...) {
     va_list args;
-    CHAR    buffer[1024+32] = "";
-    LPSTR   szBp;
-    int     len = 0;
-    LPCSTR  f = szFile;
-    CHAR    sb[SIZ_PATHLEN];
-    DWORD   wr;
-    DWORD   err;
-    BOOL    dolock = TRUE;
-    apx_logfile_st *lf = (apx_logfile_st *)hFile;
+    CHAR buffer[1024 + 32] = "";
+    LPSTR szBp;
+    int len = 0;
+    LPCSTR f = szFile;
+    CHAR sb[SIZ_PATHLEN];
+    DWORD wr;
+    DWORD err;
+    BOOL dolock = TRUE;
+    apx_logfile_st *lf = (apx_logfile_st *) hFile;
 
     err = GetLastError(); /* save the last Error code */
     if (IS_INVALID_HANDLE(lf))
@@ -318,12 +308,11 @@ apxLogWrite(
     APX_LOGENTER();
     if (f && (lf->dwLogLevel == APXLOG_LEVEL_DEBUG || dwLevel == APXLOG_LEVEL_ERROR)) {
         f = (szFile + lstrlenA(szFile) - 1);
-        while(f != szFile && '\\' != *f && '/' != *f)
+        while (f != szFile && '\\' != *f && '/' != *f)
             f--;
-        if(f != szFile)
+        if (f != szFile)
             f++;
-    }
-    else
+    } else
         f = NULL;
     szBp = buffer;
     if (!szFormat) {
@@ -333,18 +322,16 @@ apxLogWrite(
                 szBp += 18;
                 wsprintfA(szBp, " occured in (%s:%d) ", f, dwLine);
             }
-        }
-        else
+        } else
             FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
-                           FORMAT_MESSAGE_IGNORE_INSERTS,
-                           NULL,
-                           err,
-                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                           szBp,
-                           1000,
-                           NULL);
-    }
-    else {
+                FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,
+                err,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                szBp,
+                1000,
+                NULL);
+    } else {
         va_start(args, szFormat);
         wvsprintfA(szBp, szFormat, args);
         va_end(args);
@@ -367,12 +354,12 @@ apxLogWrite(
             }
             if (bTimeStamp) {
                 wsprintfA(sb, "[%d-%02d-%02d %02d:%02d:%02d] ",
-                          t.wYear, t.wMonth, t.wDay,
-                          t.wHour, t.wMinute, t.wSecond);
+                        t.wYear, t.wMonth, t.wDay,
+                        t.wHour, t.wMinute, t.wSecond);
                 WriteFile(lf->hFile, sb, lstrlenA(sb), &wr, NULL);
             }
             WriteFile(lf->hFile, _log_level[dwLevel],
-                      lstrlenA(_log_level[dwLevel]), &wr, NULL);
+                    lstrlenA(_log_level[dwLevel]), &wr, NULL);
             if (f && lf->dwLogLevel == APXLOG_LEVEL_DEBUG) {
                 wsprintfA(sb, "(%10s:%-4d) ", f, dwLine);
                 WriteFile(lf->hFile, sb, lstrlenA(sb), &wr, NULL);
@@ -386,7 +373,7 @@ apxLogWrite(
                 WriteFile(lf->hFile, buffer, len, &wr, NULL);
 
             /* Terminate the line */
-            WriteFile(lf->hFile, LINE_SEP, sizeof(LINE_SEP) - 1, &wr, NULL);
+            WriteFile(lf->hFile, LINE_SEP, sizeof (LINE_SEP) - 1, &wr, NULL);
             if (dwLevel)
                 FlushFileBuffers(lf->hFile);
             if (dolock) {
@@ -406,9 +393,8 @@ apxLogWrite(
 }
 
 void apxLogClose(
-    HANDLE hFile)
-{
-    apx_logfile_st *lf = (apx_logfile_st *)hFile;
+        HANDLE hFile) {
+    apx_logfile_st *lf = (apx_logfile_st *) hFile;
 
     if (IS_INVALID_HANDLE(lf))
         lf = _st_sys_loghandle;
@@ -424,37 +410,35 @@ void apxLogClose(
 
 int
 apxDisplayError(
-    BOOL    bDisplay,
-    LPCSTR  szFile,
-    DWORD   dwLine,
-    LPCSTR  szFormat,
-    ...)
-{
+        BOOL bDisplay,
+        LPCSTR szFile,
+        DWORD dwLine,
+        LPCSTR szFormat,
+        ...) {
     va_list args;
-    CHAR    buffer[SIZ_HUGLEN];
-    CHAR    sysbuf[SIZ_HUGLEN];
-    int     len = 0, nRet;
-    LPCSTR  f = szFile;
-    DWORD   err = GetLastError(); /* save the last Error code */
+    CHAR buffer[SIZ_HUGLEN];
+    CHAR sysbuf[SIZ_HUGLEN];
+    int len = 0, nRet;
+    LPCSTR f = szFile;
+    DWORD err = GetLastError(); /* save the last Error code */
     if (f) {
         f = (szFile + lstrlenA(szFile) - 1);
-        while(f != szFile && '\\' != *f && '/' != *f)
+        while (f != szFile && '\\' != *f && '/' != *f)
             f--;
-        if(f != szFile)
+        if (f != szFile)
             f++;
-    }
-    else
+    } else
         f = "";
     sysbuf[0] = '\0';
     if (err != ERROR_SUCCESS) {
         len = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
-                             FORMAT_MESSAGE_IGNORE_INSERTS,
-                             NULL,
-                             err,
-                             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                             sysbuf,
-                             SIZ_DESLEN,
-                             NULL);
+                FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,
+                err,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                sysbuf,
+                SIZ_DESLEN,
+                NULL);
         sysbuf[len] = '\0';
         if (len > 0) {
             if (sysbuf[len - 1] == '\n')
@@ -479,10 +463,9 @@ apxDisplayError(
     if (len > 0) {
         if (bDisplay) {
             nRet = MessageBoxA(NULL, sysbuf,
-                               "Application System Error",
-                               MB_ICONERROR | MB_OK | MB_SYSTEMMODAL);
-        }
-        else {
+                    "Application System Error",
+                    MB_ICONERROR | MB_OK | MB_SYSTEMMODAL);
+        } else {
             fputs(sysbuf, stderr);
             if (!szFormat)
                 fputs(LINE_SEP, stderr);

@@ -23,22 +23,19 @@ bool ld_library_path_set = false;
 #endif /* ifdef OS_LINUX */
 
 /* Initialize all DSO stuff */
-bool dso_init(void)
-{
+bool dso_init(void) {
     return true;
 }
 
 /* Attempt to link a library from a specified filename */
-dso_handle dso_link(const char *path)
-{
+dso_handle dso_link(const char *path) {
     log_debug("Attemtping to load library %s", path);
 
-    return ((void *)dlopen(path, RTLD_GLOBAL | RTLD_NOW));
+    return ((void *) dlopen(path, RTLD_GLOBAL | RTLD_NOW));
 }
 
 /* Attempt to unload a library */
-bool dso_unlink(dso_handle libr)
-{
+bool dso_unlink(dso_handle libr) {
     if (dlclose(libr) == 0)
         return true;
     else
@@ -46,14 +43,12 @@ bool dso_unlink(dso_handle libr)
 }
 
 /* Get the address for a specifed symbol */
-void *dso_symbol(dso_handle hdl, const char *nam)
-{
+void *dso_symbol(dso_handle hdl, const char *nam) {
     return dlsym(hdl, nam);
 }
 
 /* Return the error message from dlopen */
-char *dso_error(void)
-{
+char *dso_error(void) {
     return (dlerror());
 }
 

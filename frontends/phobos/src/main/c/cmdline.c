@@ -25,10 +25,11 @@
 #define A64_SUFFIX      L".I64"
 
 /* Those two are declared in handles.c */
-extern LPWSTR   *_st_sys_argvw;
-extern int      _st_sys_argc;
+extern LPWSTR *_st_sys_argvw;
+extern int _st_sys_argc;
 
-static WCHAR    _st_sys_appexe[MAX_PATH];
+static WCHAR _st_sys_appexe[MAX_PATH];
+
 /*
  * argv parsing.
  * Parse the argv[0] and split to ExePath and
@@ -38,36 +39,34 @@ static WCHAR    _st_sys_appexe[MAX_PATH];
  * break on first argument that doesn't start with '--'
  */
 LPAPXCMDLINE apxCmdlineParse(
-    APXHANDLE hPool,
-    APXCMDLINEOPT   *lpOptions,
-    LPCWSTR         *lpszCommands)
-{
+        APXHANDLE hPool,
+        APXCMDLINEOPT *lpOptions,
+        LPCWSTR *lpszCommands) {
 
     LPAPXCMDLINE lpCmdline = NULL;
     DWORD l, i, s = 1;
     LPWSTR p;
-    DWORD  match;
-    WCHAR  mh[SIZ_HUGLEN];
+    DWORD match;
+    WCHAR mh[SIZ_HUGLEN];
 
     if (_st_sys_argc < 1)
         return NULL;
 
-    if (!(lpCmdline = (LPAPXCMDLINE)apxPoolCalloc(hPool, sizeof(APXCMDLINE))))
+    if (!(lpCmdline = (LPAPXCMDLINE) apxPoolCalloc(hPool, sizeof (APXCMDLINE))))
         return NULL;
-    lpCmdline->hPool     = hPool;
+    lpCmdline->hPool = hPool;
     lpCmdline->lpOptions = lpOptions;
     if (GetModuleFileNameW(GetModuleHandle(NULL), mh, SIZ_HUGLEN)) {
         GetLongPathNameW(mh, mh, SIZ_HUGLEN);
         lpCmdline->szExePath = apxPoolStrdupW(hPool, mh);
-        lpCmdline->szArgv0   = apxPoolStrdupW(hPool, mh);
+        lpCmdline->szArgv0 = apxPoolStrdupW(hPool, mh);
         if (lpCmdline->szExePath == NULL || lpCmdline->szArgv0 == NULL)
             return NULL;
         if ((p = wcsrchr(lpCmdline->szExePath, L'\\')))
             *p++ = L'\0';
         else
             return NULL;
-    }
-    else
+    } else
         return NULL;
     lpCmdline->szExecutable = p;
     p = wcsrchr(lpCmdline->szExecutable, L'.');
@@ -76,11 +75,9 @@ LPAPXCMDLINE apxCmdlineParse(
     if ((p = wcsrchr(lpCmdline->szExecutable, L'.'))) {
         if (lstrcmpiW(p, X86_SUFFIX) == 0) {
             *p = L'\0';
-        }
-        else if (lstrcmpiW(p, X64_SUFFIX) == 0) {
+        } else if (lstrcmpiW(p, X64_SUFFIX) == 0) {
             *p = L'\0';
-        }
-        else if (lstrcmpiW(p, A64_SUFFIX) == 0) {
+        } else if (lstrcmpiW(p, A64_SUFFIX) == 0) {
             *p = L'\0';
         }
     }
@@ -100,21 +97,18 @@ LPAPXCMDLINE apxCmdlineParse(
             if (cn && iswalnum(*cn)) {
                 s++;
                 lpCmdline->szApplication = cn;
-            }
-            else
+            } else
                 lpCmdline->szApplication = lpCmdline->szExecutable;
-        }
-        else {
+        } else {
             apxLogWrite(APXLOG_MARK_ERROR "Unrecognized cmd option %S", cp);
             return NULL;
         }
-    }
-    else {
+    } else {
         lpCmdline->szApplication = lpCmdline->szExecutable;
         lpCmdline->dwCmdIndex = 1;
         return lpCmdline;
     }
-    for (i = s; i < (DWORD)_st_sys_argc; i++) {
+    for (i = s; i < (DWORD) _st_sys_argc; i++) {
         LPWSTR e = NULL;
         LPWSTR a = _st_sys_argvw[i];
         BOOL add = FALSE;
@@ -131,8 +125,7 @@ LPAPXCMDLINE apxCmdlineParse(
                 *p = L'\0';
                 e = p + 1;
                 break;
-            }
-            else
+            } else
                 p++;
         }
         match = 0;
@@ -142,7 +135,7 @@ LPAPXCMDLINE apxCmdlineParse(
                 /* check if arg is needed */
                 if (e)
                     val = e;
-                else if ((i + 1) < (DWORD)_st_sys_argc)
+                else if ((i + 1) < (DWORD) _st_sys_argc)
                     val = _st_sys_argvw[++i];
                 else {
                     lpOptions[l].dwValue = 0;
@@ -156,43 +149,41 @@ LPAPXCMDLINE apxCmdlineParse(
                          */
                         lpOptions[l].dwType |= APXCMDOPT_ADD;
                     }
-                }
-                else if (lpOptions[l].dwType & APXCMDOPT_ADD) {
+                } else if (lpOptions[l].dwType & APXCMDOPT_ADD) {
                     /* We have ++option --option ...
                      * Discard earlier values and go over.
                      */
-                     lpOptions[l].dwType &= ~APXCMDOPT_ADD;
-                     lpOptions[l].dwValue = 0;
-                     lpOptions[l].szValue = 0;
+                    lpOptions[l].dwType &= ~APXCMDOPT_ADD;
+                    lpOptions[l].dwValue = 0;
+                    lpOptions[l].szValue = 0;
                 }
                 if (lpOptions[l].dwType & APXCMDOPT_STR)
                     lpOptions[l].szValue = val;
                 else if (lpOptions[l].dwType & APXCMDOPT_INT)
-                    lpOptions[l].dwValue = (DWORD)apxAtoulW(val);
+                    lpOptions[l].dwValue = (DWORD) apxAtoulW(val);
                 else if (lpOptions[l].dwType & APXCMDOPT_MSZ) {
                     LPWSTR pp;
-                    BOOL insquote = FALSE, indquote=FALSE;
+                    BOOL insquote = FALSE, indquote = FALSE;
                     DWORD sp = 0;
                     LPWSTR ov = lpOptions[l].szValue;
                     if (lpOptions[l].dwValue > 2) {
-                        sp = (lpOptions[l].dwValue - sizeof(WCHAR)) / sizeof(WCHAR);
+                        sp = (lpOptions[l].dwValue - sizeof (WCHAR)) / sizeof (WCHAR);
                     }
-                    lpOptions[l].dwValue = (sp + lstrlenW(val) + 2) * sizeof(WCHAR);
-                    lpOptions[l].szValue = (LPWSTR)apxPoolCalloc(hPool,
-                                                lpOptions[l].dwValue);
+                    lpOptions[l].dwValue = (sp + lstrlenW(val) + 2) * sizeof (WCHAR);
+                    lpOptions[l].szValue = (LPWSTR) apxPoolCalloc(hPool,
+                            lpOptions[l].dwValue);
                     if (sp) {
-                        AplMoveMemory(lpOptions[l].szValue, ov, sp * sizeof(WCHAR));
+                        AplMoveMemory(lpOptions[l].szValue, ov, sp * sizeof (WCHAR));
                         apxFree(ov);
                     }
                     pp = val;
-                    while(*pp) {
+                    while (*pp) {
                         if (*pp == L'\'')
                             insquote = !insquote;
                         else if (*pp == L'"') {
                             indquote = !indquote;
                             lpOptions[l].szValue[sp++] = L'"';
-                        }
-                        else if ((*pp == L'#' || *pp == L';') && !insquote && !indquote)
+                        } else if ((*pp == L'#' || *pp == L';') && !insquote && !indquote)
                             lpOptions[l].szValue[sp++] = L'\0';
                         else
                             lpOptions[l].szValue[sp++] = *pp;
@@ -209,11 +200,11 @@ LPAPXCMDLINE apxCmdlineParse(
              *
              */
             apxLogWrite(APXLOG_MARK_ERROR "Unrecognized program option %S",
-                        _st_sys_argvw[i]);
+                    _st_sys_argvw[i]);
             return NULL;
         }
     }
-    if (i < (DWORD)_st_sys_argc) {
+    if (i < (DWORD) _st_sys_argc) {
         lpCmdline->dwArgc = _st_sys_argc - i;
         lpCmdline->lpArgvw = &_st_sys_argvw[i];
     }
@@ -222,8 +213,7 @@ LPAPXCMDLINE apxCmdlineParse(
 
 /* Used for future expansion */
 void apxCmdlineFree(
-    LPAPXCMDLINE lpCmdline)
-{
+        LPAPXCMDLINE lpCmdline) {
 
     apxFree(lpCmdline);
 }
@@ -236,8 +226,7 @@ void apxCmdlineFree(
  * Multistring variables are added to the present conf.
  */
 void apxCmdlineLoadEnvVars(
-    LPAPXCMDLINE lpCmdline)
-{
+        LPAPXCMDLINE lpCmdline) {
     WCHAR szEnv[64];
     int i = 0;
     if (!lpCmdline || !lpCmdline->lpOptions)
@@ -252,7 +241,7 @@ void apxCmdlineLoadEnvVars(
         if (l == 0 || l >= SIZ_HUGMAX) {
             if (l == 0 && GetLastError() != ERROR_ENVVAR_NOT_FOUND) {
                 apxLogWrite(APXLOG_MARK_ERROR "Error geting environment variable %S",
-                            szEnv);
+                        szEnv);
                 return;
             }
             ++i;
@@ -261,27 +250,24 @@ void apxCmdlineLoadEnvVars(
         if (lpCmdline->lpOptions[i].dwType & APXCMDOPT_STR) {
             lpCmdline->lpOptions[i].szValue = apxPoolStrdupW(lpCmdline->hPool, szVar);
             lpCmdline->lpOptions[i].dwType |= APXCMDOPT_FOUND;
-        }
-        else if (lpCmdline->lpOptions[i].dwType & APXCMDOPT_INT) {
-            lpCmdline->lpOptions[i].dwValue = (DWORD)apxAtoulW(szVar);
+        } else if (lpCmdline->lpOptions[i].dwType & APXCMDOPT_INT) {
+            lpCmdline->lpOptions[i].dwValue = (DWORD) apxAtoulW(szVar);
             lpCmdline->lpOptions[i].dwType |= APXCMDOPT_FOUND;
-        }
-        else if (lpCmdline->lpOptions[i].dwType & APXCMDOPT_MSZ) {
+        } else if (lpCmdline->lpOptions[i].dwType & APXCMDOPT_MSZ) {
             LPWSTR pp;
             BOOL insquote = FALSE, indquote = FALSE;
             DWORD sp = 0;
-            lpCmdline->lpOptions[i].dwValue = (lstrlenW(szVar) + 2) * sizeof(WCHAR);
+            lpCmdline->lpOptions[i].dwValue = (lstrlenW(szVar) + 2) * sizeof (WCHAR);
             lpCmdline->lpOptions[i].szValue = apxPoolCalloc(lpCmdline->hPool,
-                                                    lpCmdline->lpOptions[i].dwValue);
+                    lpCmdline->lpOptions[i].dwValue);
             pp = szVar;
-            while(*pp) {
+            while (*pp) {
                 if (*pp == L'\'')
                     insquote = !insquote;
                 else if (*pp == L'"') {
                     indquote = !indquote;
                     lpCmdline->lpOptions[i].szValue[sp++] = L'"';
-                }
-                else if ((*pp == L'#' || *pp == L';') && !insquote && !indquote)
+                } else if ((*pp == L'#' || *pp == L';') && !insquote && !indquote)
                     lpCmdline->lpOptions[i].szValue[sp++] = L'\0';
                 else
                     lpCmdline->lpOptions[i].szValue[sp++] = *pp;

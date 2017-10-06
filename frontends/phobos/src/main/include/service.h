@@ -20,55 +20,55 @@
 __APXBEGIN_DECLS
 
 typedef struct APXSERVENTRY {
-    WCHAR   szServiceName[SIZ_RESLEN];
-    WCHAR   szObjectName[SIZ_RESLEN];
-    WCHAR   szServiceDescription[SIZ_DESLEN];
-    DWORD   dwStart;
+    WCHAR szServiceName[SIZ_RESLEN];
+    WCHAR szObjectName[SIZ_RESLEN];
+    WCHAR szServiceDescription[SIZ_DESLEN];
+    DWORD dwStart;
     LPQUERY_SERVICE_CONFIGW lpConfig;
-    SERVICE_STATUS          stServiceStatus;
-    SERVICE_STATUS_PROCESS  stStatusProcess;
+    SERVICE_STATUS stServiceStatus;
+    SERVICE_STATUS_PROCESS stStatusProcess;
 
 } APXSERVENTRY, *LPAPXSERVENTRY;
 
 
-extern APXHANDLE   apxCreateService(APXHANDLE hPool, DWORD dwOptions,
-                             BOOL bManagerMode);
+extern APXHANDLE apxCreateService(APXHANDLE hPool, DWORD dwOptions,
+        BOOL bManagerMode);
 
-extern BOOL        apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions);
+extern BOOL apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions);
 
 
-extern BOOL        apxServiceSetNames(APXHANDLE hService, LPCWSTR szImagePath,
-                               LPCWSTR szDisplayName, LPCWSTR szDescription,
-                               LPCWSTR szUsername, LPCWSTR szPassword);
+extern BOOL apxServiceSetNames(APXHANDLE hService, LPCWSTR szImagePath,
+        LPCWSTR szDisplayName, LPCWSTR szDescription,
+        LPCWSTR szUsername, LPCWSTR szPassword);
 
-extern BOOL        apxServiceSetOptions(APXHANDLE hService, DWORD dwServiceType,
-                                 DWORD dwStartType, DWORD dwErrorControl);
+extern BOOL apxServiceSetOptions(APXHANDLE hService, DWORD dwServiceType,
+        DWORD dwStartType, DWORD dwErrorControl);
 
-extern BOOL        apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
-                              LPAPXFNCALLBACK fnControlCallback,
-                              LPVOID lpCbData);
-extern BOOL        apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
-                              LPCWSTR szDisplayName, LPCWSTR szImagePath,
-                              LPCWSTR lpDependencies, DWORD dwServiceType,
-                              DWORD dwStartType);
+extern BOOL apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
+        LPAPXFNCALLBACK fnControlCallback,
+        LPVOID lpCbData);
+extern BOOL apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
+        LPCWSTR szDisplayName, LPCWSTR szImagePath,
+        LPCWSTR lpDependencies, DWORD dwServiceType,
+        DWORD dwStartType);
 
-extern LPAPXSERVENTRY  apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus);
+extern LPAPXSERVENTRY apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus);
 
 /** Delete te service
  * Stops the service if running
  */
-extern BOOL        apxServiceDelete(APXHANDLE hService);
+extern BOOL apxServiceDelete(APXHANDLE hService);
 
-extern DWORD       apxServiceBrowse(APXHANDLE hService,
-                             LPCWSTR szIncludeNamePattern,
-                             LPCWSTR szIncludeImagePattern,
-                             LPCWSTR szExcludeNamePattern,
-                             LPCWSTR szExcludeImagePattern,
-                             UINT uMsg,
-                             LPAPXFNCALLBACK fnDisplayCallback,
-                             LPVOID lpCbData);
+extern DWORD apxServiceBrowse(APXHANDLE hService,
+        LPCWSTR szIncludeNamePattern,
+        LPCWSTR szIncludeImagePattern,
+        LPCWSTR szExcludeNamePattern,
+        LPCWSTR szExcludeImagePattern,
+        UINT uMsg,
+        LPAPXFNCALLBACK fnDisplayCallback,
+        LPVOID lpCbData);
 
-extern DWORD       apxGetMaxServiceTimeout(APXHANDLE hPool);
+extern DWORD apxGetMaxServiceTimeout(APXHANDLE hPool);
 
 __APXEND_DECLS
 

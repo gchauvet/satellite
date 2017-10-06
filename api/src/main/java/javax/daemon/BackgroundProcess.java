@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package java.daemon;
+package javax.daemon;
 
 /**
  * Provides support for native background process invocation. Using a platform
@@ -69,6 +69,7 @@ public interface BackgroundProcess {
      * the JVM has been dropped. Implementors of this method are free to resume
      * any number of threads, but need to return control after having done that
      * to enable invocation of the pause()-method.
+     *
      * @throws java.lang.Exception Exception not catched
      */
     public void resume() throws Exception;
@@ -78,6 +79,7 @@ public interface BackgroundProcess {
      * that the proper place to free any allocated resources such as sockets or
      * file descriptors is in the shutdown method, as the container may restart
      * the BackgroundProcess by calling resume() after pause().
+     *
      * @throws java.lang.Exception Exception not catched
      */
     public void pause() throws Exception;

@@ -42,7 +42,7 @@ static DYNLOAD_FPTR_DECLARE(JNI_GetCreatedJavaVMs) = NULL;
 DYNOLAD_TYPE_DECLARE(JVM_DumpAllStacks, JNICALL, void)(JNIEnv *, jclass);
 static DYNLOAD_FPTR_DECLARE(JVM_DumpAllStacks) = NULL;
 
-static HANDLE  _st_sys_jvmDllHandle = NULL;
+static HANDLE _st_sys_jvmDllHandle = NULL;
 static JavaVM *_st_sys_jvm = NULL;
 
 DYNOLAD_TYPE_DECLARE(SetDllDirectoryW, WINAPI, BOOL)(LPCWSTR);
@@ -90,18 +90,18 @@ static DYNLOAD_FPTR_DECLARE(SetDllDirectoryW) = NULL;
         ((*(lpJava->lpEnv))->fName(lpJava->lpEnv, (a1), (a2), (a3), (a4)))
 
 typedef struct {
-    DWORD           dwOptions;
-    jobject         jWrapper;
-    jint            iVersion;
-    jsize           iVmCount;
-    JNIEnv          *lpEnv;
-    JavaVM          *lpJvm;
+    DWORD dwOptions;
+    jobject jWrapper;
+    jint iVersion;
+    jsize iVmCount;
+    JNIEnv *lpEnv;
+    JavaVM *lpJvm;
     /* JVM worker thread info */
-    HANDLE          hWorkerThread;
-    DWORD           iWorkerThread;
-    DWORD           dwWorkerStatus;
-    HANDLE          hWorkerSync;
-    HANDLE          hWorkerInit;
+    HANDLE hWorkerThread;
+    DWORD iWorkerThread;
+    DWORD dwWorkerStatus;
+    HANDLE hWorkerSync;
+    HANDLE hWorkerInit;
 } APXJAVAVM, *LPAPXJAVAVM;
 
 #define JAVA_CLASSPATH      "-Djava.class.path="
@@ -110,19 +110,18 @@ typedef struct {
 #define MSVCRT71_DLLNAME    L"\\msvcrt71.dll"
 
 static __inline BOOL __apxJvmAttachEnv(LPAPXJAVAVM lpJava, JNIEnv **lpEnv,
-                                       LPBOOL lpAttached)
-{
+        LPBOOL lpAttached) {
     jint _iStatus;
 
     if (!_st_sys_jvm || !lpJava->lpJvm)
-      return FALSE;
+        return FALSE;
     _iStatus = (*(lpJava->lpJvm))->GetEnv(lpJava->lpJvm,
-                                          (void **)lpEnv,
-                                          lpJava->iVersion);
+            (void **) lpEnv,
+            lpJava->iVersion);
     if (_iStatus != JNI_OK) {
         if (_iStatus == JNI_EDETACHED) {
             _iStatus = (*(lpJava->lpJvm))->AttachCurrentThread(lpJava->lpJvm,
-                                                (void **)lpEnv, NULL);
+                    (void **) lpEnv, NULL);
             if (lpAttached)
                 *lpAttached = TRUE;
         }
@@ -130,35 +129,30 @@ static __inline BOOL __apxJvmAttachEnv(LPAPXJAVAVM lpJava, JNIEnv **lpEnv,
     if (_iStatus != JNI_OK) {
         *lpEnv = NULL;
         return FALSE;
-    }
-    else
+    } else
         return TRUE;
 }
 
-static __inline BOOL __apxJvmAttach(LPAPXJAVAVM lpJava)
-{
+static __inline BOOL __apxJvmAttach(LPAPXJAVAVM lpJava) {
     return __apxJvmAttachEnv(lpJava, &lpJava->lpEnv, NULL);
 }
 
-static __inline BOOL __apxJvmDetach(LPAPXJAVAVM lpJava)
-{
+static __inline BOOL __apxJvmDetach(LPAPXJAVAVM lpJava) {
     if (!_st_sys_jvm || !lpJava->lpJvm)
-      return FALSE;
+        return FALSE;
     if ((*(lpJava->lpJvm))->DetachCurrentThread(lpJava->lpJvm) != JNI_OK) {
         lpJava->lpEnv = NULL;
         return FALSE;
-    }
-    else
+    } else
         return TRUE;
 }
 
-static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
-{
+static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath) {
     UINT errMode;
     DYNLOAD_FPTR_DECLARE(SetDllDirectoryW);
 
     if (!IS_INVALID_HANDLE(_st_sys_jvmDllHandle))
-        return TRUE;    /* jvm.dll is already loaded */
+        return TRUE; /* jvm.dll is already loaded */
 
     if (szJvmDllPath && *szJvmDllPath) {
         /* Explicit JVM path.
@@ -168,8 +162,7 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
             apxLogWrite(APXLOG_MARK_ERROR "Invalid RuntimeLib specified '%S'", szJvmDllPath);
             return FALSE;
         }
-    }
-    else {
+    } else {
         apxLogWrite(APXLOG_MARK_DEBUG "No JVM shared library specified");
         return FALSE;
     }
@@ -179,13 +172,13 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
     apxLogWrite(APXLOG_MARK_DEBUG "loading jvm '%S'", szJvmDllPath);
     _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, 0);
     if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle) &&
-        GetFileAttributesW(szJvmDllPath) != INVALID_FILE_ATTRIBUTES) {
+            GetFileAttributesW(szJvmDllPath) != INVALID_FILE_ATTRIBUTES) {
         /* There is a file but cannot be loaded.
          * Try to load the MSVCRTxx.dll before JVM.dll
          */
-        WCHAR  jreBinPath[SIZ_PATHLEN];
-        WCHAR  crtBinPath[SIZ_PATHLEN];
-        DWORD  i, l = 0;
+        WCHAR jreBinPath[SIZ_PATHLEN];
+        WCHAR crtBinPath[SIZ_PATHLEN];
+        DWORD i, l = 0;
 
         wcsncpy(jreBinPath, szJvmDllPath, SIZ_PATHLEN);
         for (i = lstrlenW(jreBinPath); i > 0, l < 2; i--) {
@@ -208,8 +201,8 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         _st_sys_jvmDllHandle = LoadLibraryExW(szJvmDllPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     if (IS_INVALID_HANDLE(_st_sys_jvmDllHandle)) {
-        WCHAR  jreBinPath[SIZ_PATHLEN];
-        DWORD  i, l = 0;
+        WCHAR jreBinPath[SIZ_PATHLEN];
+        DWORD i, l = 0;
 
         wcsncpy(jreBinPath, szJvmDllPath, SIZ_PATHLEN);
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
@@ -232,13 +225,13 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
         return FALSE;
     }
     DYNLOAD_FPTR_LOAD(JNI_GetDefaultJavaVMInitArgs, _st_sys_jvmDllHandle);
-    DYNLOAD_FPTR_LOAD(JNI_CreateJavaVM,             _st_sys_jvmDllHandle);
-    DYNLOAD_FPTR_LOAD(JNI_GetCreatedJavaVMs,        _st_sys_jvmDllHandle);
-    DYNLOAD_FPTR_LOAD(JVM_DumpAllStacks,            _st_sys_jvmDllHandle);
+    DYNLOAD_FPTR_LOAD(JNI_CreateJavaVM, _st_sys_jvmDllHandle);
+    DYNLOAD_FPTR_LOAD(JNI_GetCreatedJavaVMs, _st_sys_jvmDllHandle);
+    DYNLOAD_FPTR_LOAD(JVM_DumpAllStacks, _st_sys_jvmDllHandle);
 
     if (!DYNLOAD_FPTR(JNI_GetDefaultJavaVMInitArgs) ||
-        !DYNLOAD_FPTR(JNI_CreateJavaVM) ||
-        !DYNLOAD_FPTR(JNI_GetCreatedJavaVMs)) {
+            !DYNLOAD_FPTR(JNI_CreateJavaVM) ||
+            !DYNLOAD_FPTR(JNI_GetCreatedJavaVMs)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
         FreeLibrary(_st_sys_jvmDllHandle);
         _st_sys_jvmDllHandle = NULL;
@@ -251,10 +244,9 @@ static BOOL __apxLoadJvmDll(LPCWSTR szJvmDllPath)
 
 static
 BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam)
-{
+        WPARAM wParam, LPARAM lParam) {
     LPAPXJAVAVM lpJava;
-    DWORD       dwJvmRet = 0;
+    DWORD dwJvmRet = 0;
 
     lpJava = APXHANDLE_DATA(hObject);
     switch (uMsg) {
@@ -262,7 +254,7 @@ BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
             if (_st_sys_jvm && lpJava->lpJvm) {
                 if (!IS_INVALID_HANDLE(lpJava->hWorkerThread)) {
                     if (GetExitCodeThread(lpJava->hWorkerThread, &dwJvmRet) &&
-                        dwJvmRet == STILL_ACTIVE) {
+                            dwJvmRet == STILL_ACTIVE) {
                         TerminateThread(lpJava->hWorkerThread, 5);
                     }
                 }
@@ -278,17 +270,16 @@ BOOL __apxJavaJniCallback(APXHANDLE hObject, UINT uMsg,
                 }
                 lpJava->lpJvm = NULL;
             }
-        break;
+            break;
         default:
-        break;
+            break;
     }
     return TRUE;
 }
 
 static LPVOID
-apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
-{
-    LPAPXJAVAVM     lpJava;
+apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString) {
+    LPAPXJAVAVM lpJava;
     jstring str;
 
     lpJava = APXHANDLE_DATA(hJava);
@@ -303,11 +294,9 @@ apxJavaCreateStringA(APXHANDLE hJava, LPCSTR szString)
     return str;
 }
 
-
 static LPVOID
-apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
-{
-    LPAPXJAVAVM     lpJava;
+apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString) {
+    LPAPXJAVAVM lpJava;
     jstring str;
 
     lpJava = APXHANDLE_DATA(hJava);
@@ -323,17 +312,16 @@ apxJavaCreateStringW(APXHANDLE hJava, LPCWSTR szString)
 }
 
 APXHANDLE
-apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath)
-{
-    APXHANDLE    hJava;
-    LPAPXJAVAVM  lpJava;
-    jsize        iVmCount;
-    JavaVM       *lpJvm = NULL;
-    WCHAR        szJvmDllPath[SIZ_PATHLEN];
+apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath) {
+    APXHANDLE hJava;
+    LPAPXJAVAVM lpJava;
+    jsize iVmCount;
+    JavaVM *lpJvm = NULL;
+    WCHAR szJvmDllPath[SIZ_PATHLEN];
 
     wcsncpy(szJvmDllPath, szJvmPath, SIZ_PATHLEN);
     wcsncat(szJvmDllPath, L"\\bin\\server\\jvm.dll", SIZ_PATHLEN);
-    
+
     if (!__apxLoadJvmDll(szJvmDllPath))
         return NULL;
 
@@ -342,11 +330,11 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath)
     if (iVmCount && !lpJvm)
         return NULL;
 
-    hJava = apxHandleCreate(hPool, 0, NULL, sizeof(APXJAVAVM), __apxJavaJniCallback);
-    
+    hJava = apxHandleCreate(hPool, 0, NULL, sizeof (APXJAVAVM), __apxJavaJniCallback);
+
     if (IS_INVALID_HANDLE(hJava))
         return NULL;
-    
+
     hJava->dwType = APXHANDLE_TYPE_JVM;
     lpJava = APXHANDLE_DATA(hJava);
     lpJava->lpJvm = lpJvm;
@@ -357,18 +345,16 @@ apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath)
     return hJava;
 }
 
-static DWORD WINAPI __apxJavaDestroyThread(LPVOID lpParameter)
-{
-    JavaVM *lpJvm = (JavaVM *)lpParameter;
+static DWORD WINAPI __apxJavaDestroyThread(LPVOID lpParameter) {
+    JavaVM *lpJvm = (JavaVM *) lpParameter;
     (*lpJvm)->DestroyJavaVM(lpJvm);
     return 0;
 }
 
 static DWORD __apxMultiSzToJvmOptions(APXHANDLE hPool,
-                                      LPCSTR lpString,
-                                      JavaVMOption **lppArray,
-                                      DWORD  nExtra)
-{
+        LPCSTR lpString,
+        JavaVMOption **lppArray,
+        DWORD nExtra) {
     DWORD i, n = 0, l = 0;
     char *buff;
     LPSTR p;
@@ -377,10 +363,10 @@ static DWORD __apxMultiSzToJvmOptions(APXHANDLE hPool,
         l = __apxGetMultiSzLengthA(lpString, &n);
     }
     n += nExtra;
-    buff = apxPoolAlloc(hPool, (n + 1) * sizeof(JavaVMOption) + (l + 1));
+    buff = apxPoolAlloc(hPool, (n + 1) * sizeof (JavaVMOption) + (l + 1));
 
-    *lppArray = (JavaVMOption *)buff;
-    p = (LPSTR)(buff + (n + 1) * sizeof(JavaVMOption));
+    *lppArray = (JavaVMOption *) buff;
+    p = (LPSTR) (buff + (n + 1) * sizeof (JavaVMOption));
     if (lpString)
         memcpy(p, lpString, l + 1);
     for (i = 0; i < (n - nExtra); i++) {
@@ -396,29 +382,26 @@ static DWORD __apxMultiSzToJvmOptions(APXHANDLE hPool,
 }
 
 /* a hook for a function that redirects all VM messages. */
-static jint JNICALL __apxJniVfprintf(FILE *fp, const char *format, va_list args)
-{
+static jint JNICALL __apxJniVfprintf(FILE *fp, const char *format, va_list args) {
     jint rv;
-    CHAR sBuf[1024+16];
+    CHAR sBuf[1024 + 16];
     rv = wvsprintfA(sBuf, format, args);
     if (apxLogWrite(APXLOG_MARK_INFO "%s", sBuf) == 0)
         fputs(sBuf, stdout);
     return rv;
 }
 
-static LPSTR __apxStrIndexA(LPCSTR szStr, int nCh)
-{
+static LPSTR __apxStrIndexA(LPCSTR szStr, int nCh) {
     LPSTR pStr;
 
-    for (pStr = (LPSTR)szStr; *pStr; pStr++) {
+    for (pStr = (LPSTR) szStr; *pStr; pStr++) {
         if (*pStr == nCh)
             return pStr;
     }
     return NULL;
 }
 
-static LPSTR __apxStrnCatA(APXHANDLE hPool, LPSTR pOrg, LPCSTR szStr, LPCSTR szAdd)
-{
+static LPSTR __apxStrnCatA(APXHANDLE hPool, LPSTR pOrg, LPCSTR szStr, LPCSTR szAdd) {
     DWORD len = 1;
     DWORD nas = pOrg == NULL;
     if (pOrg)
@@ -427,7 +410,7 @@ static LPSTR __apxStrnCatA(APXHANDLE hPool, LPSTR pOrg, LPCSTR szStr, LPCSTR szA
         len += lstrlenA(szStr);
     if (szAdd)
         len += lstrlenA(szAdd);
-    pOrg = (LPSTR)apxPoolRealloc(hPool, pOrg, len);
+    pOrg = (LPSTR) apxPoolRealloc(hPool, pOrg, len);
     if (pOrg) {
         if (nas)
             *pOrg = '\0';
@@ -439,14 +422,13 @@ static LPSTR __apxStrnCatA(APXHANDLE hPool, LPSTR pOrg, LPCSTR szStr, LPCSTR szA
     return pOrg;
 }
 
-static LPSTR __apxEvalPathPart(APXHANDLE hPool, LPSTR pStr, LPCSTR szPattern)
-{
-    HANDLE           hFind;
+static LPSTR __apxEvalPathPart(APXHANDLE hPool, LPSTR pStr, LPCSTR szPattern) {
+    HANDLE hFind;
     WIN32_FIND_DATAA stGlob;
-    char       szJars[MAX_PATH + 1];
-    char       szPath[MAX_PATH + 1];
+    char szJars[MAX_PATH + 1];
+    char szPath[MAX_PATH + 1];
 
-    if (lstrlenA(szPattern) > (sizeof(szJars) - 5)) {
+    if (lstrlenA(szPattern) > (sizeof (szJars) - 5)) {
         return __apxStrnCatA(hPool, pStr, szPattern, NULL);
     }
     lstrcpyA(szJars, szPattern);
@@ -481,8 +463,7 @@ static LPSTR __apxEvalPathPart(APXHANDLE hPool, LPSTR pStr, LPCSTR szPattern)
  * Glob is called only if the part ends with asterisk in which
  * case asterisk is replaced by *.jar when searching
  */
-static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
-{
+static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp) {
     LPSTR pCpy = __apxStrnCatA(hPool, NULL, JAVA_CLASSPATH, szCp);
     LPSTR pGcp = NULL;
     LPSTR pPos;
@@ -490,7 +471,7 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
 
     if (!pCpy)
         return NULL;
-    pPtr = pCpy + sizeof(JAVA_CLASSPATH) - 1;
+    pPtr = pCpy + sizeof (JAVA_CLASSPATH) - 1;
     while ((pPos = __apxStrIndexA(pPtr, ';'))) {
         *pPos = '\0';
         if (pGcp)
@@ -500,17 +481,16 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
         if ((pPos > pPtr) && (*(pPos - 1) == '*')) {
             if (!(pGcp = __apxEvalPathPart(hPool, pGcp, pPtr))) {
                 /* Error.
-                * Return the original string processed so far.
-                */
+                 * Return the original string processed so far.
+                 */
                 return pCpy;
             }
-        }
-        else {
+        } else {
             /* Standard path element */
             if (!(pGcp = __apxStrnCatA(hPool, pGcp, pPtr, NULL))) {
                 /* Error.
-                * Return the original string processed so far.
-                */
+                 * Return the original string processed so far.
+                 */
                 return pCpy;
             }
         }
@@ -527,8 +507,7 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
              * Do a globbing.
              */
             pGcp = __apxEvalPathPart(hPool, pGcp, pPtr);
-        }
-        else {
+        } else {
             /* Just add the part */
             pGcp = __apxStrnCatA(hPool, pGcp, pPtr, NULL);
         }
@@ -537,26 +516,24 @@ static LPSTR __apxEvalClasspath(APXHANDLE hPool, LPCSTR szCp)
     if (pGcp) {
         apxFree(pCpy);
         return pGcp;
-    }
-    else
+    } else
         return pCpy;
 }
 
 /* ANSI version only */
 static BOOL
-apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD dwMs, DWORD dwMx, DWORD dwSs, DWORD bJniVfprintf)
-{
-    LPAPXJAVAVM     lpJava;
-    JavaVMInitArgs  vmArgs;
-    JavaVMOption    *lpJvmOptions;
-    DWORD           i, nOptions, sOptions = 0;
-    BOOL            rv = FALSE;
+apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD dwMs, DWORD dwMx, DWORD dwSs, DWORD bJniVfprintf) {
+    LPAPXJAVAVM lpJava;
+    JavaVMInitArgs vmArgs;
+    JavaVMOption *lpJvmOptions;
+    DWORD i, nOptions, sOptions = 0;
+    BOOL rv = FALSE;
 
     if (hJava->dwType != APXHANDLE_TYPE_JVM) {
         apxLogWrite(APXLOG_MARK_ERROR "Expected a JVM handler");
         return FALSE;
     }
-    
+
     lpJava = APXHANDLE_DATA(hJava);
 
     if (lpJava->iVmCount) {
@@ -564,8 +541,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
             if (lpJava->iVersion < JNI_VERSION_DEFAULT) {
                 apxLogWrite(APXLOG_MARK_ERROR "Unable To Attach the JVM");
                 return FALSE;
-            }
-            else
+            } else
                 lpJava->iVersion = JNI_VERSION_DEFAULT;
             if (!__apxJvmAttach(lpJava)) {
                 apxLogWrite(APXLOG_MARK_ERROR "Unable To Attach the JVM");
@@ -579,7 +555,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
         }
         rv = TRUE;
     } else {
-        CHAR  iB[3][64];
+        CHAR iB[3][64];
         LPSTR szCp = NULL;
         lpJava->iVersion = JNI_VERSION_DEFAULT;
 
@@ -607,7 +583,7 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
         if (bJniVfprintf) {
             /* default JNI error printer */
             lpJvmOptions[nOptions - sOptions].optionString = "vfprintf";
-            lpJvmOptions[nOptions - sOptions].extraInfo    = __apxJniVfprintf;
+            lpJvmOptions[nOptions - sOptions].extraInfo = __apxJniVfprintf;
             --sOptions;
         }
 
@@ -628,14 +604,14 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
         }
         for (i = 0; i < nOptions; i++) {
             apxLogWrite(APXLOG_MARK_DEBUG "Jvm Option[%d] %s", i,
-                        lpJvmOptions[i].optionString);
+                    lpJvmOptions[i].optionString);
         }
-        vmArgs.options  = lpJvmOptions;
+        vmArgs.options = lpJvmOptions;
         vmArgs.nOptions = nOptions;
-        vmArgs.version  = lpJava->iVersion;
+        vmArgs.version = lpJava->iVersion;
         vmArgs.ignoreUnrecognized = JNI_FALSE;
-        
-        if (DYNLOAD_FPTR(JNI_CreateJavaVM)(&(lpJava->lpJvm), (void **)&(lpJava->lpEnv), &vmArgs) != JNI_OK) {
+
+        if (DYNLOAD_FPTR(JNI_CreateJavaVM)(&(lpJava->lpJvm), (void **) &(lpJava->lpEnv), &vmArgs) != JNI_OK) {
             apxLogWrite(APXLOG_MARK_ERROR "CreateJavaVM Failed");
             rv = FALSE;
         } else {
@@ -650,15 +626,14 @@ apxJavaInitialize(APXHANDLE hJava, LPCSTR szClassPath, LPCVOID lpOptions, DWORD 
 }
 
 static BOOL
-apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
-{
-    LPWSTR      *lpArgs = NULL;
-    DWORD       nArgs;
-    jarray      jArgs;
+apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments) {
+    LPWSTR *lpArgs = NULL;
+    DWORD nArgs;
+    jarray jArgs;
     LPAPXJAVAVM lpJava;
-    jmethodID   method;
+    jmethodID method;
     BOOL result;
-    
+
     lpJava = APXHANDLE_DATA(hJava);
     if (!lpJava)
         return FALSE;
@@ -672,7 +647,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
         }
     }
     apxFree(lpArgs);
-    
+
     method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), "load", "(Ljava/lang/String;[Ljava/lang/String;)Z");
     if (method == NULL) {
         apxLogWrite(APXLOG_MARK_ERROR "Cannot find \"load\" entry point");
@@ -688,8 +663,7 @@ apxJavaLoadMainClass(APXHANDLE hJava, LPCSTR szJarName, LPCVOID lpArguments)
 }
 
 static DWORD
-apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions)
-{
+apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions) {
     DWORD dwOrgOptions;
     LPAPXJAVAVM lpJava;
 
@@ -701,12 +675,11 @@ apxJavaSetOptions(APXHANDLE hJava, DWORD dwOptions)
 
 LPVOID
 apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
-                    LPCSTR szSignature, va_list lpArgs)
-{
-    LPAPXJAVAVM     lpJava;
-    jclass          clazz;
-    jmethodID       ccont;
-    jobject         cinst;
+        LPCSTR szSignature, va_list lpArgs) {
+    LPAPXJAVAVM lpJava;
+    jclass clazz;
+    jmethodID ccont;
+    jobject cinst;
 
     lpJava = APXHANDLE_DATA(hJava);
     if (!__apxJvmAttach(lpJava))
@@ -737,8 +710,7 @@ apxJavaCreateClassV(APXHANDLE hJava, LPCSTR szClassName,
 }
 
 static LPVOID
-apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName, LPCSTR szSignature, ...)
-{
+apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName, LPCSTR szSignature, ...) {
     LPVOID rv;
     va_list args;
 
@@ -751,12 +723,11 @@ apxJavaCreateClass(APXHANDLE hJava, LPCSTR szClassName, LPCSTR szSignature, ...)
 
 static jvalue
 apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
-                         LPCSTR szSignature, va_list lpArgs)
-{
-    LPAPXJAVAVM     lpJava;
-    jmethodID       method;
-    jvalue          rv;
-    LPCSTR          s = szSignature;
+        LPCSTR szSignature, va_list lpArgs) {
+    LPAPXJAVAVM lpJava;
+    jmethodID method;
+    jvalue rv;
+    LPCSTR s = szSignature;
     rv.l = 0;
 
     lpJava = APXHANDLE_DATA(hJava);
@@ -765,53 +736,52 @@ apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
         ++s;
     if (*s != ')') {
         return rv;
-    }
-    else
+    } else
         ++s;
     method = JNICALL_3(GetStaticMethodID, lpClass, szMethodName, szSignature);
     if (method == NULL || (JVM_EXCEPTION_CHECK(lpJava))) {
         JVM_EXCEPTION_CLEAR(lpJava);
         apxLogWrite(APXLOG_MARK_ERROR "Could not find method %s with signature %s",
-                    szMethodName, szSignature);
+                szMethodName, szSignature);
         return rv;
     }
     switch (*s) {
         case 'V':
             JNICALL_3(CallStaticVoidMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'L':
         case '[':
             rv.l = JNICALL_3(CallStaticObjectMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'Z':
             rv.z = JNICALL_3(CallStaticBooleanMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'B':
             rv.b = JNICALL_3(CallStaticByteMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'C':
             rv.c = JNICALL_3(CallStaticCharMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'S':
             rv.i = JNICALL_3(CallStaticShortMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'I':
             rv.i = JNICALL_3(CallStaticIntMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'J':
             rv.j = JNICALL_3(CallStaticLongMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'F':
             rv.f = JNICALL_3(CallStaticFloatMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         case 'D':
             rv.d = JNICALL_3(CallStaticDoubleMethodV, lpClass, method, lpArgs);
-        break;
+            break;
         default:
             apxLogWrite(APXLOG_MARK_ERROR "Invalid signature %s for method %s",
-                        szSignature, szMethodName);
+                    szSignature, szMethodName);
             return rv;
-        break;
+            break;
     }
 
     return rv;
@@ -819,8 +789,7 @@ apxJavaCallStaticMethodV(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
 
 static jvalue
 apxJavaCallStaticMethod(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
-                        LPCSTR szSignature, ...)
-{
+        LPCSTR szSignature, ...) {
     jvalue rv;
     va_list args;
 
@@ -835,17 +804,16 @@ apxJavaCallStaticMethod(APXHANDLE hJava, jclass lpClass, LPCSTR szMethodName,
  * System.setOut(new PrintStream(new FileOutputStream(filename)));
  */
 static BOOL
-apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
-{
+apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename) {
     LPAPXJAVAVM lpJava;
-    jobject     fs;
-    jobject     ps;
-    jstring     fn;
-    jclass      sys;
+    jobject fs;
+    jobject ps;
+    jstring fn;
+    jclass sys;
 
     if (!szFilename)
         return FALSE;
-    
+
     lpJava = APXHANDLE_DATA(hJava);
     if (!__apxJvmAttach(lpJava))
         return FALSE;
@@ -872,28 +840,26 @@ apxJavaSetOut(APXHANDLE hJava, BOOL setErrorOrOut, LPCWSTR szFilename)
         JVM_EXCEPTION_CLEAR(lpJava);
         apxLogWrite(APXLOG_MARK_ERROR "Error calling set method for java/lang/System");
         return FALSE;
-    }
-    else
+    } else
         return TRUE;
 }
 
 BOOL
-apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
-{
+apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options) {
     const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
-    
+
     if (!lpJava)
         return FALSE;
-    
+
     if (!apxJavaInitialize(instance, options->szClassPath, options->lpOptions, options->dwMs, options->dwMx, options->dwSs, options->bJniVfprintf))
         return FALSE;
-    
+
     if (options->szLibraryPath && *options->szLibraryPath) {
         DYNLOAD_FPTR_ADDRESS(SetDllDirectoryW, KERNEL32);
         DYNLOAD_CALL(SetDllDirectoryW)(options->szLibraryPath);
         apxLogWrite(APXLOG_MARK_DEBUG "DLL search path set to '%S'", options->szLibraryPath);
     }
-    
+
     apxJavaSetOut(instance, TRUE, options->szStdErrFilename);
     apxJavaSetOut(instance, FALSE, options->szStdOutFilename);
 
@@ -909,32 +875,32 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
 
     jbyteArray array = (*((lpJava)->lpEnv))->NewByteArray((lpJava)->lpEnv, szJar);
     (*((lpJava)->lpEnv))->SetByteArrayRegion(
-        (lpJava)->lpEnv,
-        array,
-        0,
-        szJar,
-        LockResource(resJar)
-    );
-    
+            (lpJava)->lpEnv,
+            array,
+            0,
+            szJar,
+            LockResource(resJar)
+            );
+
     // Call createBootstrap to get our wrapper implementation.
     lpJava->jWrapper = JNICALL_1(NewGlobalRef,
-        JNICALL_3(
+            JNICALL_3(
             CallStaticObjectMethod,
             clLoader,
             JNICALL_3(
-                GetStaticMethodID,
-                clLoader,
-                "createBootstrap",
-                "([B)Ljava/lang/Object;"
+            GetStaticMethodID,
+            clLoader,
+            "createBootstrap",
+            "([B)Ljava/lang/Object;"
             ),
             array
-        )
-    );
-    
+            )
+            );
+
     // Initialize natives methods
     JNINativeMethod nativemethods[2];
     BOOL result = FALSE;
-    
+
     nativemethods[0].name = "shutdown";
     nativemethods[0].signature = "(Z)V";
     nativemethods[0].fnPtr = options->shutdown;
@@ -952,19 +918,18 @@ apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options)
 }
 
 BOOL
-apxJavaCall(APXHANDLE instance, LPCSTR szMethod)
-{
+apxJavaCall(APXHANDLE instance, LPCSTR szMethod) {
     const LPAPXJAVAVM lpJava = APXHANDLE_DATA(instance);
     jmethodID method;
-    
+
     if (!lpJava)
         return FALSE;
-    
+
     if (!__apxJvmAttach(lpJava))
         return FALSE;
 
     method = JNICALL_3(GetMethodID, JVM_GET_OBJECT_CLASS(lpJava, jWrapper), szMethod, "()Z");
-    if(!method)
+    if (!method)
         return FALSE;
     JNICALL_2(CallBooleanMethod, lpJava->jWrapper, method);
     if (JVM_EXCEPTION_CHECK(lpJava)) {
@@ -972,8 +937,7 @@ apxJavaCall(APXHANDLE instance, LPCSTR szMethod)
         (*((lpJava)->lpEnv))->ExceptionDescribe((lpJava)->lpEnv);
         __apxJvmDetach(lpJava);
         return FALSE;
-    }
-    else {
+    } else {
         __apxJvmDetach(lpJava);
         return TRUE;
     }

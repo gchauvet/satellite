@@ -20,42 +20,42 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/**
- * Wether debugging is enabled or not.
- */
-extern bool log_debug_flag;
+    /**
+     * Wether debugging is enabled or not.
+     */
+    extern bool log_debug_flag;
 
-/* Wether SYSLOG logging (for stderr) is enable or not. */
-extern bool log_stderr_syslog_flag;
+    /* Wether SYSLOG logging (for stderr) is enable or not. */
+    extern bool log_stderr_syslog_flag;
 
-/* Wether SYSLOG logging (for stdout) is enable or not. */
-extern bool log_stdout_syslog_flag;
+    /* Wether SYSLOG logging (for stdout) is enable or not. */
+    extern bool log_stdout_syslog_flag;
 
-/**
- * The name of the deimos binary.
- */
-extern char *log_prog;
+    /**
+     * The name of the deimos binary.
+     */
+    extern char *log_prog;
 
-/**
- * Helper macro to avoid NPEs in printf.
- */
+    /**
+     * Helper macro to avoid NPEs in printf.
+     */
 #define PRINT_NULL(x) ((x) == NULL ? "null" : (x))
 
-/**
- * Dump a debug message.
- *
- * @param fmt The printf style message format.
- * @param ... Any optional parameter for the message.
- */
-void log_debug(const char *fmt, ...);
+    /**
+     * Dump a debug message.
+     *
+     * @param fmt The printf style message format.
+     * @param ... Any optional parameter for the message.
+     */
+    void log_debug(const char *fmt, ...);
 
-/**
- * Dump an error message.
- *
- * @param fmt The printf style message format.
- * @param ... Any optional parameter for the message.
- */
-void log_error(const char *fmt, ...);
+    /**
+     * Dump an error message.
+     *
+     * @param fmt The printf style message format.
+     * @param ... Any optional parameter for the message.
+     */
+    void log_error(const char *fmt, ...);
 
 #ifdef __cplusplus
 }

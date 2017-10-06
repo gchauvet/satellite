@@ -26,23 +26,23 @@ static char *_find_file_in_java_home(char *java_home, const char *filename) {
     struct dirent *entry;
     struct stat stat;
     char *result = NULL;
-    
-    if((dp = opendir(java_home)) != NULL) {
+
+    if ((dp = opendir(java_home)) != NULL) {
         chdir(java_home);
-        while((entry = readdir(dp)) != NULL) {
+        while ((entry = readdir(dp)) != NULL) {
             lstat(entry->d_name, &stat);
-            if(S_ISDIR(stat.st_mode)) {
-                if(strcmp(".", entry->d_name) == 0 ||
-                   strcmp("..", entry->d_name) == 0)
+            if (S_ISDIR(stat.st_mode)) {
+                if (strcmp(".", entry->d_name) == 0 ||
+                        strcmp("..", entry->d_name) == 0)
                     continue;
                 result = _find_file_in_java_home(entry->d_name, filename);
-                if(result != NULL)
+                if (result != NULL)
                     break;
             } else {
-                if(strcmp(filename, entry->d_name) == 0) {
+                if (strcmp(filename, entry->d_name) == 0) {
                     char buffer[PATH_MAX + 1];
                     result = realpath(entry->d_name, buffer);
-                    if(result != NULL)
+                    if (result != NULL)
                         result = strdup(result);
                     break;
                 }
@@ -57,7 +57,7 @@ static char *_find_file_in_java_home(char *java_home, const char *filename) {
 static char *find_file_in_java_home(char *java_home, const char *filename) {
     char buffer[PATH_MAX + 1];
     char *result = NULL;
-    if(getcwd(buffer, sizeof(buffer)) != NULL) {
+    if (getcwd(buffer, sizeof (buffer)) != NULL) {
         result = _find_file_in_java_home(java_home, filename);
         chdir(buffer);
     }
@@ -75,13 +75,13 @@ char *find_location_jvm_cfg(char *java_home) {
 char *find_location_jvm_default(char *java_home) {
     static const char *filename =
 #if defined(__APPLE__)
-    "libjvm.dylib";
+            "libjvm.dylib";
 #elif defined(_WIN32)
-    "jvm.dll";
+            "jvm.dll";
 #elif defined(__unix__)
-    "libjvm.so";
+            "libjvm.so";
 #else
-    "libgcj.so";
+            "libgcj.so";
 #endif
     return find_file_in_java_home(java_home, filename);
 }

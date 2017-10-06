@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef _CMDLINE_H_INCLUDED_
 #define _CMDLINE_H_INCLUDED_
 
@@ -37,40 +37,40 @@ __APXBEGIN_DECLS
 typedef struct APXCMDLINEOPT APXCMDLINEOPT;
 
 struct APXCMDLINEOPT {
-    LPWSTR          szName;         /* Long Argument Name */
-    LPWSTR          szRegistry;     /* Registry Association */
-    LPWSTR          szSubkey;       /* Registry Association */
-    DWORD           dwType;         /* Argument type (string, number, multistring */
-    LPWSTR          szValue;        /* Return string value  */
-    DWORD           dwValue;        /* Return numeric value or present if NIL */
+    LPWSTR szName; /* Long Argument Name */
+    LPWSTR szRegistry; /* Registry Association */
+    LPWSTR szSubkey; /* Registry Association */
+    DWORD dwType; /* Argument type (string, number, multistring */
+    LPWSTR szValue; /* Return string value  */
+    DWORD dwValue; /* Return numeric value or present if NIL */
 };
 
 typedef struct APXCMDLINE {
-    APXCMDLINEOPT       *lpOptions;
-    LPWSTR              szArgv0;
-    LPWSTR              szExecutable;   /* Parsed argv0 */
-    LPWSTR              szExePath;      /* Parsed argv0 */
-    LPWSTR              szApplication;  /* Fist string after //CMD// */
-    DWORD               dwCmdIndex;     /* Command index */
-    LPWSTR              *lpArgvw;
-    DWORD               dwArgc;
-    APXHANDLE           hPool;
-    
+    APXCMDLINEOPT *lpOptions;
+    LPWSTR szArgv0;
+    LPWSTR szExecutable; /* Parsed argv0 */
+    LPWSTR szExePath; /* Parsed argv0 */
+    LPWSTR szApplication; /* Fist string after //CMD// */
+    DWORD dwCmdIndex; /* Command index */
+    LPWSTR *lpArgvw;
+    DWORD dwArgc;
+    APXHANDLE hPool;
+
 } APXCMDLINE, *LPAPXCMDLINE;
 
 extern LPAPXCMDLINE apxCmdlineParse(
-    APXHANDLE hPool,
-    APXCMDLINEOPT   *lpOptions,
-    LPCWSTR         *lpszCommands
-);
+        APXHANDLE hPool,
+        APXCMDLINEOPT *lpOptions,
+        LPCWSTR *lpszCommands
+        );
 
 extern void apxCmdlineLoadEnvVars(
-    LPAPXCMDLINE lpCmdline
-);
+        LPAPXCMDLINE lpCmdline
+        );
 
 extern void apxCmdlineFree(
-    LPAPXCMDLINE lpCmdline
-);
+        LPAPXCMDLINE lpCmdline
+        );
 
 
 __APXEND_DECLS

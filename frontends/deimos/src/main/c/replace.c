@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "deimos.h"
 
 /* Replace all occurrences of a string in another */
-int replace(char *new, int len, char *old, char *mch, char *rpl)
-{
+int replace(char *new, int len, char *old, char *mch, char *rpl) {
     char *tmp;
     int count;
     int shift;
@@ -77,7 +76,7 @@ int replace(char *new, int len, char *old, char *mch, char *rpl)
      * and of how many bytes we need to shift the data
      */
     shift = rlen - mlen;
-    nlen  = olen + (shift * count);
+    nlen = olen + (shift * count);
     /* printf("Count=%d Shift= %d OLen=%d NLen=%d\n",count,shift,olen,nlen); */
 
     /* Check if we have enough size in the buffer */
@@ -100,8 +99,7 @@ int replace(char *new, int len, char *old, char *mch, char *rpl)
                 tmp[x] = tmp[x - shift];
             }
             /* If shift is < 0 we need to move data from left to right */
-        }
-        else if (shift < 0) {
+        } else if (shift < 0) {
             for (x = mlen; x < strlen(tmp) - shift; x++) {
                 /*
                    printf("src %c(%d) dst %c(%d)\n",

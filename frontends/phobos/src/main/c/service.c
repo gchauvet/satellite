@@ -27,26 +27,26 @@
 
 typedef struct APXSERVICE {
     /* Are we a service manager or we are the service itself */
-    BOOL            bManagerMode;
+    BOOL bManagerMode;
     /* Handle to the current service */
-    SC_HANDLE       hService;
+    SC_HANDLE hService;
     /* Handle of the Service manager */
-    SC_HANDLE       hManager;
-    APXSERVENTRY    stServiceEntry;
+    SC_HANDLE hManager;
+    APXSERVENTRY stServiceEntry;
 
 } APXSERVICE, *LPAPXSERVICE;
 
 static WCHAR __invalidPathChars[] = L"<>:\"/\\:|?*";
-static BOOL __apxIsValidServiceName(LPCWSTR szServiceName)
-{
+
+static BOOL __apxIsValidServiceName(LPCWSTR szServiceName) {
     WCHAR ch;
-    int   i = 0;
+    int i = 0;
     while ((ch = szServiceName[i++])) {
         int j = 0;
         while (__invalidPathChars[j]) {
             if (ch < 30 || ch == __invalidPathChars[j++]) {
                 apxDisplayError(FALSE, NULL, 0, "Service '%S' contains invalid character '%C'",
-                                szServiceName, ch);
+                        szServiceName, ch);
                 return FALSE;
             }
         }
@@ -59,8 +59,7 @@ static BOOL __apxIsValidServiceName(LPCWSTR szServiceName)
 }
 
 static BOOL __apxServiceCallback(APXHANDLE hObject, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam)
-{
+        WPARAM wParam, LPARAM lParam) {
     LPAPXSERVICE lpService;
 
     lpService = APXHANDLE_DATA(hObject);
@@ -70,19 +69,18 @@ static BOOL __apxServiceCallback(APXHANDLE hObject, UINT uMsg,
             lpService->stServiceEntry.lpConfig = NULL;
             SAFE_CLOSE_SCH(lpService->hService);
             SAFE_CLOSE_SCH(lpService->hManager);
-        break;
+            break;
         default:
-        break;
+            break;
     }
     return TRUE;
 }
 
 APXHANDLE
-apxCreateService(APXHANDLE hPool, DWORD dwOptions, BOOL bManagerMode)
-{
-    APXHANDLE    hService;
+apxCreateService(APXHANDLE hPool, DWORD dwOptions, BOOL bManagerMode) {
+    APXHANDLE hService;
     LPAPXSERVICE lpService;
-    SC_HANDLE    hManager;
+    SC_HANDLE hManager;
 
     if (!(hManager = OpenSCManager(NULL, NULL, dwOptions))) {
         if (GetLastError() != ERROR_ACCESS_DENIED)
@@ -90,23 +88,22 @@ apxCreateService(APXHANDLE hPool, DWORD dwOptions, BOOL bManagerMode)
         return NULL;
     }
     hService = apxHandleCreate(hPool, 0,
-                               NULL, sizeof(APXSERVICE),
-                               __apxServiceCallback);
+            NULL, sizeof (APXSERVICE),
+            __apxServiceCallback);
     if (IS_INVALID_HANDLE(hService)) {
         apxLogWrite(APXLOG_MARK_ERROR "Failed to Create Handle for Service");
         return NULL;
     }
     hService->dwType = APXHANDLE_TYPE_SERVICE;
     lpService = APXHANDLE_DATA(hService);
-    lpService->hManager     = hManager;
+    lpService->hManager = hManager;
     lpService->bManagerMode = bManagerMode;
 
     return hService;
 }
 
 BOOL
-apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions)
-{
+apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions) {
     LPAPXSERVICE lpService;
     DWORD dwNeeded;
 
@@ -128,8 +125,8 @@ apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions)
     lpService->stServiceEntry.lpConfig = NULL;
     /* Open the service */
     lpService->hService = OpenServiceW(lpService->hManager,
-                                       szServiceName,
-                                       dwOptions);
+            szServiceName,
+            dwOptions);
 
     if (IS_INVALID_HANDLE(lpService->hService)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
@@ -137,38 +134,37 @@ apxServiceOpen(APXHANDLE hService, LPCWSTR szServiceName, DWORD dwOptions)
     }
     wcsncpy(lpService->stServiceEntry.szServiceName, szServiceName, SIZ_RESLEN);
     if (!apxGetServiceDescriptionW(szServiceName,
-                                   lpService->stServiceEntry.szServiceDescription,
-                                   SIZ_DESLEN)) {
+            lpService->stServiceEntry.szServiceDescription,
+            SIZ_DESLEN)) {
         apxLogWrite(APXLOG_MARK_WARN "Failed to obtain service description");
         lpService->stServiceEntry.szServiceDescription[0] = L'\0';
     }
     if (!apxGetServiceUserW(szServiceName,
-                            lpService->stServiceEntry.szObjectName,
-                            SIZ_RESLEN)) {
+            lpService->stServiceEntry.szObjectName,
+            SIZ_RESLEN)) {
         apxLogWrite(APXLOG_MARK_WARN "Failed to obtain service user name");
         lpService->stServiceEntry.szObjectName[0] = L'\0';
     }
     if (!QueryServiceConfigW(lpService->hService, NULL, 0, &dwNeeded)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-        	// This is expected. The call is expected to fail with the required
-        	// buffer size set in dwNeeded.
-        	// Clear the last error to prevent it being logged if a genuine
-        	// error occurs
-        	SetLastError(ERROR_SUCCESS);
+            // This is expected. The call is expected to fail with the required
+            // buffer size set in dwNeeded.
+            // Clear the last error to prevent it being logged if a genuine
+            // error occurs
+            SetLastError(ERROR_SUCCESS);
         } else {
             apxLogWrite(APXLOG_MARK_SYSERR);
         }
     }
-    lpService->stServiceEntry.lpConfig =  (LPQUERY_SERVICE_CONFIGW)apxPoolAlloc(hService->hPool,
-                                                                                dwNeeded);
+    lpService->stServiceEntry.lpConfig = (LPQUERY_SERVICE_CONFIGW) apxPoolAlloc(hService->hPool,
+            dwNeeded);
     return QueryServiceConfigW(lpService->hService,
-                               lpService->stServiceEntry.lpConfig,
-                               dwNeeded, &dwNeeded);
+            lpService->stServiceEntry.lpConfig,
+            dwNeeded, &dwNeeded);
 }
 
 LPAPXSERVENTRY
-apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus)
-{
+apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus) {
     LPAPXSERVICE lpService;
 
     if (hService->dwType != APXHANDLE_TYPE_SERVICE)
@@ -180,7 +176,7 @@ apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus)
         return NULL;
 
     if (bRequeryStatus && !QueryServiceStatus(lpService->hService,
-                            &(lpService->stServiceEntry.stServiceStatus))) {
+            &(lpService->stServiceEntry.stServiceStatus))) {
         apxLogWrite(APXLOG_MARK_SYSERR);
         return NULL;
     }
@@ -193,12 +189,11 @@ apxServiceEntry(APXHANDLE hService, BOOL bRequeryStatus)
  */
 BOOL
 apxServiceSetNames(APXHANDLE hService,
-                   LPCWSTR szImagePath,
-                   LPCWSTR szDisplayName,
-                   LPCWSTR szDescription,
-                   LPCWSTR szUsername,
-                   LPCWSTR szPassword)
-{
+        LPCWSTR szImagePath,
+        LPCWSTR szDisplayName,
+        LPCWSTR szDescription,
+        LPCWSTR szUsername,
+        LPCWSTR szPassword) {
     LPAPXSERVICE lpService;
     DWORD dwServiceType = SERVICE_NO_CHANGE;
 
@@ -215,35 +210,34 @@ apxServiceSetNames(APXHANDLE hService,
     if (szUsername || szPassword)
         dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     if (!ChangeServiceConfigW(lpService->hService,
-                              dwServiceType,
-                              SERVICE_NO_CHANGE,
-                              SERVICE_NO_CHANGE,
-                              szImagePath,
-                              NULL,
-                              NULL,
-                              NULL,
-                              szUsername,
-                              szPassword,
-                              szDisplayName)) {
+            dwServiceType,
+            SERVICE_NO_CHANGE,
+            SERVICE_NO_CHANGE,
+            szImagePath,
+            NULL,
+            NULL,
+            NULL,
+            szUsername,
+            szPassword,
+            szDisplayName)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
         return FALSE;
     }
     if (szDescription) {
         SERVICE_DESCRIPTIONW desc;
-        desc.lpDescription = (LPWSTR)szDescription;
+        desc.lpDescription = (LPWSTR) szDescription;
         return ChangeServiceConfig2(lpService->hService,
-                                    SERVICE_CONFIG_DESCRIPTION,
-                                    &desc);
+                SERVICE_CONFIG_DESCRIPTION,
+                &desc);
     }
     return TRUE;
 }
 
 BOOL
 apxServiceSetOptions(APXHANDLE hService,
-                     DWORD dwServiceType,
-                     DWORD dwStartType,
-                     DWORD dwErrorControl)
-{
+        DWORD dwServiceType,
+        DWORD dwStartType,
+        DWORD dwErrorControl) {
     LPAPXSERVICE lpService;
 
     if (hService->dwType != APXHANDLE_TYPE_SERVICE)
@@ -257,53 +251,52 @@ apxServiceSetOptions(APXHANDLE hService,
     if (IS_INVALID_HANDLE(lpService->hService))
         return FALSE;
     return ChangeServiceConfig(lpService->hService, dwServiceType,
-                               dwStartType, dwErrorControl,
-                               NULL, NULL, NULL, NULL, NULL,
-                               NULL, NULL);
+            dwStartType, dwErrorControl,
+            NULL, NULL, NULL, NULL, NULL,
+            NULL, NULL);
 }
 
 static BOOL
-__apxStopDependentServices(LPAPXSERVICE lpService)
-{
+__apxStopDependentServices(LPAPXSERVICE lpService) {
     DWORD i;
     DWORD dwBytesNeeded;
     DWORD dwCount;
 
-    LPENUM_SERVICE_STATUSW  lpDependencies = NULL;
-    ENUM_SERVICE_STATUS     ess;
-    SC_HANDLE               hDepService;
-    SERVICE_STATUS_PROCESS  ssp;
+    LPENUM_SERVICE_STATUSW lpDependencies = NULL;
+    ENUM_SERVICE_STATUS ess;
+    SC_HANDLE hDepService;
+    SERVICE_STATUS_PROCESS ssp;
 
     DWORD dwStartTime = GetTickCount();
     /* Use the 30-second time-out */
-    DWORD dwTimeout   = 30000;
+    DWORD dwTimeout = 30000;
     BOOL result = TRUE;
 
     /* Pass a zero-length buffer to get the required buffer size.
      */
     if (!EnumDependentServicesW(lpService->hService,
-                               SERVICE_ACTIVE,
-                               lpDependencies, 0,
-                               &dwBytesNeeded,
-                               &dwCount)) {
+            SERVICE_ACTIVE,
+            lpDependencies, 0,
+            &dwBytesNeeded,
+            &dwCount)) {
         if (GetLastError() != ERROR_MORE_DATA)
             return FALSE; // Unexpected error
 
         /* Allocate a buffer for the dependencies.
          */
         lpDependencies = (LPENUM_SERVICE_STATUS) HeapAlloc(GetProcessHeap(),
-                                                           HEAP_ZERO_MEMORY,
-                                                           dwBytesNeeded);
+                HEAP_ZERO_MEMORY,
+                dwBytesNeeded);
         if (!lpDependencies)
             return FALSE;
 
         /* Enumerate the dependencies. */
         if (!EnumDependentServicesW(lpService->hService,
-                                    SERVICE_ACTIVE,
-                                    lpDependencies,
-                                    dwBytesNeeded,
-                                    &dwBytesNeeded,
-                                    &dwCount)) {
+                SERVICE_ACTIVE,
+                lpDependencies,
+                dwBytesNeeded,
+                &dwBytesNeeded,
+                &dwCount)) {
             result = FALSE;
         } else {
             BOOL exit = FALSE;
@@ -311,19 +304,19 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
                 ess = *(lpDependencies + i);
                 /* Open the service. */
                 hDepService = OpenServiceW(lpService->hManager,
-                                           ess.lpServiceName,
-                                           SERVICE_STOP | SERVICE_QUERY_STATUS);
+                        ess.lpServiceName,
+                        SERVICE_STOP | SERVICE_QUERY_STATUS);
 
                 if (!hDepService)
-                   continue;
+                    continue;
                 if (lstrcmpiW(ess.lpServiceName, L"Tcpip") == 0 ||
-                    lstrcmpiW(ess.lpServiceName, L"Afd") == 0)
+                        lstrcmpiW(ess.lpServiceName, L"Afd") == 0)
                     continue;
 
                 /* Send a stop code. */
                 if (!ControlService(hDepService,
-                                    SERVICE_CONTROL_STOP,
-                                    (LPSERVICE_STATUS) &ssp)) {
+                        SERVICE_CONTROL_STOP,
+                        (LPSERVICE_STATUS) & ssp)) {
                     result = FALSE;
                     exit = TRUE;
                 } else {
@@ -331,16 +324,16 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
                     while (ssp.dwCurrentState != SERVICE_STOPPED) {
                         Sleep(ssp.dwWaitHint);
                         if (!QueryServiceStatusEx(hDepService,
-                                                  SC_STATUS_PROCESS_INFO,
-                                                 (LPBYTE)&ssp,
-                                                  sizeof(SERVICE_STATUS_PROCESS),
-                                                 &dwBytesNeeded)) {
+                                SC_STATUS_PROCESS_INFO,
+                                (LPBYTE) & ssp,
+                                sizeof (SERVICE_STATUS_PROCESS),
+                                &dwBytesNeeded)) {
                             result = FALSE;
                             exit = TRUE;
                             break;
                         } else if (ssp.dwCurrentState == SERVICE_STOPPED) {
-                             break;
-                        }  else if (GetTickCount() - dwStartTime > dwTimeout) {
+                            break;
+                        } else if (GetTickCount() - dwStartTime > dwTimeout) {
                             result = FALSE;
                             exit = TRUE;
                             break;
@@ -359,16 +352,15 @@ __apxStopDependentServices(LPAPXSERVICE lpService)
 
 BOOL
 apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
-                  LPAPXFNCALLBACK fnControlCallback,
-                  LPVOID lpCbData)
-{
-    LPAPXSERVICE   lpService;
+        LPAPXFNCALLBACK fnControlCallback,
+        LPVOID lpCbData) {
+    LPAPXSERVICE lpService;
     SERVICE_STATUS stStatus;
-    DWORD          dwPending = 0;
-    DWORD          dwState = 0;
-    DWORD          dwTick  = 0;
-    DWORD          dwWait, dwCheck, dwStart;
-    BOOL           bStatus;
+    DWORD dwPending = 0;
+    DWORD dwState = 0;
+    DWORD dwTick = 0;
+    DWORD dwWait, dwCheck, dwStart;
+    BOOL bStatus;
 
     if (hService->dwType != APXHANDLE_TYPE_SERVICE)
         return FALSE;
@@ -383,15 +375,15 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
     switch (dwControl) {
         case SERVICE_CONTROL_CONTINUE:
             dwPending = SERVICE_START_PENDING;
-            dwState   = SERVICE_RUNNING;
+            dwState = SERVICE_RUNNING;
             break;
         case SERVICE_CONTROL_STOP:
             dwPending = SERVICE_STOP_PENDING;
-            dwState   = SERVICE_STOPPED;
+            dwState = SERVICE_STOPPED;
             break;
         case SERVICE_CONTROL_PAUSE:
             dwPending = SERVICE_PAUSE_PENDING;
-            dwState   = SERVICE_PAUSED;
+            dwState = SERVICE_PAUSED;
             break;
         default:
             break;
@@ -406,17 +398,17 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
             case 0x80:
             case 0x90:
                 dwPending = SERVICE_START_PENDING;
-                dwState   = SERVICE_RUNNING;
+                dwState = SERVICE_RUNNING;
                 break;
             case 0xA0:
             case 0xB0:
                 dwPending = SERVICE_STOP_PENDING;
-                dwState   = SERVICE_STOPPED;
+                dwState = SERVICE_STOPPED;
                 break;
             case 0xC0:
             case 0xD0:
                 dwPending = SERVICE_PAUSE_PENDING;
-                dwState   = SERVICE_PAUSED;
+                dwState = SERVICE_PAUSED;
                 break;
             default:
                 break;
@@ -431,9 +423,9 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
     }
     /* signal that we are about to control the service */
     if (fnControlCallback)
-        (*fnControlCallback)(lpCbData, uMsg, (WPARAM)1, (LPARAM)dwState);
+        (*fnControlCallback)(lpCbData, uMsg, (WPARAM) 1, (LPARAM) dwState);
     if (dwControl == SERVICE_CONTROL_CONTINUE &&
-        stStatus.dwCurrentState != SERVICE_PAUSED)
+            stStatus.dwCurrentState != SERVICE_PAUSED)
         bStatus = StartService(lpService->hService, 0, NULL);
     else {
         bStatus = TRUE;
@@ -457,16 +449,16 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
                  */
                 dwWait = stStatus.dwWaitHint / 10;
 
-                if( dwWait < 1000 )
+                if (dwWait < 1000)
                     dwWait = 1000;
-                else if ( dwWait > 10000 )
+                else if (dwWait > 10000)
                     dwWait = 10000;
                 /* Signal to the callback that we are pending
                  * break if callback returns false.
                  */
                 if (fnControlCallback) {
-                    if (!(*fnControlCallback)(lpCbData, uMsg, (WPARAM)2,
-                                              (LPARAM)dwTick++))
+                    if (!(*fnControlCallback)(lpCbData, uMsg, (WPARAM) 2,
+                            (LPARAM) dwTick++))
                         break;
                 }
                 Sleep(dwWait);
@@ -474,28 +466,26 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
                     /* The service is making progress. */
                     dwStart = GetTickCount();
                     dwCheck = stStatus.dwCheckPoint;
-                }
-                else {
-                    if(GetTickCount() - dwStart > stStatus.dwWaitHint) {
+                } else {
+                    if (GetTickCount() - dwStart > stStatus.dwWaitHint) {
                         /* No progress made within the wait hint */
                         break;
                     }
                 }
-            }
-            else
+            } else
                 break;
         }
     }
     /* signal that we are done with controling the service */
     if (fnControlCallback)
-        (*fnControlCallback)(lpCbData, uMsg, (WPARAM)3, (LPARAM)0);
+        (*fnControlCallback)(lpCbData, uMsg, (WPARAM) 3, (LPARAM) 0);
     /* Check if we are in the desired state */
     Sleep(1000);
 
     if (QueryServiceStatus(lpService->hService, &stStatus)) {
         if (fnControlCallback)
-            (*fnControlCallback)(lpCbData, uMsg, (WPARAM)4,
-                                 (LPARAM)&stStatus);
+            (*fnControlCallback)(lpCbData, uMsg, (WPARAM) 4,
+                (LPARAM) & stStatus);
         if (stStatus.dwCurrentState == dwState)
             return TRUE;
 
@@ -506,11 +496,10 @@ apxServiceControl(APXHANDLE hService, DWORD dwControl, UINT uMsg,
 
 BOOL
 apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
-                  LPCWSTR szDisplayName, LPCWSTR szImagePath,
-                  LPCWSTR lpDependencies, DWORD dwServiceType,
-                  DWORD dwStartType)
-{
-    LPAPXSERVICE   lpService;
+        LPCWSTR szDisplayName, LPCWSTR szImagePath,
+        LPCWSTR lpDependencies, DWORD dwServiceType,
+        DWORD dwStartType) {
+    LPAPXSERVICE lpService;
 
     if (hService->dwType != APXHANDLE_TYPE_SERVICE)
         return FALSE;
@@ -530,32 +519,31 @@ apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
 
     apxFree(lpService->stServiceEntry.lpConfig);
     lpService->stServiceEntry.lpConfig = NULL;
-    memset(&lpService->stServiceEntry, 0, sizeof(APXSERVENTRY));
+    memset(&lpService->stServiceEntry, 0, sizeof (APXSERVENTRY));
 
     if (lpDependencies)
         lpDependencies = apxMultiSzCombine(NULL, lpDependencies,
-                                           L"Tcpip\0Afd\0", NULL);
+            L"Tcpip\0Afd\0", NULL);
     else
         lpDependencies = L"Tcpip\0Afd\0";
     lpService->hService = CreateServiceW(lpService->hManager,
-                                         szServiceName,
-                                         szDisplayName,
-                                         SERVICE_ALL_ACCESS,
-                                         dwServiceType,
-                                         dwStartType,
-                                         SERVICE_ERROR_NORMAL,
-                                         szImagePath,
-                                         NULL,
-                                         NULL,
-                                         lpDependencies,
-                                         NULL,
-                                         NULL);
+            szServiceName,
+            szDisplayName,
+            SERVICE_ALL_ACCESS,
+            dwServiceType,
+            dwStartType,
+            SERVICE_ERROR_NORMAL,
+            szImagePath,
+            NULL,
+            NULL,
+            lpDependencies,
+            NULL,
+            NULL);
 
     if (IS_INVALID_HANDLE(lpService->hService)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
         return FALSE;
-    }
-    else {
+    } else {
         wcsncpy(lpService->stServiceEntry.szServiceName, szServiceName, SIZ_RESLEN);
         lpService->stServiceEntry.dwStart = dwStartType;
         return TRUE;
@@ -563,9 +551,8 @@ apxServiceInstall(APXHANDLE hService, LPCWSTR szServiceName,
 }
 
 BOOL
-apxServiceDelete(APXHANDLE hService)
-{
-    LPAPXSERVICE   lpService;
+apxServiceDelete(APXHANDLE hService) {
+    LPAPXSERVICE lpService;
     SERVICE_STATUS stStatus;
     if (hService->dwType != APXHANDLE_TYPE_SERVICE)
         return FALSE;
@@ -593,25 +580,24 @@ apxServiceDelete(APXHANDLE hService)
 /* Browse the services */
 DWORD
 apxServiceBrowse(APXHANDLE hService,
-                 LPCWSTR szIncludeNamePattern,
-                 LPCWSTR szIncludeImagePattern,
-                 LPCWSTR szExcludeNamePattern,
-                 LPCWSTR szExcludeImagePattern,
-                 UINT uMsg,
-                 LPAPXFNCALLBACK fnDisplayCallback,
-                 LPVOID lpCbData)
-{
-    DWORD        nFound = 0;
-    APXREGENUM   stEnum;
+        LPCWSTR szIncludeNamePattern,
+        LPCWSTR szIncludeImagePattern,
+        LPCWSTR szExcludeNamePattern,
+        LPCWSTR szExcludeImagePattern,
+        UINT uMsg,
+        LPAPXFNCALLBACK fnDisplayCallback,
+        LPVOID lpCbData) {
+    DWORD nFound = 0;
+    APXREGENUM stEnum;
     LPAPXSERVICE lpService;
-    SC_LOCK      hLock;
+    SC_LOCK hLock;
     if (hService->dwType != APXHANDLE_TYPE_SERVICE || !fnDisplayCallback)
         return 0;
 
     lpService = APXHANDLE_DATA(hService);
     /* Only the manager mode can browse services */
     if (!lpService->bManagerMode ||
-        IS_INVALID_HANDLE(lpService->hManager))
+            IS_INVALID_HANDLE(lpService->hManager))
         return 0;
     hLock = LockServiceDatabase(lpService->hManager);
     if (IS_INVALID_HANDLE(hLock)) {
@@ -619,12 +605,12 @@ apxServiceBrowse(APXHANDLE hService,
 
         return 0;
     }
-    memset(&stEnum, 0, sizeof(APXREGENUM));
+    memset(&stEnum, 0, sizeof (APXREGENUM));
 
     while (TRUE) {
         APXSERVENTRY stEntry;
         BOOL rv;
-        memset(&stEntry, 0, sizeof(APXSERVENTRY));
+        memset(&stEntry, 0, sizeof (APXSERVENTRY));
         rv = apxRegistryEnumServices(&stEnum, &stEntry);
 
         if (rv) {
@@ -632,12 +618,12 @@ apxServiceBrowse(APXHANDLE hService,
             SC_HANDLE hSrv = NULL;
             DWORD dwNeeded = 0;
             hSrv = OpenServiceW(lpService->hManager,
-                                stEntry.szServiceName,
-                                GENERIC_READ);
+                    stEntry.szServiceName,
+                    GENERIC_READ);
             if (!IS_INVALID_HANDLE(hSrv)) {
                 QueryServiceConfigW(hSrv, NULL, 0, &dwNeeded);
-                stEntry.lpConfig = (LPQUERY_SERVICE_CONFIGW)apxPoolAlloc(hService->hPool,
-                                                                         dwNeeded);
+                stEntry.lpConfig = (LPQUERY_SERVICE_CONFIGW) apxPoolAlloc(hService->hPool,
+                        dwNeeded);
                 /* Call the QueryServiceConfig againg with allocated config */
                 if (QueryServiceConfigW(hSrv, stEntry.lpConfig, dwNeeded, &dwNeeded)) {
                     /* Make that customizable so that kernel mode drivers can be
@@ -646,24 +632,24 @@ apxServiceBrowse(APXHANDLE hService,
                      * XXX: Do we need that customizable after all?
                      */
                     if ((stEntry.lpConfig->dwServiceType &
-                         ~SERVICE_INTERACTIVE_PROCESS) & SERVICE_WIN32)
+                            ~SERVICE_INTERACTIVE_PROCESS) & SERVICE_WIN32)
                         fm = 0;
 
                     if (!fm && szIncludeNamePattern) {
                         fm = apxMultiStrMatchW(stEntry.szServiceName,
-                                               szIncludeNamePattern, L';', TRUE);
+                                szIncludeNamePattern, L';', TRUE);
                     }
                     if (!fm && szExcludeNamePattern) {
                         fm = !apxMultiStrMatchW(stEntry.szServiceName,
-                                                szExcludeNamePattern, L';', TRUE);
+                                szExcludeNamePattern, L';', TRUE);
                     }
                     if (!fm && szIncludeImagePattern) {
                         fm = apxMultiStrMatchW(stEntry.lpConfig->lpBinaryPathName,
-                                               szIncludeImagePattern, L';', TRUE);
+                                szIncludeImagePattern, L';', TRUE);
                     }
                     if (!fm && szExcludeImagePattern) {
                         fm = !apxMultiStrMatchW(stEntry.szServiceName,
-                                                szExcludeImagePattern, L';', TRUE);
+                                szExcludeImagePattern, L';', TRUE);
                     }
                     if (!fm) {
                         QueryServiceStatus(hSrv, &(stEntry.stServiceStatus));
@@ -671,14 +657,14 @@ apxServiceBrowse(APXHANDLE hService,
                         if (apxGetOsLevel() >= 4) {
                             DWORD dwNeed;
                             QueryServiceStatusEx(hSrv, SC_STATUS_PROCESS_INFO,
-                                                 (LPBYTE)(&(stEntry.stStatusProcess)),
-                                                 sizeof(SERVICE_STATUS_PROCESS),
-                                                 &dwNeed);
+                                    (LPBYTE) (&(stEntry.stStatusProcess)),
+                                    sizeof (SERVICE_STATUS_PROCESS),
+                                    &dwNeed);
                         }
                         /* finaly call the provided callback */
                         rv = (*fnDisplayCallback)(lpCbData, uMsg,
-                                                  (WPARAM)&stEntry,
-                                                  (LPARAM)nFound++);
+                                (WPARAM) & stEntry,
+                                (LPARAM) nFound++);
                     }
                 }
                 /* release the skipped service config */

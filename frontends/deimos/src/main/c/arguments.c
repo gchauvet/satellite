@@ -19,8 +19,7 @@
 #include <glob.h>
 
 /* Return the argument of a command line option */
-static char *optional(int argc, char *argv[], int argi)
-{
+static char *optional(int argc, char *argv[], int argi) {
 
     argi++;
     if (argi >= argc)
@@ -32,17 +31,16 @@ static char *optional(int argc, char *argv[], int argi)
     return strdup(argv[argi]);
 }
 
-static char *memstrcat(char *ptr, const char *str, const char *add)
-{
+static char *memstrcat(char *ptr, const char *str, const char *add) {
     size_t nl = 1;
-    int   nas = ptr == NULL;
+    int nas = ptr == NULL;
     if (ptr)
         nl += strlen(ptr);
     if (str)
         nl += strlen(str);
     if (add)
         nl += strlen(add);
-    ptr = (char *)realloc(ptr, nl);
+    ptr = (char *) realloc(ptr, nl);
     if (ptr) {
         if (nas)
             *ptr = '\0';
@@ -54,17 +52,16 @@ static char *memstrcat(char *ptr, const char *str, const char *add)
     return ptr;
 }
 
-static char* eval_ppath(char *strcp, const char *pattern)
-{
+static char* eval_ppath(char *strcp, const char *pattern) {
     glob_t globbuf;
-    char   jars[PATH_MAX + 1];
+    char jars[PATH_MAX + 1];
 
-    if (strlen(pattern) > (sizeof(jars) - 5)) {
+    if (strlen(pattern) > (sizeof (jars) - 5)) {
         return memstrcat(strcp, pattern, NULL);
     }
     strcpy(jars, pattern);
     strcat(jars, ".jar");
-    memset(&globbuf, 0, sizeof(glob_t));
+    memset(&globbuf, 0, sizeof (glob_t));
     if (glob(jars, GLOB_ERR, NULL, &globbuf) == 0) {
         size_t n;
         for (n = 0; n < globbuf.gl_pathc - 1; n++) {
@@ -81,13 +78,13 @@ static char* eval_ppath(char *strcp, const char *pattern)
 }
 
 #define JAVA_CLASSPATH      "-Djava.class.path="
+
 /**
  * Call glob on each PATH like string path.
  * Glob is called only if the part ends with asterisk in which
  * case asterisk is replaced by *.jar when searching
  */
-static char* eval_cpath(const char *cp)
-{
+static char* eval_cpath(const char *cp) {
     char *cpy = memstrcat(NULL, JAVA_CLASSPATH, cp);
     char *gcp = NULL;
     char *pos;
@@ -95,7 +92,8 @@ static char* eval_cpath(const char *cp)
 
     if (!cpy)
         return NULL;
-    ptr = cpy + sizeof(JAVA_CLASSPATH) - 1;;
+    ptr = cpy + sizeof (JAVA_CLASSPATH) - 1;
+    ;
     while ((pos = strchr(ptr, ':'))) {
         *pos = '\0';
         if (gcp)
@@ -105,12 +103,11 @@ static char* eval_cpath(const char *cp)
         if ((pos > ptr) && (*(pos - 1) == '*')) {
             if (!(gcp = eval_ppath(gcp, ptr))) {
                 /* Error.
-                * Return the original string processed so far.
-                */
+                 * Return the original string processed so far.
+                 */
                 return cpy;
             }
-        }
-        else
+        } else
             gcp = memstrcat(gcp, ptr, NULL);
         ptr = pos + 1;
     }
@@ -122,11 +119,10 @@ static char* eval_cpath(const char *cp)
             gcp = memstrcat(NULL, JAVA_CLASSPATH, NULL);
         if (end > 0 && ptr[end - 1] == '*') {
             /* Last path elemet ends with star
-            * Do a globbing.
-            */
+             * Do a globbing.
+             */
             gcp = eval_ppath(gcp, ptr);
-        }
-        else {
+        } else {
             /* Just add the part */
             gcp = memstrcat(gcp, ptr, NULL);
         }
@@ -135,54 +131,52 @@ static char* eval_cpath(const char *cp)
     if (gcp) {
         free(cpy);
         return gcp;
-    }
-    else
+    } else
         return cpy;
 }
 
 /* Parse command line arguments */
-static arg_data *parse(int argc, char *argv[])
-{
+static arg_data *parse(int argc, char *argv[]) {
     arg_data *args = NULL;
-    char *temp     = NULL;
-    char *cmnd     = NULL;
-    int x          = 0;
+    char *temp = NULL;
+    char *cmnd = NULL;
+    int x = 0;
 
     /* Create the default command line arguments */
-    args = (arg_data *)malloc(sizeof(arg_data));
+    args = (arg_data *) malloc(sizeof (arg_data));
     args->pidf = "/var/run/deimos.pid"; /* The default PID file */
-    args->user    = NULL;         /* No user switching by default */
-    args->dtch    = true;         /* Do detach from parent */
-    args->vers    = false;        /* Don't display version */
-    args->help    = false;        /* Don't display help */
-    args->chck    = false;        /* Don't do a check-only startup */
-    args->shutdown= false;        /* Shutdown a running deimos */
-    args->pause   = false;        /* Pause the running deimos */
-    args->resume  = false;        /* Continue the running deimos */
-    args->wait    = 0;            /* Wait until deimos has started the JVM */
-    args->name    = NULL;         /* No VM version name */
-    args->home    = NULL;         /* No default JAVA_HOME */
-    args->onum    = 0;            /* Zero arguments, but let's have some room */
-    args->jar    = NULL;          /* No main jar predefined */
-    args->anum    = 0;            /* Zero class specific arguments but make room*/
-    args->cwd     = "/";          /* Use root as default */
-    args->outfile = "/dev/null";  /* Swallow by default */
-    args->errfile = "/dev/null";  /* Swallow by default */
-    args->redirectstdin = true;   /* Redirect stdin to /dev/null by default */
+    args->user = NULL; /* No user switching by default */
+    args->dtch = true; /* Do detach from parent */
+    args->vers = false; /* Don't display version */
+    args->help = false; /* Don't display help */
+    args->chck = false; /* Don't do a check-only startup */
+    args->shutdown = false; /* Shutdown a running deimos */
+    args->pause = false; /* Pause the running deimos */
+    args->resume = false; /* Continue the running deimos */
+    args->wait = 0; /* Wait until deimos has started the JVM */
+    args->name = NULL; /* No VM version name */
+    args->home = NULL; /* No default JAVA_HOME */
+    args->onum = 0; /* Zero arguments, but let's have some room */
+    args->jar = NULL; /* No main jar predefined */
+    args->anum = 0; /* Zero class specific arguments but make room*/
+    args->cwd = "/"; /* Use root as default */
+    args->outfile = "/dev/null"; /* Swallow by default */
+    args->errfile = "/dev/null"; /* Swallow by default */
+    args->redirectstdin = true; /* Redirect stdin to /dev/null by default */
     args->procname = "deimos.exec";
 #ifndef DEIMOS_UMASK
-    args->umask   = 0077;
+    args->umask = 0077;
 #else
-    args->umask   = DEIMOS_UMASK;
+    args->umask = DEIMOS_UMASK;
 #endif
 
-    if (!(args->args = (char **)malloc(argc * sizeof(char *))))
+    if (!(args->args = (char **) malloc(argc * sizeof (char *))))
         return NULL;
-    if (!(args->opts = (char **)malloc(argc * sizeof(char *))))
+    if (!(args->opts = (char **) malloc(argc * sizeof (char *))))
         return NULL;
 
     /* Set up the command name */
-    cmnd = strrchr(argv[0],'/');
+    cmnd = strrchr(argv[0], '/');
     if (cmnd == NULL)
         cmnd = argv[0];
     else
@@ -193,7 +187,7 @@ static arg_data *parse(int argc, char *argv[])
     for (x = 1; x < argc; x++) {
 
         if (!strcmp(argv[x], "-cp") ||
-            !strcmp(argv[x], "-classpath")) {
+                !strcmp(argv[x], "-classpath")) {
             temp = optional(argc, argv, x++);
             if (temp == NULL) {
                 log_error("Invalid classpath specified");
@@ -207,64 +201,52 @@ static arg_data *parse(int argc, char *argv[])
             free(temp);
             args->onum++;
 
-        }
-        else if (!strcmp(argv[x], "-jvm")) {
+        } else if (!strcmp(argv[x], "-jvm")) {
             args->name = optional(argc, argv, x++);
             if (args->name == NULL) {
                 log_error("Invalid Java VM name specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-client")) {
+        } else if (!strcmp(argv[x], "-client")) {
             args->name = strdup("client");
-        }
-        else if (!strcmp(argv[x], "-server")) {
+        } else if (!strcmp(argv[x], "-server")) {
             args->name = strdup("server");
-        }
-        else if (!strcmp(argv[x], "-home") ||
-                 !strcmp(argv[x], "-java-home")) {
+        } else if (!strcmp(argv[x], "-home") ||
+                !strcmp(argv[x], "-java-home")) {
             args->home = optional(argc, argv, x++);
             if (args->home == NULL) {
                 log_error("Invalid Java Home specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-user")) {
+        } else if (!strcmp(argv[x], "-user")) {
             args->user = optional(argc, argv, x++);
             if (args->user == NULL) {
                 log_error("Invalid user name specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-cwd")) {
+        } else if (!strcmp(argv[x], "-cwd")) {
             args->cwd = optional(argc, argv, x++);
             if (args->cwd == NULL) {
                 log_error("Invalid working directory specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-version")) {
+        } else if (!strcmp(argv[x], "-version")) {
             args->vers = true;
             args->dtch = false;
-        }
-        else if (!strcmp(argv[x], "-showversion")) {
+        } else if (!strcmp(argv[x], "-showversion")) {
             args->vershow = true;
-        }
-        else if (!strcmp(argv[x], "-?") ||
-                 !strcmp(argv[x], "-help") ||
-                 !strcmp(argv[x], "--help")) {
+        } else if (!strcmp(argv[x], "-?") ||
+                !strcmp(argv[x], "-help") ||
+                !strcmp(argv[x], "--help")) {
             args->help = true;
             args->dtch = false;
             return args;
-        }
-        else if (!strcmp(argv[x], "-X")) {
+        } else if (!strcmp(argv[x], "-X")) {
             log_error("Option -X currently unsupported");
             log_error("Please use \"java -X\" to see your extra VM options");
-        }
-        else if (!strcmp(argv[x], "-debug")) {
+        } else if (!strcmp(argv[x], "-debug")) {
             log_debug_flag = true;
-        }
-        else if (!strcmp(argv[x], "-wait")) {
+        } else if (!strcmp(argv[x], "-wait")) {
             temp = optional(argc, argv, x++);
             if (temp)
                 args->wait = atoi(temp);
@@ -272,124 +254,96 @@ static arg_data *parse(int argc, char *argv[])
                 log_error("Invalid wait time specified (min=10)");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-umask")) {
+        } else if (!strcmp(argv[x], "-umask")) {
             temp = optional(argc, argv, x++);
             if (temp == NULL) {
                 log_error("Invalid umask specified");
                 return NULL;
             }
             /* Parameter must be in octal */
-            args->umask = (int)strtol(temp, NULL, 8);
+            args->umask = (int) strtol(temp, NULL, 8);
             if (args->umask < 02) {
                 log_error("Invalid umask specified (min=02)");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "shutdown")) {
+        } else if (!strcmp(argv[x], "shutdown")) {
             args->shutdown = true;
-        }
-        else if (!strcmp(argv[x], "pause")) {
+        } else if (!strcmp(argv[x], "pause")) {
             args->pause = true;
-        }
-        else if (!strcmp(argv[x], "resume")) {
+        } else if (!strcmp(argv[x], "resume")) {
             args->resume = true;
-        }
-        else if (!strcmp(argv[x], "-check")) {
+        } else if (!strcmp(argv[x], "-check")) {
             args->chck = true;
             args->dtch = false;
-        }
-        else if (!strcmp(argv[x], "-nodetach")) {
+        } else if (!strcmp(argv[x], "-nodetach")) {
             args->dtch = false;
-        }
-        else if (!strcmp(argv[x], "-keepstdin")) {
-           args->redirectstdin = false;
-        }
-        else if (!strcmp(argv[x], "-pidfile")) {
+        } else if (!strcmp(argv[x], "-keepstdin")) {
+            args->redirectstdin = false;
+        } else if (!strcmp(argv[x], "-pidfile")) {
             args->pidf = optional(argc, argv, x++);
             if (args->pidf == NULL) {
                 log_error("Invalid PID file specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-outfile")) {
+        } else if (!strcmp(argv[x], "-outfile")) {
             args->outfile = optional(argc, argv, x++);
-            if(args->outfile == NULL) {
+            if (args->outfile == NULL) {
                 log_error("Invalid Output File specified");
                 return NULL;
             }
-        }
-        else if (!strcmp(argv[x], "-errfile")) {
+        } else if (!strcmp(argv[x], "-errfile")) {
             args->errfile = optional(argc, argv, x++);
             if (args->errfile == NULL) {
                 log_error("Invalid Error File specified");
                 return NULL;
             }
-        }
-        else if (!strncmp(argv[x], "-verbose", 8)) {
+        } else if (!strncmp(argv[x], "-verbose", 8)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-D")) {
+        } else if (!strcmp(argv[x], "-D")) {
             log_error("Parameter -D must be followed by <name>=<value>");
             return NULL;
-        }
-        else if (!strncmp(argv[x], "-D", 2)) {
+        } else if (!strncmp(argv[x], "-D", 2)) {
             temp = strchr(argv[x], '=');
             if (temp == argv[x] + 2) {
                 log_error("A property name must be specified before '='");
                 return NULL;
             }
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-X", 2)) {
+        } else if (!strncmp(argv[x], "-X", 2)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-ea", 3)) {
+        } else if (!strncmp(argv[x], "-ea", 3)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-enableassertions", 17)) {
+        } else if (!strncmp(argv[x], "-enableassertions", 17)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-da", 3)) {
+        } else if (!strncmp(argv[x], "-da", 3)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-disableassertions", 18)) {
+        } else if (!strncmp(argv[x], "-disableassertions", 18)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-esa")) {
+        } else if (!strcmp(argv[x], "-esa")) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-enablesystemassertions")) {
+        } else if (!strcmp(argv[x], "-enablesystemassertions")) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-dsa")) {
+        } else if (!strcmp(argv[x], "-dsa")) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-disablesystemassertions")) {
+        } else if (!strcmp(argv[x], "-disablesystemassertions")) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strcmp(argv[x], "-procname")) {
+        } else if (!strcmp(argv[x], "-procname")) {
             args->procname = optional(argc, argv, x++);
             if (args->procname == NULL) {
-              log_error("Invalid process name specified");
-              return NULL;
+                log_error("Invalid process name specified");
+                return NULL;
             }
-        }
-        else if (!strncmp(argv[x], "-agentlib:", 10)) {
+        } else if (!strncmp(argv[x], "-agentlib:", 10)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-agentpath:", 11)) {
+        } else if (!strncmp(argv[x], "-agentpath:", 11)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (!strncmp(argv[x], "-javaagent:", 11)) {
+        } else if (!strncmp(argv[x], "-javaagent:", 11)) {
             args->opts[args->onum++] = strdup(argv[x]);
-        }
-        else if (*argv[x] == '-') {
-            log_error("Invalid option %s",argv[x]);
+        } else if (*argv[x] == '-') {
+            log_error("Invalid option %s", argv[x]);
             return NULL;
-        }
-        else {
-            args->jar=strdup(argv[x]);
+        } else {
+            args->jar = strdup(argv[x]);
             break;
         }
     }
@@ -405,8 +359,8 @@ static arg_data *parse(int argc, char *argv[])
     }
     return args;
 }
-static const char *IsYesNo(bool par)
-{
+
+static const char *IsYesNo(bool par) {
     switch (par) {
         case false:
             return "No";
@@ -415,19 +369,18 @@ static const char *IsYesNo(bool par)
     }
     return "[Error]";
 }
-static const char *IsTrueFalse(bool par)
-{
+
+static const char *IsTrueFalse(bool par) {
     switch (par) {
         case false:
             return "False";
         case true:
-             return "True";
+            return "True";
     }
     return "[Error]";
 }
 
-static const char *IsEnabledDisabled(bool par)
-{
+static const char *IsEnabledDisabled(bool par) {
     switch (par) {
         case true:
             return "Enabled";
@@ -438,9 +391,8 @@ static const char *IsEnabledDisabled(bool par)
 }
 
 /* Main entry point: parse command line arguments and dump them */
-arg_data *arguments(int argc, char *argv[])
-{
-    arg_data *args = parse(argc,argv);
+arg_data *arguments(int argc, char *argv[]) {
+    arg_data *args = parse(argc, argv);
     int x = 0;
 
     if (args == NULL) {
@@ -470,7 +422,7 @@ arg_data *arguments(int argc, char *argv[])
         log_debug("| Jar Invoked:   \"%s\"", PRINT_NULL(args->jar));
         log_debug("| Class Arguments: %d", args->anum);
         for (x = 0; x < args->anum; x++) {
-            log_debug("|   \"%s\"",args->args[x]);
+            log_debug("|   \"%s\"", args->args[x]);
         }
         log_debug("+-------------------------------------------------------");
     }

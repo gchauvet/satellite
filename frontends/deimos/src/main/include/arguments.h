@@ -18,73 +18,72 @@
 #define __DEIMOS_ARGUMENTS_H__
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-/**
- * The structure holding all parsed command line options.
- */
-typedef struct {
-    /** The name of the PID file. */
-    char *pidf;
-    /** The name of the user. */
-    char *user;
-    /** The name of the JVM to use. */
-    char *name;
-    /** The JDK or JRE installation path (JAVA_HOME). */
-    char *home;
-    /** Working directory (defaults to /). */
-    char *cwd;
-    /** Options used to invoke the JVM. */
-    char **opts;
-    /** Number of JVM options. */
-    int onum;
-    /** The name of the class to invoke. */
-    char *jar;
-    /** Command line arguments to the class. */
-    char **args;
-    /** Number of class command line arguments. */
-    int anum;
-    /** Wether to detach from parent process or not. */
-    bool dtch;
-    /** Wether to print the VM version number or not. */
-    bool vers;
-    /** Show the VM version and continue. */
-    bool vershow;
-    /** Wether to display the help page or not. */
-    bool help;
-    /** Only check environment without running the service. */
-    bool chck;
-    /** Shutdown a running deimos */
-    bool shutdown;
-    /** Pause a running deimos */
-    bool pause;
-    /** Continue to a running deimos*/
-    bool resume;
-    /** number of seconds to until service started */
-    int wait;
-    /** Destination for stdout */
-    char *outfile;
-    /** Destination for stderr */
-    char *errfile;
-    /** Program name **/
-    char *procname;
-    /** Whether to redirect stdin to /dev/null or not. Defaults to true **/
-    bool redirectstdin;
-    /** What umask to use **/
-    int umask;
-} arg_data;
+    /**
+     * The structure holding all parsed command line options.
+     */
+    typedef struct {
+        /** The name of the PID file. */
+        char *pidf;
+        /** The name of the user. */
+        char *user;
+        /** The name of the JVM to use. */
+        char *name;
+        /** The JDK or JRE installation path (JAVA_HOME). */
+        char *home;
+        /** Working directory (defaults to /). */
+        char *cwd;
+        /** Options used to invoke the JVM. */
+        char **opts;
+        /** Number of JVM options. */
+        int onum;
+        /** The name of the class to invoke. */
+        char *jar;
+        /** Command line arguments to the class. */
+        char **args;
+        /** Number of class command line arguments. */
+        int anum;
+        /** Wether to detach from parent process or not. */
+        bool dtch;
+        /** Wether to print the VM version number or not. */
+        bool vers;
+        /** Show the VM version and continue. */
+        bool vershow;
+        /** Wether to display the help page or not. */
+        bool help;
+        /** Only check environment without running the service. */
+        bool chck;
+        /** Shutdown a running deimos */
+        bool shutdown;
+        /** Pause a running deimos */
+        bool pause;
+        /** Continue to a running deimos*/
+        bool resume;
+        /** number of seconds to until service started */
+        int wait;
+        /** Destination for stdout */
+        char *outfile;
+        /** Destination for stderr */
+        char *errfile;
+        /** Program name **/
+        char *procname;
+        /** Whether to redirect stdin to /dev/null or not. Defaults to true **/
+        bool redirectstdin;
+        /** What umask to use **/
+        int umask;
+    } arg_data;
 
-/**
- * Parse command line arguments.
- *
- * @param argc The number of command line arguments.
- * @param argv Pointers to the different arguments.
- * @return A pointer to a arg_data structure containing the parsed command
- *         line arguments, or NULL if an error was detected.
- */
-arg_data *arguments(int argc, char *argv[]);
+    /**
+     * Parse command line arguments.
+     *
+     * @param argc The number of command line arguments.
+     * @param argv Pointers to the different arguments.
+     * @return A pointer to a arg_data structure containing the parsed command
+     *         line arguments, or NULL if an error was detected.
+     */
+    arg_data *arguments(int argc, char *argv[]);
 
 #ifdef __cplusplus
 }

@@ -32,8 +32,7 @@ bool log_stdout_syslog_flag = false;
 char *log_prog = "deimos";
 
 /* Dump a debug trace message to stderr */
-void log_debug(const char *fmt, ...)
-{
+void log_debug(const char *fmt, ...) {
     va_list ap;
     time_t now;
     struct tm *nowtm;
@@ -44,9 +43,9 @@ void log_debug(const char *fmt, ...)
     if (fmt == NULL)
         return;
 
-    now   = time(NULL);
+    now = time(NULL);
     nowtm = localtime(&now);
-    strftime(buff, sizeof(buff), "%Y-%m-%d %T", nowtm);
+    strftime(buff, sizeof (buff), "%Y-%m-%d %T", nowtm);
     va_start(ap, fmt);
     if (log_stderr_syslog_flag)
         fprintf(stderr, "%s %d %s debug: ", buff, getpid(), log_prog);
@@ -61,8 +60,7 @@ void log_debug(const char *fmt, ...)
 }
 
 /* Dump an error message to stderr */
-void log_error(const char *fmt, ...)
-{
+void log_error(const char *fmt, ...) {
     va_list ap;
     time_t now;
     struct tm *nowtm;
@@ -73,9 +71,9 @@ void log_error(const char *fmt, ...)
 
     va_start(ap, fmt);
     if (log_stderr_syslog_flag) {
-        now   = time(NULL);
+        now = time(NULL);
         nowtm = localtime(&now);
-        strftime(buff, sizeof(buff), "%Y-%m-%d %T", nowtm);
+        strftime(buff, sizeof (buff), "%Y-%m-%d %T", nowtm);
         fprintf(stderr, "%s %d %s error: ", buff, getpid(), log_prog);
     }
     vfprintf(stderr, fmt, ap);

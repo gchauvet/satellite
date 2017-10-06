@@ -16,8 +16,7 @@
 
 #include "deimos.h"
 
-void help(home_data *data)
-{
+void help(home_data *data) {
     int x;
 
     printf("Usage: %s [-options...] [\"main.jar\" | command] [args...]\n", log_prog);
@@ -96,7 +95,7 @@ void help(home_data *data)
     printf("        waittime should multiple of 10 (min=10)\n");
     printf("    -keepstdin\n");
     printf("        does not redirect stdin to /dev/null\n");
-    
+
     printf("\nWhere command are:\n");
     printf("    shutdown\n");
     printf("        stop the service using the file given in the -pidfile option\n");
@@ -104,7 +103,7 @@ void help(home_data *data)
     printf("        pause the service using the file given in the -pidfile option\n");
     printf("    resume\n");
     printf("        continue the service using the file given in the -pidfile option\n");
-    
+
     printf("\nDeimos (JSR-96) " DEIMOS_VERSION_STRING "\n");
     printf("Copyright 2017 Zatarox\n");
 

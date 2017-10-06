@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package java.daemon;
+package javax.daemon;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -77,7 +77,7 @@ public final class BackgroundWrapperTest {
     @Test
     public void check() {
         assertTrue(instance.check(FakeBackgroundProcessImpl.class.getName()));
-        assertFalse(instance.check("java.daemon.undefined"));
+        assertFalse(instance.check("javax.daemon.undefined"));
     }
 
     @Test(expected = NullPointerException.class)

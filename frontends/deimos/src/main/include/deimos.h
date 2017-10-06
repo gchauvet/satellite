@@ -28,6 +28,7 @@
 #ifdef OS_DARWIN
 #include <stdbool.h>
 #else
+
 typedef enum {
     false,
     true
@@ -44,7 +45,7 @@ typedef enum {
 #include "java.h"
 #include "help.h"
 
-int  main(int argc, char *argv[]);
+int main(int argc, char *argv[]);
 void main_reload(void);
 void main_shutdown(void);
 

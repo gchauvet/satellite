@@ -19,17 +19,17 @@
 #include "apxwin.h"
 #include "private.h"
 
-static LPCWSTR REGSERVICE_ROOT  = L"SYSTEM\\CurrentControlSet\\Services\\";
+static LPCWSTR REGSERVICE_ROOT = L"SYSTEM\\CurrentControlSet\\Services\\";
 static LPCWSTR REGSOFTWARE_ROOT = L"SOFTWARE\\";
 static LPCWSTR REGSERVICE_START = L"Start";
-static LPCWSTR REGSERVICE_USER  = L"ObjectName";
-static LPCWSTR REGPARAMS        = L"Parameters";
-static LPCWSTR REGDESCRIPTION   = L"Description";
-static LPCWSTR REGSEPARATOR     = L"\\";
-static LPCWSTR REGPROJECT_ROOT   = L"Zatarox";
+static LPCWSTR REGSERVICE_USER = L"ObjectName";
+static LPCWSTR REGPARAMS = L"Parameters";
+static LPCWSTR REGDESCRIPTION = L"Description";
+static LPCWSTR REGSEPARATOR = L"\\";
+static LPCWSTR REGPROJECT_ROOT = L"Zatarox";
 /* predefined java keys */
-static LPCWSTR CONTROL_REGKEY   = L"SYSTEM\\CurrentControlSet\\Control";
-static LPCWSTR REGTIMEOUT       = L"WaitToKillServiceTimeout";
+static LPCWSTR CONTROL_REGKEY = L"SYSTEM\\CurrentControlSet\\Control";
+static LPCWSTR REGTIMEOUT = L"WaitToKillServiceTimeout";
 
 #define REG_CAN_CREATE(r)   \
     ((r)->samOptions & KEY_CREATE_SUB_KEY)
@@ -51,27 +51,27 @@ static LPCWSTR REGTIMEOUT       = L"WaitToKillServiceTimeout";
     } APXMACRO_END
 
 
-typedef struct APXREGISTRY  APXREGISTRY;
-typedef APXREGISTRY*        LPAPXREGISTRY;
+typedef struct APXREGISTRY APXREGISTRY;
+typedef APXREGISTRY* LPAPXREGISTRY;
 typedef struct APXREGSUBKEY APXREGSUBKEY;
 
 struct APXREGSUBKEY {
-    APXHANDLE   hRegistry;
-    HKEY        hKey;
-    LPCTSTR     syKeyName;
+    APXHANDLE hRegistry;
+    HKEY hKey;
+    LPCTSTR syKeyName;
     TAILQ_ENTRY(APXREGSUBKEY);
 };
 
 struct APXREGISTRY {
-    HKEY    hRootKey;   /* root key */
-    HKEY    hServKey;   /* service key */
-    HKEY    hUserKey;   /* user key */
-    HKEY    hCurrKey;   /* Current opened key */
-    LPVOID  pCurrVal;   /* Current value, overwitten on a next call */
-    HKEY    hRparamKey; /* root\\Parameters */
-    HKEY    hSparamKey; /* service\\Parameters */
-    HKEY    hUparamKey; /* service\\Parameters */
-    REGSAM  samOptions;
+    HKEY hRootKey; /* root key */
+    HKEY hServKey; /* service key */
+    HKEY hUserKey; /* user key */
+    HKEY hCurrKey; /* Current opened key */
+    LPVOID pCurrVal; /* Current value, overwitten on a next call */
+    HKEY hRparamKey; /* root\\Parameters */
+    HKEY hSparamKey; /* service\\Parameters */
+    HKEY hUparamKey; /* service\\Parameters */
+    REGSAM samOptions;
     /** list enty for opened subkeys  */
     TAILQ_HEAD(_lSubkeys, APXREGSUBKEY) lSubkeys;
 
@@ -84,33 +84,31 @@ struct APXREGISTRY {
     }
 
 static BOOL __apxRegistryCallback(APXHANDLE hObject, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam)
-{
+        WPARAM wParam, LPARAM lParam) {
     LPAPXREGISTRY lpReg;
 
     lpReg = APXHANDLE_DATA(hObject);
     switch (uMsg) {
         case WM_CLOSE:
-        SAFE_CLOSE_KEY(lpReg->hCurrKey);
-        SAFE_CLOSE_KEY(lpReg->hRparamKey);
-        SAFE_CLOSE_KEY(lpReg->hSparamKey);
-        SAFE_CLOSE_KEY(lpReg->hUparamKey);
-        SAFE_CLOSE_KEY(lpReg->hRootKey);
-        SAFE_CLOSE_KEY(lpReg->hServKey);
-        SAFE_CLOSE_KEY(lpReg->hUserKey);
-        break;
+            SAFE_CLOSE_KEY(lpReg->hCurrKey);
+            SAFE_CLOSE_KEY(lpReg->hRparamKey);
+            SAFE_CLOSE_KEY(lpReg->hSparamKey);
+            SAFE_CLOSE_KEY(lpReg->hUparamKey);
+            SAFE_CLOSE_KEY(lpReg->hRootKey);
+            SAFE_CLOSE_KEY(lpReg->hServKey);
+            SAFE_CLOSE_KEY(lpReg->hUserKey);
+            break;
         default:
-        break;
+            break;
     }
     return TRUE;
 }
 
-LPSTR __apxGetRegistrySzA(APXHANDLE hPool, HKEY hKey, LPCSTR szValueName)
-{
-    LPSTR  szRet;
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize;
+LPSTR __apxGetRegistrySzA(APXHANDLE hPool, HKEY hKey, LPCSTR szValueName) {
+    LPSTR szRet;
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize;
 
     rc = RegQueryValueExA(hKey, szValueName, NULL, &dwType, NULL, &dwSize);
     if (rc != ERROR_SUCCESS || dwType != REG_SZ) {
@@ -118,52 +116,48 @@ LPSTR __apxGetRegistrySzA(APXHANDLE hPool, HKEY hKey, LPCSTR szValueName)
     }
     if (!(szRet = apxPoolAlloc(hPool, dwSize)))
         return NULL;
-    RegQueryValueExA(hKey, szValueName, NULL, &dwType, (LPBYTE)szRet, &dwSize);
+    RegQueryValueExA(hKey, szValueName, NULL, &dwType, (LPBYTE) szRet, &dwSize);
 
     return szRet;
 }
 
-LPWSTR __apxGetRegistrySzW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName)
-{
+LPWSTR __apxGetRegistrySzW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName) {
     LPWSTR wsRet;
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize;
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize;
 
     rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, NULL, &dwSize);
     if (rc != ERROR_SUCCESS || dwType != REG_SZ) {
         return NULL;
     }
-    if (!(wsRet = apxPoolAlloc(hPool, dwSize * sizeof(WCHAR))))
+    if (!(wsRet = apxPoolAlloc(hPool, dwSize * sizeof (WCHAR))))
         return NULL;
-    RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE)wsRet, &dwSize);
+    RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE) wsRet, &dwSize);
 
     return wsRet;
 }
 
 BOOL __apxGetRegistryStrW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName,
-                          LPWSTR lpRetval, DWORD dwMaxLen)
-{
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize = dwMaxLen;
+        LPWSTR lpRetval, DWORD dwMaxLen) {
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize = dwMaxLen;
 
-    rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE)lpRetval, &dwSize);
+    rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE) lpRetval, &dwSize);
     if (rc != ERROR_SUCCESS || dwType != REG_SZ) {
         lpRetval = L'\0';
         return FALSE;
-    }
-    else
+    } else
         return TRUE;
 }
 
 LPBYTE __apxGetRegistryBinaryA(APXHANDLE hPool, HKEY hKey, LPCSTR szValueName,
-                               LPDWORD lpdwLength)
-{
+        LPDWORD lpdwLength) {
     LPBYTE lpRet;
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize;
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize;
 
     rc = RegQueryValueExA(hKey, szValueName, NULL, &dwType, NULL, &dwSize);
     if (rc != ERROR_SUCCESS || dwSize == 0) {
@@ -178,12 +172,11 @@ LPBYTE __apxGetRegistryBinaryA(APXHANDLE hPool, HKEY hKey, LPCSTR szValueName,
 }
 
 LPBYTE __apxGetRegistryBinaryW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName,
-                               LPDWORD lpdwLength)
-{
+        LPDWORD lpdwLength) {
     LPBYTE lpRet;
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize;
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize;
 
     rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, NULL, &dwSize);
     if (rc != ERROR_SUCCESS || dwSize == 0) {
@@ -198,14 +191,13 @@ LPBYTE __apxGetRegistryBinaryW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName,
     return lpRet;
 }
 
-DWORD __apxGetRegistryDwordW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName)
-{
-    DWORD  dwRet;
-    DWORD  rc;
-    DWORD  dwType;
-    DWORD  dwSize = sizeof(DWORD);
+DWORD __apxGetRegistryDwordW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName) {
+    DWORD dwRet;
+    DWORD rc;
+    DWORD dwType;
+    DWORD dwSize = sizeof (DWORD);
 
-    rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE)&dwRet, &dwSize);
+    rc = RegQueryValueExW(hKey, wsValueName, NULL, &dwType, (LPBYTE) & dwRet, &dwSize);
     if (rc != ERROR_SUCCESS || dwType != REG_DWORD) {
         return 0xFFFFFFFF;
     }
@@ -213,24 +205,22 @@ DWORD __apxGetRegistryDwordW(APXHANDLE hPool, HKEY hKey, LPCWSTR wsValueName)
     return dwRet;
 }
 
-
 APXHANDLE
 apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
-                   LPCWSTR szRoot,
-                   LPCWSTR szKeyName,
-                   DWORD dwOptions)
-{
+        LPCWSTR szRoot,
+        LPCWSTR szKeyName,
+        DWORD dwOptions) {
     APXHANDLE hRegistry;
     LPAPXREGISTRY lpReg;
-     /* maximum key length is 512 characters. */
-    WCHAR     buff[SIZ_BUFLEN];
-    LONG      rc = ERROR_SUCCESS;
-    HKEY      hRootKey   = NULL;
-    HKEY      hUserKey   = NULL;
-    HKEY      hServKey   = NULL;
-    HKEY      hRparamKey = NULL;
-    HKEY      hSparamKey = NULL;
-    HKEY      hUparamKey = NULL;
+    /* maximum key length is 512 characters. */
+    WCHAR buff[SIZ_BUFLEN];
+    LONG rc = ERROR_SUCCESS;
+    HKEY hRootKey = NULL;
+    HKEY hUserKey = NULL;
+    HKEY hServKey = NULL;
+    HKEY hRparamKey = NULL;
+    HKEY hSparamKey = NULL;
+    HKEY hUparamKey = NULL;
 
     if (!szKeyName || lstrlenW(szKeyName) > SIZ_RESMAX) {
         SetLastError(ERROR_INVALID_PARAMETER);
@@ -253,11 +243,11 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
     if (dwOptions & APXREG_SOFTWARE) {
         if (samDesired & KEY_CREATE_SUB_KEY)
             rc = RegCreateKeyExW(HKEY_LOCAL_MACHINE, buff, 0, NULL, 0,
-                                 samDesired, NULL,
-                                 &hRootKey, NULL);
+                samDesired, NULL,
+                &hRootKey, NULL);
         else
             rc = RegOpenKeyExW(HKEY_LOCAL_MACHINE, buff, 0,
-                               samDesired, &hRootKey);
+                samDesired, &hRootKey);
         if (rc != ERROR_SUCCESS) {
             hRootKey = NULL;
             goto cleanup;
@@ -265,11 +255,11 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
         /* Open or create the root parameters key */
         if (samDesired & KEY_CREATE_SUB_KEY)
             rc = RegCreateKeyExW(hRootKey, REGPARAMS, 0, NULL, 0,
-                                 samDesired, NULL,
-                                 &hRparamKey, NULL);
+                samDesired, NULL,
+                &hRparamKey, NULL);
         else
             rc = RegOpenKeyExW(hRootKey, REGPARAMS, 0,
-                               samDesired, &hRparamKey);
+                samDesired, &hRparamKey);
         if (rc != ERROR_SUCCESS) {
             hRparamKey = NULL;
             goto cleanup;
@@ -280,11 +270,11 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
         /* Open or create the users root key */
         if (samDesired & KEY_CREATE_SUB_KEY)
             rc = RegCreateKeyExW(HKEY_CURRENT_USER, buff, 0, NULL, 0,
-                                 samDesired, NULL,
-                                 &hUserKey, NULL);
+                samDesired, NULL,
+                &hUserKey, NULL);
         else
             rc = RegOpenKeyExW(HKEY_CURRENT_USER, buff, 0,
-                               samDesired, &hUserKey);
+                samDesired, &hUserKey);
         if (rc != ERROR_SUCCESS) {
             hUserKey = NULL;
             goto cleanup;
@@ -292,11 +282,11 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
         /* Open or create the users parameters key */
         if (samDesired & KEY_CREATE_SUB_KEY)
             rc = RegCreateKeyExW(hUserKey, REGPARAMS, 0, NULL, 0,
-                                 samDesired, NULL,
-                             &hUparamKey, NULL);
+                samDesired, NULL,
+                &hUparamKey, NULL);
         else
             rc = RegOpenKeyExW(hUserKey, REGPARAMS, 0,
-                               samDesired, &hUparamKey);
+                samDesired, &hUparamKey);
         if (rc != ERROR_SUCCESS) {
             hUparamKey = NULL;
             goto cleanup;
@@ -308,7 +298,7 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
         lstrcatW(buff, szKeyName);
         /* Service has to be created allready */
         rc = RegOpenKeyExW(HKEY_LOCAL_MACHINE, buff, 0,
-                           samDesired, &hServKey);
+                samDesired, &hServKey);
         if (rc != ERROR_SUCCESS) {
             hServKey = NULL;
             goto cleanup;
@@ -316,27 +306,27 @@ apxCreateRegistryW(APXHANDLE hPool, REGSAM samDesired,
         /* Open or create the root parameters key */
         if (samDesired & KEY_CREATE_SUB_KEY)
             rc = RegCreateKeyExW(hServKey, REGPARAMS, 0, NULL, 0,
-                                 samDesired, NULL,
-                                 &hSparamKey, NULL);
+                samDesired, NULL,
+                &hSparamKey, NULL);
         else
             rc = RegOpenKeyExW(hServKey, REGPARAMS, 0,
-                               samDesired, &hSparamKey);
+                samDesired, &hSparamKey);
         if (rc != ERROR_SUCCESS) {
             hSparamKey = NULL;
             goto cleanup;
         }
     }
     hRegistry = apxHandleCreate(hPool, 0,
-                                NULL, sizeof(APXREGISTRY),
-                                __apxRegistryCallback);
+            NULL, sizeof (APXREGISTRY),
+            __apxRegistryCallback);
     if (IS_INVALID_HANDLE(hRegistry))
         return NULL;
     hRegistry->dwType = APXHANDLE_TYPE_REGISTRY;
     lpReg = APXHANDLE_DATA(hRegistry);
     lpReg->samOptions = samDesired;
-    lpReg->hRootKey   = hRootKey;
-    lpReg->hUserKey   = hUserKey;
-    lpReg->hServKey   = hServKey;
+    lpReg->hRootKey = hRootKey;
+    lpReg->hUserKey = hUserKey;
+    lpReg->hServKey = hServKey;
     lpReg->hRparamKey = hRparamKey;
     lpReg->hUparamKey = hUparamKey;
     lpReg->hSparamKey = hSparamKey;
@@ -359,13 +349,12 @@ cleanup:
 
 APXHANDLE
 apxCreateRegistryA(APXHANDLE hPool, REGSAM samDesired,
-                   LPCSTR szRoot,
-                   LPCSTR szKeyName,
-                   DWORD dwOptions)
-{
-    WCHAR    wcRoot[SIZ_RESLEN];
-    WCHAR    wcKey[SIZ_RESLEN];
-    LPWSTR   wsRoot = NULL;
+        LPCSTR szRoot,
+        LPCSTR szKeyName,
+        DWORD dwOptions) {
+    WCHAR wcRoot[SIZ_RESLEN];
+    WCHAR wcKey[SIZ_RESLEN];
+    LPWSTR wsRoot = NULL;
     if (szRoot) {
         AsciiToWide(szRoot, wcRoot);
         wsRoot = wcRoot;
@@ -376,12 +365,11 @@ apxCreateRegistryA(APXHANDLE hPool, REGSAM samDesired,
 
 LPSTR
 apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCSTR szSubkey, LPCSTR szValueName)
-{
+        LPCSTR szSubkey, LPCSTR szValueName) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
+    HKEY hKey, hSub = NULL;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return NULL;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -391,7 +379,7 @@ apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExA(hKey, szSubkey, 0,
-                         lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return NULL;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -403,12 +391,11 @@ apxRegistryGetStringA(APXHANDLE hRegistry, DWORD dwFrom,
 
 LPWSTR
 apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCWSTR szSubkey, LPCWSTR szValueName)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
+    HKEY hKey, hSub = NULL;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return NULL;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -418,7 +405,7 @@ apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExW(hKey, szSubkey, 0,
-                         lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return NULL;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -430,13 +417,12 @@ apxRegistryGetStringW(APXHANDLE hRegistry, DWORD dwFrom,
 
 LPBYTE
 apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCSTR szSubkey, LPCSTR szValueName,
-                      LPBYTE lpData, LPDWORD lpdwLength)
-{
+        LPCSTR szSubkey, LPCSTR szValueName,
+        LPBYTE lpData, LPDWORD lpdwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
+    HKEY hKey, hSub = NULL;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return NULL;
     lpReg = APXHANDLE_DATA(hRegistry);
     REG_GET_KEY(lpReg, dwFrom, hKey);
@@ -445,7 +431,7 @@ apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExA(hKey, szSubkey, 0,
-                         lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return NULL;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -458,8 +444,7 @@ apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
             return NULL;
         }
         lpReg->pCurrVal = lpData;
-    }
-    else {
+    } else {
         lpReg->pCurrVal = __apxGetRegistryBinaryA(hRegistry->hPool, hKey, szValueName, lpdwLength);
     }
 
@@ -468,13 +453,12 @@ apxRegistryGetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
 
 LPBYTE
 apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCWSTR szSubkey, LPCWSTR szValueName,
-                      LPBYTE lpData, LPDWORD lpdwLength)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        LPBYTE lpData, LPDWORD lpdwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
+    HKEY hKey, hSub = NULL;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return NULL;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -484,7 +468,7 @@ apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExW(hKey, szSubkey, 0,
-                          lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return NULL;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -496,8 +480,7 @@ apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
             return NULL;
         }
         lpReg->pCurrVal = lpData;
-    }
-    else {
+    } else {
         lpReg->pCurrVal = __apxGetRegistryBinaryW(hRegistry->hPool, hKey, szValueName, lpdwLength);
     }
     return lpReg->pCurrVal;
@@ -505,15 +488,14 @@ apxRegistryGetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
 
 DWORD
 apxRegistryGetNumberW(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCWSTR szSubkey, LPCWSTR szValueName)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwRval, rl;
+    HKEY hKey, hSub = NULL;
+    DWORD dwRval, rl;
     DWORD rc, dwType = REG_DWORD;
 
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return 0;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -523,13 +505,13 @@ apxRegistryGetNumberW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExW(hKey, szSubkey, 0,
-                          lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return 0;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
-    rl = sizeof(DWORD);
-    rc = RegQueryValueExW(hKey, szValueName, NULL, &dwType, (LPBYTE)&dwRval, &rl);
+    rl = sizeof (DWORD);
+    rc = RegQueryValueExW(hKey, szValueName, NULL, &dwType, (LPBYTE) & dwRval, &rl);
     if (rc != ERROR_SUCCESS || dwType != REG_DWORD)
         return 0;
     else
@@ -538,13 +520,12 @@ apxRegistryGetNumberW(APXHANDLE hRegistry, DWORD dwFrom,
 
 LPWSTR
 apxRegistryGetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
-                     LPCWSTR szSubkey, LPCWSTR szValueName,
-                     LPWSTR lpData, LPDWORD lpdwLength)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        LPWSTR lpData, LPDWORD lpdwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
+    HKEY hKey, hSub = NULL;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return NULL;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -554,37 +535,35 @@ apxRegistryGetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExW(hKey, szSubkey, 0,
-                          lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return NULL;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
     if (lpData && lpdwLength && *lpdwLength) {
         DWORD rc, dwType = REG_MULTI_SZ;
-        rc = RegQueryValueExW(hKey, szValueName, NULL, &dwType, (BYTE *)lpData, lpdwLength);
+        rc = RegQueryValueExW(hKey, szValueName, NULL, &dwType, (BYTE *) lpData, lpdwLength);
         if (rc != ERROR_SUCCESS || dwType != REG_MULTI_SZ) {
             return NULL;
         }
         lpReg->pCurrVal = lpData;
-    }
-    else {
+    } else {
         lpReg->pCurrVal = __apxGetRegistryBinaryW(hRegistry->hPool, hKey, szValueName, lpdwLength);
         if (lpReg->pCurrVal && lpdwLength)
-            *lpdwLength = *lpdwLength * sizeof(WCHAR);
+            *lpdwLength = *lpdwLength * sizeof (WCHAR);
     }
     return lpReg->pCurrVal;
 }
 
 BOOL
 apxRegistrySetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCSTR szSubkey, LPCSTR szValueName,
-                      const LPBYTE lpData, DWORD dwLength)
-{
+        LPCSTR szSubkey, LPCSTR szValueName,
+        const LPBYTE lpData, DWORD dwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_BINARY;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_BINARY;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -595,14 +574,14 @@ apxRegistrySetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExA(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
     if (RegSetValueExA(hKey, szValueName, 0, dwType,
-                      lpData, dwLength) != ERROR_SUCCESS)
+            lpData, dwLength) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
@@ -610,14 +589,13 @@ apxRegistrySetBinaryA(APXHANDLE hRegistry, DWORD dwFrom,
 
 BOOL
 apxRegistrySetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
-                      LPCWSTR szSubkey, LPCWSTR szValueName,
-                      const LPBYTE lpData, DWORD dwLength)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        const LPBYTE lpData, DWORD dwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_BINARY;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_BINARY;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -628,14 +606,14 @@ apxRegistrySetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExW(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
     if (RegSetValueExW(hKey, szValueName, 0, dwType,
-                      lpData, dwLength) != ERROR_SUCCESS)
+            lpData, dwLength) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
@@ -643,14 +621,13 @@ apxRegistrySetBinaryW(APXHANDLE hRegistry, DWORD dwFrom,
 
 BOOL
 apxRegistrySetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
-                     LPCWSTR szSubkey, LPCWSTR szValueName,
-                     LPCWSTR lpData, DWORD dwLength)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        LPCWSTR lpData, DWORD dwLength) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_MULTI_SZ;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_MULTI_SZ;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -661,14 +638,14 @@ apxRegistrySetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExW(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
     if (RegSetValueExW(hKey, szValueName, 0, dwType,
-                       (const BYTE *)lpData, dwLength) != ERROR_SUCCESS)
+            (const BYTE *) lpData, dwLength) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
@@ -676,14 +653,13 @@ apxRegistrySetMzStrW(APXHANDLE hRegistry, DWORD dwFrom,
 
 BOOL
 apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
-                   LPCSTR szSubkey, LPCSTR szValueName,
-                   LPCSTR szValue)
-{
+        LPCSTR szSubkey, LPCSTR szValueName,
+        LPCSTR szValue) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_SZ;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_SZ;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -694,8 +670,8 @@ apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExA(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -703,9 +679,8 @@ apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
     if (!szValue || !lstrlenA(szValue)) {
         if (RegDeleteValueA(hKey, szValueName) != ERROR_SUCCESS)
             return FALSE;
-    }
-    else if (RegSetValueExA(hKey, szValueName, 0, dwType,
-                       (LPBYTE)szValue, lstrlenA(szValue) + 1) != ERROR_SUCCESS)
+    } else if (RegSetValueExA(hKey, szValueName, 0, dwType,
+            (LPBYTE) szValue, lstrlenA(szValue) + 1) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
@@ -713,14 +688,13 @@ apxRegistrySetStrA(APXHANDLE hRegistry, DWORD dwFrom,
 
 BOOL
 apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
-                   LPCWSTR szSubkey, LPCWSTR szValueName,
-                   LPCWSTR szValue)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        LPCWSTR szValue) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_SZ;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_SZ;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -731,8 +705,8 @@ apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExW(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -740,10 +714,9 @@ apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
     if (!szValue || !lstrlenW(szValue)) {
         if (RegDeleteValueW(hKey, szValueName) != ERROR_SUCCESS)
             return FALSE;
-    }
-    else if (RegSetValueExW(hKey, szValueName, 0, dwType,
-                       (LPBYTE)szValue,
-                       (lstrlenW(szValue) + 1) * sizeof(WCHAR)) != ERROR_SUCCESS)
+    } else if (RegSetValueExW(hKey, szValueName, 0, dwType,
+            (LPBYTE) szValue,
+            (lstrlenW(szValue) + 1) * sizeof (WCHAR)) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
@@ -751,14 +724,13 @@ apxRegistrySetStrW(APXHANDLE hRegistry, DWORD dwFrom,
 
 BOOL
 apxRegistrySetNumW(APXHANDLE hRegistry, DWORD dwFrom,
-                   LPCWSTR szSubkey, LPCWSTR szValueName,
-                   DWORD dwValue)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName,
+        DWORD dwValue) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_DWORD;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_DWORD;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -769,30 +741,28 @@ apxRegistrySetNumW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegCreateKeyExW(hKey, szSubkey, 0,
-                            NULL, 0, lpReg->samOptions,
-                            NULL, &hSub, NULL) != ERROR_SUCCESS)
+                NULL, 0, lpReg->samOptions,
+                NULL, &hSub, NULL) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
     }
     if (RegSetValueExW(hKey, szValueName, 0, dwType,
-                       (LPBYTE)&dwValue,
-                       sizeof(DWORD)) != ERROR_SUCCESS)
+            (LPBYTE) & dwValue,
+            sizeof (DWORD)) != ERROR_SUCCESS)
         return FALSE;
 
     return TRUE;
 }
 
-
 BOOL
 apxRegistryDeleteW(APXHANDLE hRegistry, DWORD dwFrom,
-                   LPCWSTR szSubkey, LPCWSTR szValueName)
-{
+        LPCWSTR szSubkey, LPCWSTR szValueName) {
     LPAPXREGISTRY lpReg;
-    HKEY          hKey, hSub = NULL;
-    DWORD         dwType = REG_SZ;
+    HKEY hKey, hSub = NULL;
+    DWORD dwType = REG_SZ;
     if (IS_INVALID_HANDLE(hRegistry) ||
-        hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
+            hRegistry->dwType != APXHANDLE_TYPE_REGISTRY)
         return FALSE;
     lpReg = APXHANDLE_DATA(hRegistry);
 
@@ -803,7 +773,7 @@ apxRegistryDeleteW(APXHANDLE hRegistry, DWORD dwFrom,
     if (szSubkey) {
         SAFE_CLOSE_KEY(lpReg->hCurrKey);
         if (RegOpenKeyExW(hKey, szSubkey, 0,
-                          lpReg->samOptions, &hSub) != ERROR_SUCCESS)
+                lpReg->samOptions, &hSub) != ERROR_SUCCESS)
             return FALSE;
         lpReg->hCurrKey = hSub;
         hKey = hSub;
@@ -813,7 +783,6 @@ apxRegistryDeleteW(APXHANDLE hRegistry, DWORD dwFrom,
 
     return TRUE;
 }
-
 
 LONG apxDeleteRegistryRecursive(HKEY hKeyRoot, LPCWSTR szSubKey) {
     LONG rc = ERROR_SUCCESS;
@@ -835,7 +804,7 @@ LONG apxDeleteRegistryRecursive(HKEY hKeyRoot, LPCWSTR szSubKey) {
     }
     while (rc == ERROR_SUCCESS) {
         dwSize = SIZ_BUFLEN;
-        rc = RegEnumKeyExW(hKey, 0, szName, &dwSize, NULL, NULL, NULL, NULL );
+        rc = RegEnumKeyExW(hKey, 0, szName, &dwSize, NULL, NULL, NULL, NULL);
 
         if (rc == ERROR_NO_MORE_ITEMS) {
             rc = RegDeleteKeyW(hKeyRoot, szSubKey);
@@ -843,7 +812,7 @@ LONG apxDeleteRegistryRecursive(HKEY hKeyRoot, LPCWSTR szSubKey) {
         } else {
             rc = apxDeleteRegistryRecursive(hKey, szName);
             if (rc != ERROR_SUCCESS) {
-                break;   // abort when we start failing
+                break; // abort when we start failing
             }
         }
     }
@@ -851,18 +820,16 @@ LONG apxDeleteRegistryRecursive(HKEY hKeyRoot, LPCWSTR szSubKey) {
     return rc;
 }
 
-
 BOOL
 apxDeleteRegistryW(LPCWSTR szRoot,
-                   LPCWSTR szKeyName,
-                   REGSAM samDesired,
-                   BOOL bDeleteEmptyRoot)
-{
-    WCHAR     buff[SIZ_BUFLEN];
-    LONG      rc = ERROR_SUCCESS;
-    HKEY      hKey = NULL;
-    BOOL      rv = TRUE;
-    HKEY      hives[] = {HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, NULL}, *hive = NULL;
+        LPCWSTR szKeyName,
+        REGSAM samDesired,
+        BOOL bDeleteEmptyRoot) {
+    WCHAR buff[SIZ_BUFLEN];
+    LONG rc = ERROR_SUCCESS;
+    HKEY hKey = NULL;
+    BOOL rv = TRUE;
+    HKEY hives[] = {HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, NULL}, *hive = NULL;
 
     if (!szKeyName || lstrlenW(szKeyName) > SIZ_RESMAX)
         return FALSE;
@@ -901,13 +868,12 @@ apxDeleteRegistryW(LPCWSTR szRoot,
 
 BOOL
 apxDeleteRegistryA(LPCSTR szRoot,
-                   LPCSTR szKeyName,
-                   REGSAM samDesired,
-                   BOOL bDeleteEmptyRoot)
-{
-    WCHAR    wcRoot[SIZ_RESLEN];
-    WCHAR    wcKey[SIZ_RESLEN];
-    LPWSTR   wsRoot = NULL;
+        LPCSTR szKeyName,
+        REGSAM samDesired,
+        BOOL bDeleteEmptyRoot) {
+    WCHAR wcRoot[SIZ_RESLEN];
+    WCHAR wcKey[SIZ_RESLEN];
+    LPWSTR wsRoot = NULL;
     if (szRoot) {
         AsciiToWide(szRoot, wcRoot);
         wsRoot = wcRoot;
@@ -919,28 +885,27 @@ apxDeleteRegistryA(LPCSTR szRoot,
 
 /* Service Registry helper functions */
 
-BOOL apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry)
-{
+BOOL apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry) {
     DWORD rc, dwLength = SIZ_RESLEN;
 
     if (IS_INVALID_HANDLE(lpEnum->hServicesKey)) {
         rc = RegOpenKeyExW(HKEY_LOCAL_MACHINE, REGSERVICE_ROOT, 0,
-                       KEY_READ, &(lpEnum->hServicesKey));
+                KEY_READ, &(lpEnum->hServicesKey));
         if (rc != ERROR_SUCCESS) {
             return FALSE;
         }
         rc = RegQueryInfoKeyW(lpEnum->hServicesKey,
-                              NULL,
-                              NULL,
-                              NULL,
-                              &lpEnum->cSubKeys,
-                              &lpEnum->cbMaxSubKey,
-                              &lpEnum->cchMaxClass,
-                              &lpEnum->cValues,
-                              &lpEnum->cchMaxValue,
-                              &lpEnum->cbMaxValueData,
-                              NULL,
-                              NULL);
+                NULL,
+                NULL,
+                NULL,
+                &lpEnum->cSubKeys,
+                &lpEnum->cbMaxSubKey,
+                &lpEnum->cchMaxClass,
+                &lpEnum->cValues,
+                &lpEnum->cchMaxValue,
+                &lpEnum->cbMaxValueData,
+                NULL,
+                NULL);
         /* TODO: add dynamic maxsubkey length */
         if (rc != ERROR_SUCCESS || lpEnum->cbMaxSubKey > SIZ_RESLEN) {
             SAFE_CLOSE_KEY(lpEnum->hServicesKey);
@@ -952,29 +917,28 @@ BOOL apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry)
         return FALSE;
     }
     rc = RegEnumKeyExW(lpEnum->hServicesKey,
-                       lpEnum->dwIndex++,
-                       lpEntry->szServiceName,
-                       &dwLength,
-                       NULL,
-                       NULL,
-                       NULL,
-                       NULL);
+            lpEnum->dwIndex++,
+            lpEntry->szServiceName,
+            &dwLength,
+            NULL,
+            NULL,
+            NULL,
+            NULL);
     if (rc != ERROR_SUCCESS) {
         SAFE_CLOSE_KEY(lpEnum->hServicesKey);
         return FALSE;
-    }
-    else {
+    } else {
         HKEY hKey;
         rc = RegOpenKeyExW(lpEnum->hServicesKey, lpEntry->szServiceName,
-                           0, KEY_READ, &hKey);
+                0, KEY_READ, &hKey);
         if (rc != ERROR_SUCCESS) {
             SAFE_CLOSE_KEY(lpEnum->hServicesKey);
             return FALSE;
         }
         __apxGetRegistryStrW(NULL, hKey, REGDESCRIPTION,
-                            lpEntry->szServiceDescription, SIZ_DESLEN);
+                lpEntry->szServiceDescription, SIZ_DESLEN);
         __apxGetRegistryStrW(NULL, hKey, REGSERVICE_USER,
-                            lpEntry->szObjectName, SIZ_RESLEN);
+                lpEntry->szObjectName, SIZ_RESLEN);
         lpEntry->dwStart = __apxGetRegistryDwordW(NULL, hKey, REGSERVICE_START);
         RegCloseKey(hKey);
 
@@ -983,11 +947,10 @@ BOOL apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry)
 }
 
 BOOL apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
-                               DWORD dwDescriptionLength)
-{
-    HKEY  hKey;
+        DWORD dwDescriptionLength) {
+    HKEY hKey;
     WCHAR wcName[SIZ_RESLEN];
-    DWORD rc, l = dwDescriptionLength * sizeof(WCHAR);
+    DWORD rc, l = dwDescriptionLength * sizeof (WCHAR);
     DWORD t = REG_SZ;
     if (lstrlenW(szServiceName) > SIZ_RESMAX)
         return FALSE;
@@ -998,8 +961,8 @@ BOOL apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
     if (rc != ERROR_SUCCESS) {
         return FALSE;
     }
-    rc = RegQueryValueExW(hKey, REGDESCRIPTION, NULL, &t, (BYTE *)szDescription,
-                          &l);
+    rc = RegQueryValueExW(hKey, REGDESCRIPTION, NULL, &t, (BYTE *) szDescription,
+            &l);
     SAFE_CLOSE_KEY(hKey);
     if (rc == ERROR_SUCCESS && t == REG_SZ)
         return TRUE;
@@ -1008,11 +971,10 @@ BOOL apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
 }
 
 BOOL apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
-                        DWORD dwUserLength)
-{
-    HKEY  hKey;
+        DWORD dwUserLength) {
+    HKEY hKey;
     WCHAR wcName[SIZ_RESLEN];
-    DWORD rc, l = dwUserLength * sizeof(WCHAR);
+    DWORD rc, l = dwUserLength * sizeof (WCHAR);
     DWORD t = REG_SZ;
     if (lstrlenW(szServiceName) > SIZ_RESMAX)
         return FALSE;
@@ -1023,8 +985,8 @@ BOOL apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
     if (rc != ERROR_SUCCESS) {
         return FALSE;
     }
-    rc = RegQueryValueExW(hKey, REGSERVICE_USER, NULL, &t, (BYTE *)szUser,
-                          &l);
+    rc = RegQueryValueExW(hKey, REGSERVICE_USER, NULL, &t, (BYTE *) szUser,
+            &l);
     SAFE_CLOSE_KEY(hKey);
     if (rc == ERROR_SUCCESS && t == REG_SZ)
         return TRUE;
@@ -1032,25 +994,24 @@ BOOL apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
         return FALSE;
 }
 
-DWORD apxGetMaxServiceTimeout(APXHANDLE hPool)
-{
-    DWORD   maxTimeout  = 20000;
-    LPWSTR  wsMaxTimeout;
-    DWORD   err;
-    HKEY    hKey;
-    WCHAR   wsBuf[SIZ_BUFLEN];
+DWORD apxGetMaxServiceTimeout(APXHANDLE hPool) {
+    DWORD maxTimeout = 20000;
+    LPWSTR wsMaxTimeout;
+    DWORD err;
+    HKEY hKey;
+    WCHAR wsBuf[SIZ_BUFLEN];
 
     lstrcpyW(wsBuf, CONTROL_REGKEY);
 
     if ((err = RegOpenKeyExW(HKEY_LOCAL_MACHINE, wsBuf,
-                             0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
+            0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
         return maxTimeout;
     }
     wsMaxTimeout = __apxGetRegistrySzW(hPool, hKey, REGTIMEOUT);
     RegCloseKey(hKey);
 
     if (wsMaxTimeout[0]) {
-        maxTimeout = (DWORD)apxAtoulW(wsMaxTimeout);
+        maxTimeout = (DWORD) apxAtoulW(wsMaxTimeout);
     }
     apxFree(wsMaxTimeout);
 

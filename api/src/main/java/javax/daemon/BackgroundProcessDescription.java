@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package java.daemon;
+package javax.daemon;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,15 +34,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface BackgroundProcessDescription {
-    
+
     /**
      * @return <code>BackgroundProcess</code> default name
      */
     String name();
-    
+
     /**
      * @return <code>BackgroundProcess</code> default description
      */
     String description();
-    
+
 }

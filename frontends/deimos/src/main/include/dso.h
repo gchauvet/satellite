@@ -29,7 +29,7 @@ typedef void *dso_handle;
 
 bool dso_init(void);
 dso_handle dso_link(const char *pth);
-bool  dso_unlink(dso_handle lib);
+bool dso_unlink(dso_handle lib);
 void *dso_symbol(dso_handle lib, const char *nam);
 char *dso_error(void);
 

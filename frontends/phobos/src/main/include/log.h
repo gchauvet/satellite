@@ -60,52 +60,52 @@ __APXBEGIN_DECLS
 #define APXLOG_MARK_SYSERR  NULL, APXLOG_LEVEL_ERROR, TRUE,  __FILE__, __LINE__, NULL
 
 extern LPWSTR apxLogFile(
-    APXHANDLE hPool,
-    LPCWSTR szPath,
-    LPCWSTR szPrefix,
-    LPCWSTR szName,
-    BOOL bTimeStamp,
-    DWORD dwRotate
-);
+        APXHANDLE hPool,
+        LPCWSTR szPath,
+        LPCWSTR szPrefix,
+        LPCWSTR szName,
+        BOOL bTimeStamp,
+        DWORD dwRotate
+        );
 
 extern HANDLE apxLogOpen(
-    APXHANDLE hPool,
-    LPCWSTR szPath,
-    LPCWSTR szPrefix,
-    DWORD dwRotate
-);
+        APXHANDLE hPool,
+        LPCWSTR szPath,
+        LPCWSTR szPrefix,
+        DWORD dwRotate
+        );
 
 extern void apxLogClose(
-    HANDLE hFile
-);
+        HANDLE hFile
+        );
 
 extern void apxLogLevelSet(
-    HANDLE  hFile,
-    DWORD dwLevel
-);
+        HANDLE hFile,
+        DWORD dwLevel
+        );
 
 extern void apxLogLevelSetW(
-    HANDLE  hFile,
-    LPCWSTR szLevel
-);
+        HANDLE hFile,
+        LPCWSTR szLevel
+        );
 
 extern int apxLogWrite(
-    HANDLE  hFile,
-    DWORD   dwLevel,
-    BOOL    bTimeStamp,
-    LPCSTR  szFile,
-    DWORD   dwLine,
-    LPCSTR  szFormat,
-    ...
-);
+        HANDLE hFile,
+        DWORD dwLevel,
+        BOOL bTimeStamp,
+        LPCSTR szFile,
+        DWORD dwLine,
+        LPCSTR szFormat,
+        ...
+        );
 
 extern int apxDisplayError(
-    BOOL    bDisplay,
-    LPCSTR  szFile,
-    DWORD   dwLine,
-    LPCSTR  szFormat,
-    ...
-);
+        BOOL bDisplay,
+        LPCSTR szFile,
+        DWORD dwLine,
+        LPCSTR szFormat,
+        ...
+        );
 
 __APXEND_DECLS
 

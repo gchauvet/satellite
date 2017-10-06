@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef _PRIVATE_H_INCLUDED_
 #define _PRIVATE_H_INCLUDED_
 
@@ -124,7 +124,7 @@ struct {                                                                \
         }                                                               \
         *(elm)->field.tqe_prev = TAILQ_NEXT((elm), field);              \
 } while (0)
-  
+
 /** Some usefull macros */
 
 #define APXHANDLE_SPINLOCK(h)               \
@@ -154,62 +154,62 @@ struct {                                                                \
 /*
  * Define a union with types which are likely to have the longest
  * *relevant* CPU-specific memory word alignment restrictions...
- */ 
+ */
 typedef union APXMEMWORD {
-    void  *vp;
+    void *vp;
     void (*fp)(void);
-    char  *cp;
-    long   l;
+    char *cp;
+    long l;
     double d;
 } APXMEMWORD;
 
 typedef struct APXCALLHOOK APXCALLHOOK;
 
 struct APXCALLHOOK {
-
-    LPAPXFNCALLBACK     fnCallback;
-    TAILQ_ENTRY(APXCALLHOOK)  queue;
+    LPAPXFNCALLBACK fnCallback;
+    TAILQ_ENTRY(APXCALLHOOK) queue;
 };
 
 struct stAPXHANDLE {
-    /** The type of the handle */ 
-    DWORD               dwType;         
-    /** Handle Flags */ 
-    DWORD               dwFlags;
-    /** Handle user data size */ 
-    DWORD               dwSize;
-    /** parameters for event callback */ 
-    WPARAM              wParam;
-    LPARAM              lParam;
-    UINT                uMsg;
-    /** main callback function (using default if not specified) */ 
-    LPAPXFNCALLBACK     fnCallback;
+    /** The type of the handle */
+    DWORD dwType;
+    /** Handle Flags */
+    DWORD dwFlags;
+    /** Handle user data size */
+    DWORD dwSize;
+    /** parameters for event callback */
+    WPARAM wParam;
+    LPARAM lParam;
+    UINT uMsg;
+    /** main callback function (using default if not specified) */
+    LPAPXFNCALLBACK fnCallback;
     /** callback functions hook list */
     TAILQ_HEAD(_lCallbacks, APXCALLHOOK) lCallbacks;
     /** allocation pool  */
-    APXHANDLE           hPool;
-    /** interlocking value */ 
-    LONG volatile       lvSpin;
+    APXHANDLE hPool;
+    /** interlocking value */
+    LONG volatile lvSpin;
 
-    /** message event handle  */ 
-    HANDLE              hEventHandle;
-    /** message event thread  */ 
-    HANDLE              hEventThread;
-    /** message event thread id  */ 
-    DWORD               hEventThreadId;
+    /** message event handle  */
+    HANDLE hEventHandle;
+    /** message event thread  */
+    HANDLE hEventThread;
+    /** message event thread id  */
+    DWORD hEventThreadId;
     /** private local heap */
-    HANDLE              hHeap;
-    /** list enty for pool  */ 
-    TAILQ_ENTRY(stAPXHANDLE)  queue;
-    /** small userdata pointer  */ 
-    union   {
-        LPVOID          lpPtr;
-        HANDLE          hWinHandle;
-        double          dValue;
-        void            (*fpValue)();
+    HANDLE hHeap;
+    /** list enty for pool  */
+    TAILQ_ENTRY(stAPXHANDLE) queue;
+
+    /** small userdata pointer  */
+    union {
+        LPVOID lpPtr;
+        HANDLE hWinHandle;
+        double dValue;
+        void (*fpValue)();
     } uData;
 
-    APXMEMWORD          stAlign;
+    APXMEMWORD stAlign;
 };
 
 #define APXHANDLE_DATA(h)       ((void *)((char*)(h) + sizeof(stAPXHANDLE)))
@@ -217,32 +217,32 @@ struct stAPXHANDLE {
 
 /* zero separated, double zero terminated string */
 struct APXMULTISZ {
-    DWORD   dwAllocated;  /* length including terminators */
-    DWORD   dwInsert;     /* next insert position */
+    DWORD dwAllocated; /* length including terminators */
+    DWORD dwInsert; /* next insert position */
 };
 
 typedef struct APXREGENUM {
-    HKEY     hServicesKey;
-    DWORD    dwIndex;                   /* current enum index           */
-    DWORD    cSubKeys;                  /* number of subkeys            */
-    DWORD    cbMaxSubKey;               /* longest subkey size          */
-    DWORD    cchMaxClass;               /* longest class string         */
-    DWORD    cValues;                   /* number of values for key     */
-    DWORD    cchMaxValue;               /* longest value name           */
-    DWORD    cbMaxValueData;            /* longest value data           */
+    HKEY hServicesKey;
+    DWORD dwIndex; /* current enum index           */
+    DWORD cSubKeys; /* number of subkeys            */
+    DWORD cbMaxSubKey; /* longest subkey size          */
+    DWORD cchMaxClass; /* longest class string         */
+    DWORD cValues; /* number of values for key     */
+    DWORD cchMaxValue; /* longest value name           */
+    DWORD cbMaxValueData; /* longest value data           */
 
 } APXREGENUM, *LPAPXREGENUM;
 
-extern BOOL    apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry);
-extern BOOL    apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
-                                  DWORD dwDescriptionLength);
-extern BOOL    apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
-                           DWORD dwUserLength);
+extern BOOL apxRegistryEnumServices(LPAPXREGENUM lpEnum, LPAPXSERVENTRY lpEntry);
+extern BOOL apxGetServiceDescriptionW(LPCWSTR szServiceName, LPWSTR szDescription,
+        DWORD dwDescriptionLength);
+extern BOOL apxGetServiceUserW(LPCWSTR szServiceName, LPWSTR szUser,
+        DWORD dwUserLength);
 
-extern DWORD   __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount);
-extern DWORD   __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount);
-extern LPSTR   __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName);
-extern LPWSTR  __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName);
+extern DWORD __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount);
+extern DWORD __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount);
+extern LPSTR __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName);
+extern LPWSTR __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName);
 
 #ifndef  MIN
 #define  MIN(a,b)    (((a)<(b)) ? (a) : (b))

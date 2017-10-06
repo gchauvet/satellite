@@ -41,84 +41,78 @@
 
 extern char **environ;
 
-static mode_t envmask;          /* mask to create the files */
+static mode_t envmask; /* mask to create the files */
 
-pid_t controlled = 0;           /* the child process pid */
-pid_t logger_pid = 0;           /* the logger process pid */
+pid_t controlled = 0; /* the child process pid */
+pid_t logger_pid = 0; /* the logger process pid */
 static volatile bool destroyed = false;
 static volatile bool stopped = false;
 static volatile bool started = true;
 static volatile bool doreload = false;
 static volatile bool dosignal = false;
 typedef void (*sighandler_t)(int);
-static sighandler_t handler_start  = NULL;
-static sighandler_t handler_stop  = NULL;
-static sighandler_t handler_continue  = NULL;
-static sighandler_t handler_destroy  = NULL;
+static sighandler_t handler_start = NULL;
+static sighandler_t handler_stop = NULL;
+static sighandler_t handler_continue = NULL;
+static sighandler_t handler_destroy = NULL;
 
 static int run_controller(arg_data *args, home_data *data, uid_t uid,
-                          gid_t gid);
+        gid_t gid);
 static void set_output(char *outfile, char *errfile, bool redirectstdin,
-                       char *procname);
+        char *procname);
 
-static void handler(int sig)
-{
+static void handler(int sig) {
     switch (sig) {
         case SIGUSR1:
             log_debug("Caught %s: Scheduling a start", strsignal(sig));
             if (started == true) {
                 log_error("Daemon already started");
-            }
-            else {
+            } else {
                 stopped = false;
                 java_start();
                 started = true;
             }
-        break;
+            break;
         case SIGUSR2:
             log_debug("Caught %s: Scheduling a stop", strsignal(sig));
-            if(started == false ) {
+            if (started == false) {
                 log_error("Can't stop an unstarted daemon");
             } else if (stopped == true) {
                 log_error("Shutdown or reload already stopped");
-            }
-            else {
+            } else {
                 started = false;
                 java_stop();
                 stopped = true;
             }
-        break;
+            break;
         case SIGTERM:
             log_debug("Caught %s: Scheduling a shutdown", strsignal(sig));
             if (destroyed == true) {
                 log_error("Shutdown or reload already scheduled");
-            }
-            else {
+            } else {
                 java_stop();
                 stopped = true;
                 java_destroy();
                 destroyed = true;
             }
-        break;
+            break;
         case SIGHUP:
             log_debug("Caught %s: Scheduling a reload", strsignal(sig));
             if (stopped == true) {
                 log_error("Shutdown or reload already scheduled");
-            }
-            else {
+            } else {
                 destroyed = true;
                 doreload = true;
             }
-        break;
+            break;
         default:
             log_debug("Caught unknown signal %s", strsignal(sig));
-        break;
+            break;
     }
 }
 
 /* user and group */
-static int set_user_group(const char *user, int uid, int gid)
-{
+static int set_user_group(const char *user, int uid, int gid) {
     if (user != NULL) {
         if (setgid(gid) != 0) {
             log_error("Cannot set group id for user '%s'", user);
@@ -127,12 +121,11 @@ static int set_user_group(const char *user, int uid, int gid)
         if (initgroups(user, gid) != 0) {
             if (getuid() != uid) {
                 log_error("Cannot set supplement group list for user '%s'",
-                          user);
+                        user);
                 return -1;
-            }
-            else
+            } else
                 log_debug("Cannot set supplement group list for user '%s'",
-                          user);
+                    user);
         }
         if (getuid() == uid) {
             log_debug("No need to change user to '%s'!", user);
@@ -171,10 +164,10 @@ static int set_user_group(const char *user, int uid, int gid)
                         (1 << CAP_DAC_READ_SEARCH)
 
 #define LEGACY_CAP_VERSION  0x19980330
-static int set_legacy_caps(int caps)
-{
+
+static int set_legacy_caps(int caps) {
     struct __user_cap_header_struct caphead;
-    struct __user_cap_data_struct   cap;
+    struct __user_cap_data_struct cap;
 
     memset(&caphead, 0, sizeof caphead);
     caphead.version = LEGACY_CAP_VERSION;
@@ -208,16 +201,16 @@ static cap_value_t caps_min[] = {
 #define CAPSMIN  2
 
 
-typedef int     (*fd_cap_free)(void *);
-typedef cap_t   (*fd_cap_init)(void);
-typedef int     (*fd_cap_clear)(cap_t);
-typedef int     (*fd_cap_get_flag)(cap_t, cap_value_t, cap_flag_t, cap_flag_value_t *);
-typedef int     (*fd_cap_set_flag)(cap_t, cap_flag_t, int, const cap_value_t *, cap_flag_value_t);
-typedef int     (*fd_cap_set_proc)(cap_t);
+typedef int (*fd_cap_free)(void *);
+typedef cap_t(*fd_cap_init)(void);
+typedef int (*fd_cap_clear)(cap_t);
+typedef int (*fd_cap_get_flag)(cap_t, cap_value_t, cap_flag_t, cap_flag_value_t *);
+typedef int (*fd_cap_set_flag)(cap_t, cap_flag_t, int, const cap_value_t *, cap_flag_value_t);
+typedef int (*fd_cap_set_proc)(cap_t);
 
 static dso_handle hlibcap = NULL;
-static fd_cap_free  fp_cap_free;
-static fd_cap_init  fp_cap_init;
+static fd_cap_free fp_cap_free;
+static fd_cap_init fp_cap_init;
 static fd_cap_clear fp_cap_clear;
 static fd_cap_get_flag fp_cap_get_flag;
 static fd_cap_set_flag fp_cap_set_flag;
@@ -244,8 +237,7 @@ static const char *libcap_locs[] = {
     NULL
 };
 
-static int ld_libcap(void)
-{
+static int ld_libcap(void) {
     int i = 0;
     dso_handle dso = NULL;
 #define CAP_LDD(name) \
@@ -277,39 +269,35 @@ static int ld_libcap(void)
     return 0;
 }
 
-
-static int set_caps(int cap_type)
-{
+static int set_caps(int cap_type) {
     cap_t c;
     int ncap;
     int flag = CAP_SET;
     cap_value_t *caps;
-    const char  *type;
+    const char *type;
 
     if (ld_libcap()) {
         return set_legacy_caps(cap_type);
     }
     if (cap_type == CAPS) {
-        ncap = sizeof(caps_std)/sizeof(cap_value_t);
+        ncap = sizeof (caps_std) / sizeof (cap_value_t);
         caps = caps_std;
         type = "default";
-    }
-    else if (cap_type == CAPSMIN) {
-        ncap = sizeof(caps_min)/sizeof(cap_value_t);
+    } else if (cap_type == CAPSMIN) {
+        ncap = sizeof (caps_min) / sizeof (cap_value_t);
         caps = caps_min;
         type = "min";
-    }
-    else {
-        ncap = sizeof(caps_min)/sizeof(cap_value_t);
+    } else {
+        ncap = sizeof (caps_min) / sizeof (cap_value_t);
         caps = caps_min;
         type = "null";
         flag = CAP_CLEAR;
     }
     c = (*fp_cap_init)();
     (*fp_cap_clear)(c);
-    (*fp_cap_set_flag)(c, CAP_EFFECTIVE,   ncap, caps, flag);
+    (*fp_cap_set_flag)(c, CAP_EFFECTIVE, ncap, caps, flag);
     (*fp_cap_set_flag)(c, CAP_INHERITABLE, ncap, caps, flag);
-    (*fp_cap_set_flag)(c, CAP_PERMITTED,   ncap, caps, flag);
+    (*fp_cap_set_flag)(c, CAP_PERMITTED, ncap, caps, flag);
     if ((*fp_cap_set_proc)(c) != 0) {
         log_error("failed setting %s capabilities.", type);
         return -1;
@@ -330,14 +318,13 @@ static int set_caps(int cap_type)
 #define CAPSMAX LEGACY_CAPSMAX
 #define CAPS    LEGACY_CAPS
 #define CAPSMIN LEGACY_CAPSMIN
-static int set_caps(int caps)
-{
+
+static int set_caps(int caps) {
     return set_legacy_caps(caps);
 }
 #endif
 
-static int linuxset_user_group(const char *user, int uid, int gid)
-{
+static int linuxset_user_group(const char *user, int uid, int gid) {
     int caps_set = 0;
 
     if (user == NULL)
@@ -380,12 +367,10 @@ static int linuxset_user_group(const char *user, int uid, int gid)
 }
 #endif
 
-
-static bool checkuser(char *user, uid_t * uid, gid_t * gid)
-{
+static bool checkuser(char *user, uid_t * uid, gid_t * gid) {
     struct passwd *pwds = NULL;
     int status = 0;
-    pid_t pid  = 0;
+    pid_t pid = 0;
 
     /* Do we actually _have_ to switch user? */
     if (user == NULL)
@@ -434,8 +419,7 @@ static bool checkuser(char *user, uid_t * uid, gid_t * gid)
     return false;
 }
 
-static void controller(int sig)
-{
+static void controller(int sig) {
     switch (sig) {
         case SIGTERM:
         case SIGUSR1:
@@ -443,18 +427,17 @@ static void controller(int sig)
             log_debug("Forwarding signal %d to process %d", sig, controlled);
             kill(controlled, sig);
             signal(sig, controller);
-        break;
+            break;
         default:
             log_debug("Caught unknown signal %d", sig);
-        break;
+            break;
     }
 }
 
 /*
  * Return the address of the current signal handler and set the new one.
  */
-static sighandler_t signal_set(int sig, sighandler_t newHandler)
-{
+static sighandler_t signal_set(int sig, sighandler_t newHandler) {
     sighandler_t hand;
 
     hand = signal(sig, newHandler);
@@ -469,22 +452,20 @@ static sighandler_t signal_set(int sig, sighandler_t newHandler)
     return hand;
 }
 
-static int mkdir0(const char *name, int perms)
-{
+static int mkdir0(const char *name, int perms) {
     if (mkdir(name, perms) == 0)
         return 0;
     else
         return errno;
 }
 
-static int mkdir1(char *name, int perms)
-{
+static int mkdir1(char *name, int perms) {
     int rc;
 
     rc = mkdir0(name, perms);
     if (rc == EEXIST)
         return 0;
-    if (rc == ENOENT) {  /* Missing an intermediate dir */
+    if (rc == ENOENT) { /* Missing an intermediate dir */
         char *pos;
         if ((pos = strrchr(name, '/'))) {
             *pos = '\0';
@@ -502,8 +483,7 @@ static int mkdir1(char *name, int perms)
     return rc;
 }
 
-static int mkdir2(const char *name, int perms)
-{
+static int mkdir2(const char *name, int perms) {
     int rc = 0;
     char *pos;
     char *dir = strdup(name);
@@ -523,8 +503,7 @@ static int mkdir2(const char *name, int perms)
  * Check pid and if still running
  */
 
-static int check_pid(arg_data *args)
-{
+static int check_pid(arg_data *args) {
     int fd;
     FILE *pidf;
     char buff[80];
@@ -542,16 +521,15 @@ retry:
         }
         log_error("Cannot open PID file %s, PID is %d", args->pidf, pidn);
         return -1;
-    }
-    else {
+    } else {
         lockf(fd, F_LOCK, 0);
-        i = read(fd, buff, sizeof(buff));
+        i = read(fd, buff, sizeof (buff));
         if (i > 0) {
             buff[i] = '\0';
             pid = atoi(buff);
             if (kill(pid, 0) == 0) {
                 log_error("Still running according to PID file %s, PID is %d",
-                          args->pidf, pid);
+                        args->pidf, pid);
                 lockf(fd, F_ULOCK, 0);
                 close(fd);
                 return 122;
@@ -562,13 +540,12 @@ retry:
         if (args->vers != true && args->chck != true) {
             lseek(fd, SEEK_SET, 0);
             pidf = fdopen(fd, "r+");
-            fprintf(pidf, "%d\n", (int)getpid());
+            fprintf(pidf, "%d\n", (int) getpid());
             fflush(pidf);
             lockf(fd, F_ULOCK, 0);
             fclose(pidf);
             close(fd);
-        }
-        else {
+        } else {
             lockf(fd, F_ULOCK, 0);
             close(fd);
         }
@@ -579,8 +556,7 @@ retry:
 /*
  * read the pid from the pidfile
  */
-static int get_pidf(arg_data *args, bool quiet)
-{
+static int get_pidf(arg_data *args, bool quiet) {
     int fd;
     int i;
     char buff[80];
@@ -593,7 +569,7 @@ static int get_pidf(arg_data *args, bool quiet)
         return -1;
     }
     lockf(fd, F_LOCK, 0);
-    i = read(fd, buff, sizeof(buff));
+    i = read(fd, buff, sizeof (buff));
     lockf(fd, F_ULOCK, 0);
     close(fd);
     if (i > 0) {
@@ -615,8 +591,7 @@ static int get_pidf(arg_data *args, bool quiet)
  * 1 - to be a daemon before the setsid(), the child is the controler process.
  * 2 - to start the JVM in the child process. (whose pid is stored in pidfile).
  */
-static int check_tmp_file(arg_data *args)
-{
+static int check_tmp_file(arg_data *args) {
     int pid;
     char buff[80];
     int fd;
@@ -633,23 +608,21 @@ static int check_tmp_file(arg_data *args)
     return 0;
 }
 
-static void create_tmp_file(arg_data *args)
-{
+static void create_tmp_file(arg_data *args) {
     char buff[80];
     int fd;
 
-    sprintf(buff, "/tmp/%d.deimos_up", (int)getpid());
+    sprintf(buff, "/tmp/%d.deimos_up", (int) getpid());
     log_debug("create_tmp_file: %s", buff);
     fd = open(buff, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd != -1)
         close(fd);
 }
 
-static void remove_tmp_file(arg_data *args)
-{
+static void remove_tmp_file(arg_data *args) {
     char buff[80];
 
-    sprintf(buff, "/tmp/%d.deimos_up", (int)getpid());
+    sprintf(buff, "/tmp/%d.deimos_up", (int) getpid());
     log_debug("remove_tmp_file: %s", buff);
     unlink(buff);
 }
@@ -658,8 +631,7 @@ static void remove_tmp_file(arg_data *args)
  * wait until deimos create the I am ready file
  * pid is the controller and args->pidf the JVM itself.
  */
-static int wait_child(arg_data *args, int pid)
-{
+static int wait_child(arg_data *args, int pid) {
     int count = 10;
     bool havejvm = false;
     int fd;
@@ -689,7 +661,7 @@ static int wait_child(arg_data *args, int pid)
             return 1;
         }
         lockf(fd, F_LOCK, 0);
-        i = read(fd, buff, sizeof(buff));
+        i = read(fd, buff, sizeof (buff));
         lockf(fd, F_ULOCK, 0);
         close(fd);
         if (i > 0) {
@@ -722,8 +694,7 @@ static int wait_child(arg_data *args, int pid)
 /*
  * stop the running deimos
  */
-static int shutdown_child(arg_data *args)
-{
+static int shutdown_child(arg_data *args) {
     int pid = get_pidf(args, false);
     int count = 60;
 
@@ -745,8 +716,7 @@ static int shutdown_child(arg_data *args)
     return -1;
 }
 
-static int child_emit(arg_data *args, int signal)
-{
+static int child_emit(arg_data *args, int signal) {
     int pid = get_pidf(args, false);
     int result = -1;
 
@@ -760,16 +730,14 @@ static int child_emit(arg_data *args, int signal)
 /*
  * Continue to running deimos
  */
-static int resume_child(arg_data *args)
-{
+static int resume_child(arg_data *args) {
     return child_emit(args, SIGUSR1);
 }
 
 /*
  * Pause the running deimos
  */
-static int pause_child(arg_data *args)
-{
+static int pause_child(arg_data *args) {
     return child_emit(args, SIGUSR2);
 }
 
@@ -777,8 +745,7 @@ static int pause_child(arg_data *args)
  * child process logic.
  */
 
-static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
-{
+static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid) {
     int ret = 0;
 
     /* check the pid file */
@@ -799,8 +766,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
     if (java_init(args, data) != true) {
         log_debug("java_init failed");
         return 1;
-    }
-    else
+    } else
         log_debug("java_init done");
 
     /* Check wether we need to dump the VM version */
@@ -809,11 +775,9 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
         log_error("Copyright 2017 Zatarox");
         if (java_version() != true) {
             return -1;
-        }
-        else
+        } else
             return 0;
-    }
-    /* Check wether we need to dump the VM version */
+    }/* Check wether we need to dump the VM version */
     else if (args->vershow == true) {
         if (java_version() != true) {
             return 7;
@@ -832,8 +796,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
     if (java_load(args) != true) {
         log_debug("java_load failed");
         return 3;
-    }
-    else
+    } else
         log_debug("java_load done");
 
     /* Downgrade user */
@@ -852,8 +815,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
     if (java_start() != true) {
         log_debug("java_start failed");
         return 5;
-    }
-    else
+    } else
         log_debug("java_start done");
 
     /* Install signal handlers */
@@ -879,7 +841,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
         ret = 123;
     else
         ret = 0;
-    
+
     if (JVM_destroy(ret) != true)
         ret = 7;
 
@@ -891,8 +853,7 @@ static int child(arg_data *args, home_data *data, uid_t uid, gid_t gid)
  * that is not very good if we are try to trace the output
  * note the code assumes that the errors are configuration errors.
  */
-static FILE *loc_freopen(char *outfile, char *mode, FILE * stream)
-{
+static FILE *loc_freopen(char *outfile, char *mode, FILE * stream) {
     FILE *ftest;
 
     mkdir2(outfile, S_IRWXU);
@@ -908,8 +869,7 @@ static FILE *loc_freopen(char *outfile, char *mode, FILE * stream)
 #define LOGBUF_SIZE 1024
 
 /* Read from file descriptors. Log to syslog. */
-static int logger_child(int out_fd, int err_fd, char *procname)
-{
+static int logger_child(int out_fd, int err_fd, char *procname) {
     fd_set rfds;
     struct timeval tv;
     int retval, nfd = -1, rc = 0;
@@ -936,7 +896,7 @@ static int logger_child(int out_fd, int err_fd, char *procname)
         if (err_fd != -1) {
             FD_SET(err_fd, &rfds);
         }
-        tv.tv_sec  = 60;
+        tv.tv_sec = 60;
         tv.tv_usec = 0;
         retval = select(nfd, &rfds, NULL, NULL, &tv);
         if (retval == -1) {
@@ -944,11 +904,10 @@ static int logger_child(int out_fd, int err_fd, char *procname)
             syslog(LOG_ERR, "select: %s", strerror(errno));
             /* If select failed no point to continue */
             break;
-        }
-        else if (retval) {
+        } else if (retval) {
             if (out_fd != -1 && FD_ISSET(out_fd, &rfds)) {
                 do {
-                    n = read(out_fd, buf, LOGBUF_SIZE-1);
+                    n = read(out_fd, buf, LOGBUF_SIZE - 1);
                 } while (n == -1 && errno == EINTR);
                 if (n == -1) {
                     syslog(LOG_ERR, "read: %s", strerror(errno));
@@ -957,15 +916,14 @@ static int logger_child(int out_fd, int err_fd, char *procname)
                         break;
                     nfd = err_fd + 1;
                     out_fd = -1;
-                }
-                else if (n > 0 && buf[0] != '\n') {
+                } else if (n > 0 && buf[0] != '\n') {
                     buf[n] = 0;
                     syslog(LOG_INFO, "%s", buf);
                 }
             }
             if (err_fd != -1 && FD_ISSET(err_fd, &rfds)) {
                 do {
-                    n = read(err_fd, buf, LOGBUF_SIZE-1);
+                    n = read(err_fd, buf, LOGBUF_SIZE - 1);
                 } while (n == -1 && errno == EINTR);
                 if (n == -1) {
                     syslog(LOG_ERR, "read: %s", strerror(errno));
@@ -974,8 +932,7 @@ static int logger_child(int out_fd, int err_fd, char *procname)
                         break;
                     nfd = out_fd + 1;
                     err_fd = -1;
-                }
-                else if (n > 0 && buf[0] != '\n') {
+                } else if (n > 0 && buf[0] != '\n') {
                     buf[n] = 0;
                     syslog(LOG_ERR, "%s", buf);
                 }
@@ -988,8 +945,7 @@ static int logger_child(int out_fd, int err_fd, char *procname)
 /**
  *  Redirect stdin, stdout, stderr.
  */
-static void set_output(char *outfile, char *errfile, bool redirectstdin, char *procname)
-{
+static void set_output(char *outfile, char *errfile, bool redirectstdin, char *procname) {
     int out_pipe[2] = {-1, -1};
     int err_pipe[2] = {-1, -1};
     int fork_needed = 0;
@@ -1010,14 +966,12 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin, char *p
         /* Send stdout to syslog through a logger process */
         if (pipe(out_pipe) == -1) {
             log_error("cannot create stdout pipe: %s",
-                      strerror(errno));
-        }
-        else {
+                    strerror(errno));
+        } else {
             fork_needed = 1;
             log_stdout_syslog_flag = true;
         }
-    }
-    else if (strcmp(outfile, "&2")) {
+    } else if (strcmp(outfile, "&2")) {
         if (strcmp(outfile, "&1")) {
             /* Redirect stdout to a file */
             loc_freopen(outfile, "a", stdout);
@@ -1029,14 +983,12 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin, char *p
         /* Send stderr to syslog through a logger process */
         if (pipe(err_pipe) == -1) {
             log_error("cannot create stderr pipe: %s",
-                      strerror(errno));
-        }
-        else {
+                    strerror(errno));
+        } else {
             fork_needed = 1;
             log_stderr_syslog_flag = true;
         }
-    }
-    else if (strcmp(errfile, "&1")) {
+    } else if (strcmp(errfile, "&1")) {
         if (strcmp(errfile, "&2")) {
             /* Redirect stderr to a file */
             loc_freopen(errfile, "a", stderr);
@@ -1063,8 +1015,7 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin, char *p
         pid_t pid = fork();
         if (pid == -1) {
             log_error("cannot create logger process: %s", strerror(errno));
-        }
-        else {
+        } else {
             if (pid != 0) {
                 /* Parent process.
                  * Close child pipe endpoints.
@@ -1074,31 +1025,29 @@ static void set_output(char *outfile, char *errfile, bool redirectstdin, char *p
                     close(out_pipe[0]);
                     if (dup2(out_pipe[1], 1) == -1) {
                         log_error("cannot redirect stdout to pipe for syslog: %s",
-                                  strerror(errno));
+                                strerror(errno));
                     }
                 }
                 if (err_pipe[0] != -1) {
                     close(err_pipe[0]);
                     if (dup2(err_pipe[1], 2) == -1) {
                         log_error("cannot redirect stderr to pipe for syslog: %s",
-                                  strerror(errno));
+                                strerror(errno));
                     }
                 }
-            }
-            else {
+            } else {
                 exit(logger_child(out_pipe[0], err_pipe[0], procname));
             }
         }
     }
 }
 
-int main(int argc, char *argv[])
-{
-    arg_data *args  = NULL;
+int main(int argc, char *argv[]) {
+    arg_data *args = NULL;
     home_data *data = NULL;
-    pid_t pid  = 0;
-    uid_t uid  = 0;
-    gid_t gid  = 0;
+    pid_t pid = 0;
+    uid_t uid = 0;
+    gid_t gid = 0;
     int res;
 
     /* Parse command line arguments */
@@ -1117,16 +1066,16 @@ int main(int argc, char *argv[])
     /* Stop running deimos if required */
     if (args->pause == true)
         return (pause_child(args));
-    
+
     /* Stop running deimos if required */
     if (args->resume == true)
         return (resume_child(args));
-    
+
     /* Retrieve JAVA_HOME layout */
     data = home(args->home);
     if (data == NULL)
         return 1;
-    
+
     /* Check for help */
     if (args->help == true) {
         help(data);
@@ -1139,13 +1088,13 @@ int main(int argc, char *argv[])
        loading of VMs (notably this is for Linux). Set, replace, and go. */
     if (strcmp(argv[0], args->procname) != 0) {
         char *oldpath = getenv("LD_LIBRARY_PATH");
-        char *libf    = java_library(args, data);
+        char *libf = java_library(args, data);
         char *filename;
-        char  buf[2048];
-        int   ret;
+        char buf[2048];
+        int ret;
         char *tmp = NULL;
-        char *p1  = NULL;
-        char *p2  = NULL;
+        char *p1 = NULL;
+        char *p2 = NULL;
 
         /* We don't want to use a form of exec() that searches the
          * PATH, so require that argv[0] be either an absolute or
@@ -1163,12 +1112,12 @@ int main(int argc, char *argv[])
          * (additionaly a strdup(NULL) cores dump on my machine).
          */
         if (libf != NULL) {
-            p1  = strdup(libf);
+            p1 = strdup(libf);
             tmp = strrchr(p1, '/');
             if (tmp != NULL)
                 tmp[0] = '\0';
 
-            p2  = strdup(p1);
+            p2 = strdup(p1);
             tmp = strrchr(p2, '/');
             if (tmp != NULL)
                 tmp[0] = '\0';
@@ -1182,11 +1131,11 @@ int main(int argc, char *argv[])
             setenv("LD_LIBRARY_PATH", tmp, 1);
 
             log_debug("Invoking w/ LD_LIBRARY_PATH=%s",
-                      getenv("LD_LIBRARY_PATH"));
+                    getenv("LD_LIBRARY_PATH"));
         }
 
         /* execve needs a full path */
-        ret = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+        ret = readlink("/proc/self/exe", buf, sizeof (buf) - 1);
         if (ret <= 0)
             strcpy(buf, argv[0]);
         else
@@ -1223,14 +1172,14 @@ int main(int argc, char *argv[])
 
     if (chdir(args->cwd)) {
         log_error("ERROR: deimos was unable to "
-                  "change directory to: %s", args->cwd);
+                "change directory to: %s", args->cwd);
     }
     /*
      * umask() uses inverse logic; bits are CLEAR for allowed access.
      */
     if (~args->umask & 0022) {
         log_error("NOTICE: deimos umask of %03o allows "
-                  "write permission to group and/or other", args->umask);
+                "write permission to group and/or other", args->umask);
     }
     envmask = umask(args->umask);
     set_output(args->outfile, args->errfile, args->redirectstdin, args->procname);
@@ -1244,8 +1193,7 @@ int main(int argc, char *argv[])
 }
 
 static int run_controller(arg_data *args, home_data *data, uid_t uid,
-                          gid_t gid)
-{
+        gid_t gid) {
     pid_t pid = 0;
 
 
@@ -1299,8 +1247,7 @@ static int run_controller(arg_data *args, home_data *data, uid_t uid,
             log_error("Service exit with a return value of %d", status);
             return 1;
 
-        }
-        else {
+        } else {
             if (WIFSIGNALED(status)) {
                 log_error("Service killed by signal %d", WTERMSIG(status));
                 /* prevent looping */
@@ -1321,14 +1268,12 @@ static int run_controller(arg_data *args, home_data *data, uid_t uid,
 
 }
 
-void main_reload(void)
-{
+void main_reload(void) {
     log_debug("Killing self with HUP signal");
     kill(controlled, SIGHUP);
 }
 
-void main_shutdown(void)
-{
+void main_shutdown(void) {
     log_debug("Killing self with TERM signal");
     kill(controlled, SIGTERM);
 }

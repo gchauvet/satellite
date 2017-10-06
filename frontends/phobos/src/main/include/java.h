@@ -27,27 +27,27 @@ __APXBEGIN_DECLS
 #define     APX_JVM_DESTROY 0x00000001
 
 typedef struct {
-    LPCSTR      szClassPath;
-    LPCVOID     lpOptions;
-    DWORD       dwMs;
-    DWORD       dwMx;
-    DWORD       dwSs;
-    LPCSTR      szJarName;
-    LPCVOID     lpArguments;
-    BOOL        setErrorOrOut;
-    LPCWSTR     szStdErrFilename;
-    LPCWSTR     szStdOutFilename;
-    LPCWSTR     szLibraryPath;
-    DWORD       bJniVfprintf;
-    LPVOID      failed;
-    LPVOID      shutdown;
+    LPCSTR szClassPath;
+    LPCVOID lpOptions;
+    DWORD dwMs;
+    DWORD dwMx;
+    DWORD dwSs;
+    LPCSTR szJarName;
+    LPCVOID lpArguments;
+    BOOL setErrorOrOut;
+    LPCWSTR szStdErrFilename;
+    LPCWSTR szStdOutFilename;
+    LPCWSTR szLibraryPath;
+    DWORD bJniVfprintf;
+    LPVOID failed;
+    LPVOID shutdown;
 } APXJAVA_INIT, *LAPXJAVA_INIT;
 
-extern APXHANDLE   apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath);
+extern APXHANDLE apxCreateJava(APXHANDLE hPool, LPCWSTR szJvmPath);
 
-extern BOOL        apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options);
+extern BOOL apxJavaInit(APXHANDLE instance, LAPXJAVA_INIT options);
 
-extern BOOL        apxJavaCall(APXHANDLE instance, LPCSTR szMethod);
+extern BOOL apxJavaCall(APXHANDLE instance, LPCSTR szMethod);
 
 __APXEND_DECLS
 

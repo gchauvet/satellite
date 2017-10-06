@@ -15,7 +15,7 @@
  * 
  * Contributed by Guillaume Chauvet <gchauvet@zatarox.com> 08 Apr 2017
  */
- 
+
 #ifndef _HANDLES_H_INCLUDED_
 #define _HANDLES_H_INCLUDED_
 
@@ -27,8 +27,8 @@ __APXBEGIN_DECLS
         (h) = NULL;                                     \
     }
 
-typedef struct stAPXHANDLE  stAPXHANDLE;
-typedef stAPXHANDLE*        APXHANDLE;
+typedef struct stAPXHANDLE stAPXHANDLE;
+typedef stAPXHANDLE* APXHANDLE;
 
 /**
  * Alignment macros
@@ -41,10 +41,10 @@ typedef stAPXHANDLE*        APXHANDLE;
 /** Default alignment */
 #define APX_ALIGN_DEFAULT(size) APX_ALIGN(size, 16)
 
- 
+
 /** Handle callback function prototype */
-typedef BOOL (*LPAPXFNCALLBACK)(APXHANDLE hObject, UINT uMsg,
-                                WPARAM wParam, LPARAM lParam);
+typedef BOOL(*LPAPXFNCALLBACK)(APXHANDLE hObject, UINT uMsg,
+        WPARAM wParam, LPARAM lParam);
 
 #if _MSC_VER >= 1300
 #define APXHANDLE_INVALID               ((void *)0xdeadbeefLL)
@@ -79,18 +79,18 @@ typedef BOOL (*LPAPXFNCALLBACK)(APXHANDLE hObject, UINT uMsg,
 /** Initialize the Handle manager
  *  reference counted
  */
-extern BOOL        apxHandleManagerInitialize();
+extern BOOL apxHandleManagerInitialize();
 /** Destroys the Handle manager
  *  reference counted
  */
-extern BOOL        apxHandleManagerDestroy();
+extern BOOL apxHandleManagerDestroy();
 /** Create the memory pool
  * param: hParent   parent pool or NULL to use the system pool
  *        dwOptions OR'd flags: APXHANDLE_HAS_HEAP,
  *                              APXHANDLE_HAS_LOCK
  *                              APXHANDLE_OWNS_LOCK
- */                 
-extern APXHANDLE   apxPoolCreate(APXHANDLE hParent, DWORD dwOptions);
+ */
+extern APXHANDLE apxPoolCreate(APXHANDLE hParent, DWORD dwOptions);
 /** Create the memory pool
  * param: hPpool    pool to allocate from or NULL for system pool
  *        dwOptions OR'd flags: see APXHANDLE_TYPE_ and APXHANDLE_HAS_
@@ -99,35 +99,35 @@ extern APXHANDLE   apxPoolCreate(APXHANDLE hParent, DWORD dwOptions);
  *        dwDataSize extra pool user data size, combined with options
  *                   the lpData is copied to the internal storage;   
  *        fnCallback Optional handle callback function
- */                 
-extern APXHANDLE   apxHandleCreate(APXHANDLE hPool, DWORD dwOptions,
-                            LPVOID lpData, DWORD  dwDataSize,
-                            LPAPXFNCALLBACK fnCallback);
+ */
+extern APXHANDLE apxHandleCreate(APXHANDLE hPool, DWORD dwOptions,
+        LPVOID lpData, DWORD dwDataSize,
+        LPAPXFNCALLBACK fnCallback);
 /** Close the handle
  *  Calls the callback function and frees the memory
  */
-extern BOOL        apxCloseHandle(APXHANDLE hObject);
+extern BOOL apxCloseHandle(APXHANDLE hObject);
 
 /** General pool memory allocation functions
  */
-extern LPVOID      apxPoolAlloc(APXHANDLE hPool, DWORD dwSize);
-extern LPVOID      apxPoolCalloc(APXHANDLE hPool, DWORD dwSize);
-extern LPVOID      apxPoolRealloc(APXHANDLE hPool, LPVOID lpMem, DWORD dwNewSize);
-extern LPTSTR      apxPoolStrdup(APXHANDLE hPool, LPCTSTR szSource);
+extern LPVOID apxPoolAlloc(APXHANDLE hPool, DWORD dwSize);
+extern LPVOID apxPoolCalloc(APXHANDLE hPool, DWORD dwSize);
+extern LPVOID apxPoolRealloc(APXHANDLE hPool, LPVOID lpMem, DWORD dwNewSize);
+extern LPTSTR apxPoolStrdup(APXHANDLE hPool, LPCTSTR szSource);
 
 /** General system pool memory allocation functions
  */
 
-extern LPVOID      apxAlloc(DWORD dwSize);
-extern LPVOID      apxCalloc(DWORD dwSize);
-extern LPVOID      apxRealloc(LPVOID lpMem, DWORD dwNewSize);
+extern LPVOID apxAlloc(DWORD dwSize);
+extern LPVOID apxCalloc(DWORD dwSize);
+extern LPVOID apxRealloc(LPVOID lpMem, DWORD dwNewSize);
 
-extern LPSTR       apxStrdupA(LPCSTR szSource);
-extern LPWSTR      apxStrdupW(LPCWSTR szSource);
-extern LPSTR       apxPoolStrdupA(APXHANDLE hPool, LPCSTR szSource);
-extern LPWSTR      apxPoolStrdupW(APXHANDLE hPool, LPCWSTR szSource);
+extern LPSTR apxStrdupA(LPCSTR szSource);
+extern LPWSTR apxStrdupW(LPCWSTR szSource);
+extern LPSTR apxPoolStrdupA(APXHANDLE hPool, LPCSTR szSource);
+extern LPWSTR apxPoolStrdupW(APXHANDLE hPool, LPCWSTR szSource);
 
-extern LPWSTR      apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource);
+extern LPWSTR apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource);
 
 #define     apxPoolWStrdupW apxPoolStrdupW
 
@@ -149,7 +149,7 @@ extern LPWSTR      apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource);
 /** Free the allocated memory
  * It will call te correct pool if the address is valid
  */
-extern VOID        apxFree(LPVOID lpMem);
+extern VOID apxFree(LPVOID lpMem);
 
 __APXEND_DECLS
 

@@ -50,68 +50,97 @@ typedef struct APX_STDWRAP {
     LPCWSTR szLogPath;
     LPCWSTR szStdOutFilename;
     LPCWSTR szStdErrFilename;
-    FILE   *fpStdOutFile;
-    FILE   *fpStdErrFile;
+    FILE *fpStdOutFile;
+    FILE *fpStdErrFile;
 } APX_STDWRAP;
 
 /* Use static variables instead of #defines */
-static LPCWSTR  BPSRV_AUTO        = L"auto";
-static LPCWSTR  BPSRV_MANUAL      = L"manual";
-static LPCWSTR  BPSRV_SIGNAL      = L"SIGNAL";
-static LPCWSTR  STYPE_INTERACTIVE = L"interactive";
+static LPCWSTR BPSRV_AUTO = L"auto";
+static LPCWSTR BPSRV_MANUAL = L"manual";
+static LPCWSTR BPSRV_SIGNAL = L"SIGNAL";
+static LPCWSTR STYPE_INTERACTIVE = L"interactive";
 
-static LPWSTR       _service_name = NULL;
-static DWORD        timeout = 0;
+static LPWSTR _service_name = NULL;
+static DWORD timeout = 0;
 
 /* Allowed commands */
 static LPCWSTR _commands[] = {
-    L"launch",     /* 1 Run Service */
-    L"update",      /* 2 Update Service parameters */
-    L"install",     /* 3 Install Service */
-    L"delete",      /* 4 Delete Service */
-    L"help",        /* 5 Help */
-    L"version",     /* 6 Version */
+    L"launch", /* 1 Run Service */
+    L"update", /* 2 Update Service parameters */
+    L"install", /* 3 Install Service */
+    L"delete", /* 4 Delete Service */
+    L"help", /* 5 Help */
+    L"version", /* 6 Version */
     NULL
 };
 
 /* Allowed parameters */
 static APXCMDLINEOPT _options[] = {
 
-/* 0  */    { L"Description",       L"Description",     NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
-/* 1  */    { L"DisplayName",       L"DisplayName",     NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
-/* 2  */    { L"Install",           L"ImagePath",       NULL,           APXCMDOPT_STE | APXCMDOPT_SRV, NULL, 0},
-/* 3  */    { L"ServiceUser",       L"ServiceUser",     NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
-/* 4  */    { L"ServicePassword",   L"ServicePassword", NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
-/* 5  */    { L"Startup",           L"Startup",         NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
-/* 6  */    { L"Type",              L"Type",            NULL,           APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 0  */
+    { L"Description", L"Description", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 1  */
+    { L"DisplayName", L"DisplayName", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 2  */
+    { L"Install", L"ImagePath", NULL, APXCMDOPT_STE | APXCMDOPT_SRV, NULL, 0},
+    /* 3  */
+    { L"ServiceUser", L"ServiceUser", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 4  */
+    { L"ServicePassword", L"ServicePassword", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 5  */
+    { L"Startup", L"Startup", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
+    /* 6  */
+    { L"Type", L"Type", NULL, APXCMDOPT_STR | APXCMDOPT_SRV, NULL, 0},
 
-/* 7  */    { L"DependsOn",         L"DependsOn",       NULL,           APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 8  */    { L"Environment",       L"Environment",     NULL,           APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 9  */    { L"User",              L"User",            NULL,           APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 10 */    { L"Password",          L"Password",        NULL,           APXCMDOPT_BIN | APXCMDOPT_REG, NULL, 0},
-/* 11 */    { L"LibraryPath",       L"LibraryPath",     NULL,           APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 7  */
+    { L"DependsOn", L"DependsOn", NULL, APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+    /* 8  */
+    { L"Environment", L"Environment", NULL, APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+    /* 9  */
+    { L"User", L"User", NULL, APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+    /* 10 */
+    { L"Password", L"Password", NULL, APXCMDOPT_BIN | APXCMDOPT_REG, NULL, 0},
+    /* 11 */
+    { L"LibraryPath", L"LibraryPath", NULL, APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
 
-/* 12 */    { L"Home",              L"Home",            L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 13 */    { L"JvmOptions",        L"Options",         L"Java",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
-/* 14 */    { L"Classpath",         L"Classpath",       L"Java",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 15 */    { L"JvmMs",             L"JvmMs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 16 */    { L"JvmMx",             L"JvmMx",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 17 */    { L"JvmSs",             L"JvmSs",           L"Java",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+    /* 12 */
+    { L"Home", L"Home", L"Java", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 13 */
+    { L"JvmOptions", L"Options", L"Java", APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+    /* 14 */
+    { L"Classpath", L"Classpath", L"Java", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 15 */
+    { L"JvmMs", L"JvmMs", L"Java", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+    /* 16 */
+    { L"JvmMx", L"JvmMx", L"Java", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+    /* 17 */
+    { L"JvmSs", L"JvmSs", L"Java", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
 
-/* 18 */    { L"StopTimeout",       L"Timeout",         L"Conf",        APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-/* 19 */    { L"StartPath",         L"WorkingPath",     L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 20 */    { L"MainJar",           L"MainJar",         L"Conf",        APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 21 */    { L"Arguments",         L"Params",          L"Conf",        APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
+    /* 18 */
+    { L"StopTimeout", L"Timeout", L"Conf", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+    /* 19 */
+    { L"StartPath", L"WorkingPath", L"Conf", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 20 */
+    { L"MainJar", L"MainJar", L"Conf", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 21 */
+    { L"Arguments", L"Params", L"Conf", APXCMDOPT_MSZ | APXCMDOPT_REG, NULL, 0},
 
-/* 22 */    { L"LogPath",           L"Path",            L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 23 */    { L"LogPrefix",         L"Prefix",          L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 24 */    { L"LogLevel",          L"Level",           L"Log",         APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
-/* 25 */    { L"StdError",          L"StdError",        L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 26 */    { L"StdOutput",         L"StdOutput",       L"Log",         APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
-/* 27 */    { L"LogJniMessages",    L"LogJniMessages",  L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
-/* 28 */    { L"Rotate",            L"Rotate",          L"Log",         APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
-            /* NULL terminate the array */
-            { NULL }
+    /* 22 */
+    { L"LogPath", L"Path", L"Log", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 23 */
+    { L"LogPrefix", L"Prefix", L"Log", APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+    /* 24 */
+    { L"LogLevel", L"Level", L"Log", APXCMDOPT_STR | APXCMDOPT_REG, NULL, 0},
+    /* 25 */
+    { L"StdError", L"StdError", L"Log", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 26 */
+    { L"StdOutput", L"StdOutput", L"Log", APXCMDOPT_STE | APXCMDOPT_REG, NULL, 0},
+    /* 27 */
+    { L"LogJniMessages", L"LogJniMessages", L"Log", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 1},
+    /* 28 */
+    { L"Rotate", L"Rotate", L"Log", APXCMDOPT_INT | APXCMDOPT_REG, NULL, 0},
+    /* NULL terminate the array */
+    { NULL}
 };
 
 #define GET_OPT_V(x)  _options[x].szValue
@@ -163,31 +192,30 @@ static APXCMDLINEOPT _options[] = {
 #define SO_JNIVFPRINTF      GET_OPT_I(27)
 #define SO_LOGROTATE        GET_OPT_I(28)
 
-static SERVICE_STATUS        _service_status;
+static SERVICE_STATUS _service_status;
 static SERVICE_STATUS_HANDLE _service_status_handle = NULL;
 /* Set if launched by SCM   */
-static BOOL                  _service_mode = FALSE;
+static BOOL _service_mode = FALSE;
 /* Global variables and objects */
-static APXHANDLE    gPool;
-static APXHANDLE    gWorker;
-static APX_STDWRAP  gStdwrap;           /* stdio/stderr redirection */
-static int          gExitval;
-static LPWSTR       gStartPath;
+static APXHANDLE gPool;
+static APXHANDLE gWorker;
+static APX_STDWRAP gStdwrap; /* stdio/stderr redirection */
+static int gExitval;
+static LPWSTR gStartPath;
 
-static LPWSTR   _jni_jvmpath              = NULL;   /* Path to jvm dll */
-static LPSTR    _jni_jvmoptions           = NULL;   /* Path to jvm options */
+static LPWSTR _jni_jvmpath = NULL; /* Path to jvm dll */
+static LPSTR _jni_jvmoptions = NULL; /* Path to jvm options */
 
-static LPSTR    _jni_classpath            = NULL;
-static LPSTR    _jni_mainjar              = NULL;
-static LPCWSTR  _jni_rparam               = NULL;    /* Startup  arguments */
+static LPSTR _jni_classpath = NULL;
+static LPSTR _jni_mainjar = NULL;
+static LPCWSTR _jni_rparam = NULL; /* Startup  arguments */
 
 /* redirect console stdout/stderr to files
  * so that java messages can get logged
  * If stderrfile is not specified it will
  * go to stdoutfile.
  */
-static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
-{
+static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline) {
     BOOL aErr = FALSE;
     BOOL aOut = FALSE;
 
@@ -202,10 +230,10 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
             wcsncat(lsn, L"-stdout", 1020);
             CharLower(lsn);
             lpWrapper->szStdOutFilename = apxLogFile(gPool,
-                                                     lpWrapper->szLogPath,
-                                                     lsn,
-                                                     NULL, TRUE,
-                                                     SO_LOGROTATE);
+                    lpWrapper->szLogPath,
+                    lsn,
+                    NULL, TRUE,
+                    SO_LOGROTATE);
         }
         /* Delete the file if not in append mode
          * XXX: See if we can use the params instead of that.
@@ -216,8 +244,7 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
             _dup2(_fileno(lpWrapper->fpStdOutFile), 1);
             *stdout = *lpWrapper->fpStdOutFile;
             setvbuf(stdout, NULL, _IONBF, 0);
-        }
-        else
+        } else
             lpWrapper->szStdOutFilename = NULL;
     }
     if (lpWrapper->szStdErrFilename) {
@@ -228,33 +255,30 @@ static BOOL redirectStdStreams(APX_STDWRAP *lpWrapper, LPAPXCMDLINE lpCmdline)
             wcsncat(lsn, L"-stderr", 1020);
             CharLower(lsn);
             lpWrapper->szStdErrFilename = apxLogFile(gPool,
-                                                     lpWrapper->szLogPath,
-                                                     lsn,
-                                                     NULL, TRUE,
-                                                     SO_LOGROTATE);
+                    lpWrapper->szLogPath,
+                    lsn,
+                    NULL, TRUE,
+                    SO_LOGROTATE);
         }
         if (!aErr)
             DeleteFileW(lpWrapper->szStdErrFilename);
         if ((lpWrapper->fpStdErrFile = _wfopen(lpWrapper->szStdErrFilename,
-                                              L"a"))) {
+                L"a"))) {
             _dup2(_fileno(lpWrapper->fpStdErrFile), 2);
             *stderr = *lpWrapper->fpStdErrFile;
             setvbuf(stderr, NULL, _IONBF, 0);
-        }
-        else
+        } else
             lpWrapper->szStdOutFilename = NULL;
-    }
-    else if (lpWrapper->fpStdOutFile) {
+    } else if (lpWrapper->fpStdOutFile) {
         _dup2(_fileno(lpWrapper->fpStdOutFile), 2);
         *stderr = *lpWrapper->fpStdOutFile;
-         setvbuf(stderr, NULL, _IONBF, 0);
+        setvbuf(stderr, NULL, _IONBF, 0);
     }
     return TRUE;
 }
 
 /* Debugging functions */
-static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
-{
+static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp) {
     int i = 0;
     fwprintf(stderr, L"Usage:\n\t%s command [ServiceName] [--options]\n", lpCmdline->szExecutable);
     fwprintf(stderr, L"\nCommands:\n");
@@ -272,17 +296,15 @@ static void printUsage(LPAPXCMDLINE lpCmdline, BOOL isHelp)
     }
 }
 
-static void printVersion(void)
-{
-    fwprintf(stderr, L"JSR-96 Service Wrapper version %u.%u.%u/Win%d (%S)\n", PRG_VERSION_MAJOR,PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
+static void printVersion(void) {
+    fwprintf(stderr, L"JSR-96 Service Wrapper version %u.%u.%u/Win%d (%S)\n", PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS, __DATE__);
 }
 
-static void setInprocEnvironment()
-{
+static void setInprocEnvironment() {
     LPWSTR p, e;
 
     if (!SO_ENVIRONMENT)
-        return;    /* Nothing to do */
+        return; /* Nothing to do */
 
     for (p = SO_ENVIRONMENT; *p; p++) {
         e = apxExpandStrW(gPool, p);
@@ -296,8 +318,7 @@ static void setInprocEnvironment()
 /* Load the configuration from Registry
  * loads only nonspecified items
  */
-static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
-{
+static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline) {
     APXHANDLE hRegistry;
     int i = 0;
 
@@ -308,13 +329,13 @@ static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
     }
     SetLastError(ERROR_SUCCESS);
     hRegistry = apxCreateRegistryW(gPool, KEY_READ | KREG_WOW6432,
-                                   PRG_REGROOT,
-                                   lpCmdline->szApplication,
-                                   APXREG_SOFTWARE | APXREG_SERVICE);
+            PRG_REGROOT,
+            lpCmdline->szApplication,
+            APXREG_SOFTWARE | APXREG_SERVICE);
     if (IS_INVALID_HANDLE(hRegistry)) {
         if (GetLastError() == ERROR_FILE_NOT_FOUND)
             apxLogWrite(APXLOG_MARK_WARN "The system cannot find the Registry key for service '%S'",
-                        lpCmdline->szApplication);
+                lpCmdline->szApplication);
         else
             apxLogWrite(APXLOG_MARK_SYSERR);
         return FALSE;
@@ -327,9 +348,9 @@ static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
         if (!(_options[i].dwType & APXCMDOPT_FOUND)) {
             if (_options[i].dwType & APXCMDOPT_STR) {
                 _options[i].szValue = apxRegistryGetStringW(hRegistry,
-                                                            dwFrom,
-                                                            _options[i].szSubkey,
-                                                            _options[i].szRegistry);
+                        dwFrom,
+                        _options[i].szSubkey,
+                        _options[i].szRegistry);
                 /* Expand environment variables */
                 if (_options[i].szValue && (_options[i].dwType & APXCMDOPT_STE)) {
                     LPWSTR exp = apxExpandStrW(gPool, _options[i].szValue);
@@ -337,34 +358,31 @@ static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
                         apxFree(_options[i].szValue);
                     _options[i].szValue = exp;
                 }
-            }
-            else if (_options[i].dwType & APXCMDOPT_INT) {
+            } else if (_options[i].dwType & APXCMDOPT_INT) {
                 _options[i].dwValue = apxRegistryGetNumberW(hRegistry,
-                                                            dwFrom,
-                                                            _options[i].szSubkey,
-                                                            _options[i].szRegistry);
-            }
-            else if (_options[i].dwType & APXCMDOPT_MSZ) {
+                        dwFrom,
+                        _options[i].szSubkey,
+                        _options[i].szRegistry);
+            } else if (_options[i].dwType & APXCMDOPT_MSZ) {
                 _options[i].szValue = apxRegistryGetMzStrW(hRegistry,
-                                                           dwFrom,
-                                                           _options[i].szSubkey,
-                                                           _options[i].szRegistry,
-                                                           NULL,
-                                                           &(_options[i].dwValue));
+                        dwFrom,
+                        _options[i].szSubkey,
+                        _options[i].szRegistry,
+                        NULL,
+                        &(_options[i].dwValue));
             }
-        }
-        /* Merge the command line options with registry */
+        }/* Merge the command line options with registry */
         else if (_options[i].dwType & APXCMDOPT_ADD) {
             LPWSTR cv = _options[i].szValue;
             LPWSTR ov = NULL;
             if (_options[i].dwType & APXCMDOPT_MSZ) {
                 ov = apxRegistryGetMzStrW(hRegistry, dwFrom,
-                                          _options[i].szSubkey,
-                                          _options[i].szRegistry,
-                                          NULL,
-                                          &(_options[i].dwValue));
+                        _options[i].szSubkey,
+                        _options[i].szRegistry,
+                        NULL,
+                        &(_options[i].dwValue));
                 _options[i].szValue = apxMultiSzCombine(gPool, ov, cv,
-                                                        &(_options[i].dwValue));
+                        &(_options[i].dwValue));
                 if (ov)
                     apxFree(ov);
             }
@@ -377,40 +395,38 @@ static BOOL loadConfiguration(LPAPXCMDLINE lpCmdline)
 
 /* Save changed configuration to registry
  */
-static BOOL saveConfiguration(LPAPXCMDLINE lpCmdline)
-{
+static BOOL saveConfiguration(LPAPXCMDLINE lpCmdline) {
     APXHANDLE hRegistry;
     int i = 0;
     hRegistry = apxCreateRegistryW(gPool, KEY_WRITE | KREG_WOW6432,
-                                   PRG_REGROOT,
-                                   lpCmdline->szApplication,
-                                   APXREG_SOFTWARE | APXREG_SERVICE);
+            PRG_REGROOT,
+            lpCmdline->szApplication,
+            APXREG_SOFTWARE | APXREG_SERVICE);
     if (IS_INVALID_HANDLE(hRegistry))
         return FALSE;
     /* TODO: Use array size */
     while (_options[i].szName) {
         /* Skip the service params */
         if ((_options[i].dwType & APXCMDOPT_SRV) ||
-            !(_options[i].dwType & APXCMDOPT_FOUND)) {
-                /* Skip non-modified version */
-        }
-        /* Update only modified params */
+                !(_options[i].dwType & APXCMDOPT_FOUND)) {
+            /* Skip non-modified version */
+        }/* Update only modified params */
         else if (_options[i].dwType & APXCMDOPT_STR)
             apxRegistrySetStrW(hRegistry, APXREG_PARAMSOFTWARE,
-                               _options[i].szSubkey,
-                               _options[i].szRegistry,
-                               _options[i].szValue);
+                _options[i].szSubkey,
+                _options[i].szRegistry,
+                _options[i].szValue);
         else if (_options[i].dwType & APXCMDOPT_INT)
             apxRegistrySetNumW(hRegistry, APXREG_PARAMSOFTWARE,
-                               _options[i].szSubkey,
-                               _options[i].szRegistry,
-                               _options[i].dwValue);
+                _options[i].szSubkey,
+                _options[i].szRegistry,
+                _options[i].dwValue);
         else if (_options[i].dwType & APXCMDOPT_MSZ)
             apxRegistrySetMzStrW(hRegistry, APXREG_PARAMSOFTWARE,
-                                 _options[i].szSubkey,
-                                 _options[i].szRegistry,
-                                 _options[i].szValue,
-                                 _options[i].dwValue);
+                _options[i].szSubkey,
+                _options[i].szRegistry,
+                _options[i].szValue,
+                _options[i].dwValue);
         ++i;
     }
     apxCloseHandle(hRegistry);
@@ -418,12 +434,11 @@ static BOOL saveConfiguration(LPAPXCMDLINE lpCmdline)
 }
 
 /* Operations */
-static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
-{
+static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline) {
     APXHANDLE hService;
-    BOOL  rv;
+    BOOL rv;
     DWORD dwStart = SERVICE_DEMAND_START;
-    DWORD dwType  = SERVICE_WIN32_OWN_PROCESS;
+    DWORD dwType = SERVICE_WIN32_OWN_PROCESS;
     WCHAR szImage[SIZ_HUGLEN];
     WCHAR szName[SIZ_BUFLEN];
 
@@ -435,11 +450,11 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     }
     /* Check the startup mode */
     if ((ST_STARTUP & APXCMDOPT_FOUND) &&
-        lstrcmpiW(SO_STARTUP, BPSRV_AUTO) == 0)
+            lstrcmpiW(SO_STARTUP, BPSRV_AUTO) == 0)
         dwStart = SERVICE_AUTO_START;
     /* Check the service type */
     if ((ST_TYPE & APXCMDOPT_FOUND) &&
-        lstrcmpiW(SO_TYPE, STYPE_INTERACTIVE) == 0)
+            lstrcmpiW(SO_TYPE, STYPE_INTERACTIVE) == 0)
         dwType |= SERVICE_INTERACTIVE_PROCESS;
 
     /* Check if --Install is provided */
@@ -448,8 +463,7 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
         wcsncat(szImage, L"\\", SIZ_HUGLEN);
         wcsncat(szImage, lpCmdline->szExecutable, SIZ_HUGLEN);
         wcsncat(szImage, L".exe", SIZ_HUGLEN);
-    }
-    else
+    } else
         wcsncpy(szImage, SO_INSTALL, SIZ_HUGLEN);
     /* Replace not needed quotes */
     apxStrQuoteInplaceW(szImage);
@@ -462,14 +476,14 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     /* Ensure that option gets saved in the registry */
     ST_INSTALL |= APXCMDOPT_FOUND;
     apxLogWrite(APXLOG_MARK_INFO "Service %S name %S", lpCmdline->szApplication,
-                SO_DISPLAYNAME);
+            SO_DISPLAYNAME);
     rv = apxServiceInstall(hService,
-                          lpCmdline->szApplication,
-                          SO_DISPLAYNAME,    /* --DisplayName  */
-                          SO_INSTALL,
-                          SO_DEPENDSON,      /* --DependendsOn */
-                          dwType,
-                          dwStart);
+            lpCmdline->szApplication,
+            SO_DISPLAYNAME, /* --DisplayName  */
+            SO_INSTALL,
+            SO_DEPENDSON, /* --DependendsOn */
+            dwType,
+            dwStart);
     /* Set the --Description */
     if (rv) {
         LPCWSTR sd = NULL;
@@ -478,17 +492,17 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
         if (ST_DESCRIPTION & APXCMDOPT_FOUND) {
             sd = SO_DESCRIPTION;
             apxLogWrite(APXLOG_MARK_DEBUG "Setting service description %S",
-                        SO_DESCRIPTION);
+                    SO_DESCRIPTION);
         }
         if (ST_SUSER & APXCMDOPT_FOUND) {
             su = SO_SUSER;
             apxLogWrite(APXLOG_MARK_DEBUG "Setting service user %S",
-                        SO_SUSER);
+                    SO_SUSER);
         }
         if (ST_SPASSWORD & APXCMDOPT_FOUND) {
             sp = SO_SPASSWORD;
             apxLogWrite(APXLOG_MARK_DEBUG "Setting service password %S",
-                        SO_SPASSWORD);
+                    SO_SPASSWORD);
         }
         apxServiceSetNames(hService, NULL, NULL, sd, su, sp);
     }
@@ -496,19 +510,17 @@ static BOOL docmdInstallService(LPAPXCMDLINE lpCmdline)
     if (rv) {
         saveConfiguration(lpCmdline);
         apxLogWrite(APXLOG_MARK_INFO "Service '%S' installed",
-                    lpCmdline->szApplication);
-    }
-    else
+                lpCmdline->szApplication);
+    } else
         apxLogWrite(APXLOG_MARK_ERROR "Failed installing '%S' service",
-                    lpCmdline->szApplication);
+            lpCmdline->szApplication);
 
     return rv;
 }
 
-static BOOL docmdDeleteService(LPAPXCMDLINE lpCmdline)
-{
+static BOOL docmdDeleteService(LPAPXCMDLINE lpCmdline) {
     APXHANDLE hService;
-    BOOL  rv = FALSE;
+    BOOL rv = FALSE;
 
     apxLogWrite(APXLOG_MARK_INFO "Deleting service...");
     hService = apxCreateService(gPool, SC_MANAGER_CONNECT, FALSE);
@@ -532,21 +544,19 @@ static BOOL docmdDeleteService(LPAPXCMDLINE lpCmdline)
         /* Delete all service registry settings */
         apxDeleteRegistryW(PRG_REGROOT, lpCmdline->szApplication, KREG_WOW6432, TRUE);
         apxLogWrite(APXLOG_MARK_DEBUG "Service '%S' deleted",
-                    lpCmdline->szApplication);
-    }
-    else {
+                lpCmdline->szApplication);
+    } else {
         apxDisplayError(FALSE, NULL, 0, "Unable to delete '%S' service",
-                        lpCmdline->szApplication);
+                lpCmdline->szApplication);
     }
     apxCloseHandle(hService);
     apxLogWrite(APXLOG_MARK_INFO "Delete service finished.");
     return rv;
 }
 
-static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline)
-{
+static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline) {
     APXHANDLE hService;
-    BOOL  rv = TRUE;
+    BOOL rv = TRUE;
 
     apxLogWrite(APXLOG_MARK_INFO "Updating service...");
 
@@ -566,28 +576,27 @@ static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline)
          * Install will fail if there is no minimum parameters required.
          */
         return docmdInstallService(lpCmdline);
-    }
-    else {
+    } else {
         DWORD dwStart = SERVICE_NO_CHANGE;
-        DWORD dwType  = SERVICE_NO_CHANGE;
+        DWORD dwType = SERVICE_NO_CHANGE;
         LPCWSTR su = NULL;
         LPCWSTR sp = NULL;
         if (ST_SUSER & APXCMDOPT_FOUND) {
             su = SO_SUSER;
             apxLogWrite(APXLOG_MARK_DEBUG "Setting service user %S",
-                        SO_SUSER);
+                    SO_SUSER);
         }
         if (ST_SPASSWORD & APXCMDOPT_FOUND) {
             sp = SO_SPASSWORD;
             apxLogWrite(APXLOG_MARK_DEBUG "Setting service password %S",
-                        SO_SPASSWORD);
+                    SO_SPASSWORD);
         }
         rv = (rv && apxServiceSetNames(hService,
-                                       NULL,                /* Never update the ImagePath */
-                                       SO_DISPLAYNAME,
-                                       SO_DESCRIPTION,
-                                       su,
-                                       sp));
+                NULL, /* Never update the ImagePath */
+                SO_DISPLAYNAME,
+                SO_DESCRIPTION,
+                su,
+                sp));
         /* Update the --Startup mode */
         if (ST_STARTUP & APXCMDOPT_FOUND) {
             if (!lstrcmpiW(SO_STARTUP, BPSRV_AUTO))
@@ -600,12 +609,12 @@ static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline)
                 dwType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS;
         }
         rv = (rv && apxServiceSetOptions(hService,
-                                         dwType,
-                                         dwStart,
-                                         SERVICE_NO_CHANGE));
+                dwType,
+                dwStart,
+                SERVICE_NO_CHANGE));
 
         apxLogWrite(APXLOG_MARK_INFO "Service '%S' updated",
-                    lpCmdline->szApplication);
+                lpCmdline->szApplication);
 
         rv = (rv && saveConfiguration(lpCmdline));
     }
@@ -614,70 +623,66 @@ static BOOL docmdUpdateService(LPAPXCMDLINE lpCmdline)
         apxLogWrite(APXLOG_MARK_INFO "Update service finished.");
     else
         apxLogWrite(APXLOG_MARK_INFO "Update service '%S' failed.",
-                                     lpCmdline->szApplication);
+            lpCmdline->szApplication);
     return rv;
 }
-
 
 /* Report the service status to the SCM, including service specific exit code
  */
 static BOOL reportServiceStatusE(DWORD dwCurrentState,
-                                 DWORD dwWin32ExitCode,
-                                 DWORD dwWaitHint,
-                                 DWORD dwServiceSpecificExitCode)
-{
-   static DWORD dwCheckPoint = 1;
-   BOOL fResult = TRUE;
+        DWORD dwWin32ExitCode,
+        DWORD dwWaitHint,
+        DWORD dwServiceSpecificExitCode) {
+    static DWORD dwCheckPoint = 1;
+    BOOL fResult = TRUE;
 
-   apxLogWrite(APXLOG_MARK_DEBUG "reportServiceStatusE: %d, %d, %d, %d", dwCurrentState, dwWin32ExitCode, dwWaitHint, dwServiceSpecificExitCode);
+    apxLogWrite(APXLOG_MARK_DEBUG "reportServiceStatusE: %d, %d, %d, %d", dwCurrentState, dwWin32ExitCode, dwWaitHint, dwServiceSpecificExitCode);
 
-   if (_service_mode && _service_status_handle) {
-       switch(dwCurrentState) {
-           case SERVICE_RUNNING: 
-               _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE | SERVICE_ACCEPT_SHUTDOWN;
-               break;
-            case SERVICE_PAUSED: 
+    if (_service_mode && _service_status_handle) {
+        switch (dwCurrentState) {
+            case SERVICE_RUNNING:
+                _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE | SERVICE_ACCEPT_SHUTDOWN;
+                break;
+            case SERVICE_PAUSED:
                 _service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
                 break;
-           default:
-               _service_status.dwControlsAccepted = 0;
-               break;
-       }
+            default:
+                _service_status.dwControlsAccepted = 0;
+                break;
+        }
 
-       _service_status.dwCurrentState  = dwCurrentState;
-       _service_status.dwWin32ExitCode = dwWin32ExitCode;
-       _service_status.dwWaitHint      = dwWaitHint;
-       _service_status.dwServiceSpecificExitCode = dwServiceSpecificExitCode;
+        _service_status.dwCurrentState = dwCurrentState;
+        _service_status.dwWin32ExitCode = dwWin32ExitCode;
+        _service_status.dwWaitHint = dwWaitHint;
+        _service_status.dwServiceSpecificExitCode = dwServiceSpecificExitCode;
 
-       switch(dwCurrentState) {
-           case SERVICE_RUNNING:
-           case SERVICE_STOPPED:
-           case SERVICE_PAUSED:
+        switch (dwCurrentState) {
+            case SERVICE_RUNNING:
+            case SERVICE_STOPPED:
+            case SERVICE_PAUSED:
                 _service_status.dwCheckPoint = dwCheckPoint++;
                 break;
-           default:
-               _service_status.dwCheckPoint = 0;
-       }
-       fResult = SetServiceStatus(_service_status_handle, &_service_status);
-       if (!fResult) {
-           /* TODO: Deal with error */
-           apxLogWrite(APXLOG_MARK_ERROR "Failed to set service status");
-       }
-   }
-   return fResult;
+            default:
+                _service_status.dwCheckPoint = 0;
+        }
+        fResult = SetServiceStatus(_service_status_handle, &_service_status);
+        if (!fResult) {
+            /* TODO: Deal with error */
+            apxLogWrite(APXLOG_MARK_ERROR "Failed to set service status");
+        }
+    }
+    return fResult;
 }
 
 /* Report the service status to the SCM
  */
 static BOOL reportServiceStatus(DWORD dwCurrentState,
-                                DWORD dwWin32ExitCode,
-                                DWORD dwWaitHint)
-{
+        DWORD dwWin32ExitCode,
+        DWORD dwWaitHint) {
     return reportServiceStatusE(dwCurrentState, dwWin32ExitCode, dwWaitHint, 0);
 }
 
-static BOOL reportServiceStatusStopped(DWORD exitCode)
-{
+static BOOL reportServiceStatusStopped(DWORD exitCode) {
     if (exitCode) {
         return reportServiceStatusE(SERVICE_STOPPED, ERROR_SERVICE_SPECIFIC_ERROR, 0, exitCode);
     } else {
@@ -686,9 +691,8 @@ static BOOL reportServiceStatusStopped(DWORD exitCode)
 }
 
 /* Executed when the service receives stop event */
-static DWORD WINAPI serviceShutdown()
-{
-    DWORD  rv = 0;
+static DWORD WINAPI serviceShutdown() {
+    DWORD rv = 0;
 
     apxLogWrite(APXLOG_MARK_INFO "Shutdown background process...");
     if (apxJavaCall(gWorker, "shutdown") == FALSE) {
@@ -700,42 +704,37 @@ static DWORD WINAPI serviceShutdown()
 }
 
 static
-DWORD callServiceMethod(const char *method)
-{
-    DWORD  rv = 0;
+DWORD callServiceMethod(const char *method) {
+    DWORD rv = 0;
     if (apxJavaCall(gWorker, method) == FALSE) {
         rv = 4;
         apxLogWrite(APXLOG_MARK_ERROR "Failed calling method '%s'", method);
         if (!IS_INVALID_HANDLE(gWorker))
-            apxCloseHandle(gWorker);    /* Close the worker handle */
+            apxCloseHandle(gWorker); /* Close the worker handle */
         gWorker = NULL;
     }
     return rv;
 }
 
-
 /* Executed when the service receives start event */
-static DWORD serviceStart()
-{
+static DWORD serviceStart() {
     DWORD result;
     apxLogWrite(APXLOG_MARK_INFO "Resume background process...");
-    if((result = callServiceMethod("resume")) == 0)
+    if ((result = callServiceMethod("resume")) == 0)
         apxLogWrite(APXLOG_MARK_DEBUG "Background process started");
     return result;
 }
 
 /* Executed when the service receives stop event */
-static DWORD WINAPI serviceStop()
-{
+static DWORD WINAPI serviceStop() {
     DWORD result;
     apxLogWrite(APXLOG_MARK_INFO "Send pause signal to background process...");
-    if((result = callServiceMethod("pause")) == 0)
+    if ((result = callServiceMethod("pause")) == 0)
         apxLogWrite(APXLOG_MARK_DEBUG "Background process stopped.");
     return result;
 }
 
-static void shutdown(JNIEnv *env, jobject source, jboolean reload)
-{
+static void shutdown(JNIEnv *env, jobject source, jboolean reload) {
     apxLogWrite(APXLOG_MARK_DEBUG "Shutdown requested (reload is %s)", reload == JNI_TRUE ? "enabled" : "disabled");
     serviceStop();
     if (reload == TRUE)
@@ -744,28 +743,25 @@ static void shutdown(JNIEnv *env, jobject source, jboolean reload)
         serviceShutdown();
 }
 
-static void failed(JNIEnv *env, jobject source, jstring message)
-{
+static void failed(JNIEnv *env, jobject source, jstring message) {
     if (message) {
         const char *msg = (*env)->GetStringUTFChars(env, message, NULL);
         apxLogWrite(APXLOG_MARK_ERROR "Failed %s", msg ? msg : "(null)");
         if (msg)
             (*env)->ReleaseStringUTFChars(env, message, msg);
-    }
-    else
+    } else
         apxLogWrite(APXLOG_MARK_ERROR "Failed requested");
     serviceStop();
 }
 
 /* Executed when initialize the service */
-static int serviceInit()
-{
-    DWORD  rv = 0;
+static int serviceInit() {
+    DWORD rv = 0;
     FILETIME fts;
-    
+
     if (!IS_INVALID_HANDLE(gWorker)) {
         apxLogWrite(APXLOG_MARK_INFO "Worker is not defined");
-        return TRUE;    /* Nothing to do */
+        return TRUE; /* Nothing to do */
     }
     GetSystemTimeAsFileTime(&fts);
     if (IS_EMPTY_STRING(SO_STARTPATH))
@@ -776,15 +772,15 @@ static int serviceInit()
     }
     if (IS_VALID_STRING(SO_LIBPATH)) {
         /* Add LibraryPath to the PATH */
-       apxAddToPathW(gPool, SO_LIBPATH);
+        apxAddToPathW(gPool, SO_LIBPATH);
     }
-    
+
     timeout = SO_STOPTIMEOUT * 1000;
     if (timeout > 0x7FFFFFFF)
-        timeout = INFINITE;     /* If the timeout was '-1' wait forever */
+        timeout = INFINITE; /* If the timeout was '-1' wait forever */
     if (!timeout)
-        timeout = 5 * 60 * 1000;   /* Use the 5 minute default shutdown */
-    
+        timeout = 5 * 60 * 1000; /* Use the 5 minute default shutdown */
+
     /* Set the environment using putenv, so JVM can use it */
     setInprocEnvironment();
     /* Create the JVM global worker */
@@ -792,23 +788,23 @@ static int serviceInit()
     if (IS_INVALID_HANDLE(gWorker)) {
         apxLogWrite(APXLOG_MARK_ERROR "Failed to create a JVM instance");
         rv = 3;
-    } else{
+    } else {
         APXJAVA_INIT gArgs;
 
         // Start init entry point
-        gArgs.szJarName        = _jni_mainjar;
-        gArgs.szClassPath      = _jni_classpath;
-        gArgs.lpOptions        = _jni_jvmoptions;
-        gArgs.lpArguments      = _jni_rparam;
-        gArgs.dwMs             = SO_JVMMS;
-        gArgs.dwMx             = SO_JVMMX;
-        gArgs.dwSs             = SO_JVMSS;
+        gArgs.szJarName = _jni_mainjar;
+        gArgs.szClassPath = _jni_classpath;
+        gArgs.lpOptions = _jni_jvmoptions;
+        gArgs.lpArguments = _jni_rparam;
+        gArgs.dwMs = SO_JVMMS;
+        gArgs.dwMx = SO_JVMMX;
+        gArgs.dwSs = SO_JVMSS;
         gArgs.szStdErrFilename = gStdwrap.szStdErrFilename;
         gArgs.szStdOutFilename = gStdwrap.szStdOutFilename;
-        gArgs.szLibraryPath    = SO_LIBPATH;
-        gArgs.bJniVfprintf     = SO_JNIVFPRINTF;
-        gArgs.failed           = &failed;
-        gArgs.shutdown         = &shutdown;
+        gArgs.szLibraryPath = SO_LIBPATH;
+        gArgs.bJniVfprintf = SO_JNIVFPRINTF;
+        gArgs.failed = &failed;
+        gArgs.shutdown = &shutdown;
 
         if (!apxJavaInit(gWorker, &gArgs)) {
             apxLogWrite(APXLOG_MARK_ERROR "Failed connecting JVM");
@@ -816,14 +812,14 @@ static int serviceInit()
         } else {
             FILETIME fte;
             ULARGE_INTEGER s, e;
-            DWORD    nms;
+            DWORD nms;
 
             GetSystemTimeAsFileTime(&fte);
-            s.LowPart  = fts.dwLowDateTime;
+            s.LowPart = fts.dwLowDateTime;
             s.HighPart = fts.dwHighDateTime;
-            e.LowPart  = fte.dwLowDateTime;
+            e.LowPart = fte.dwLowDateTime;
             e.HighPart = fte.dwHighDateTime;
-            nms = (DWORD)((e.QuadPart - s.QuadPart) / 10000);
+            nms = (DWORD) ((e.QuadPart - s.QuadPart) / 10000);
             apxLogWrite(APXLOG_MARK_INFO "Service started in %d ms.", nms);
         }
     }
@@ -833,8 +829,7 @@ static int serviceInit()
 /* Service control handler
  */
 static
-void WINAPI service_ctrl_handler(DWORD dwCtrlCode)
-{
+void WINAPI service_ctrl_handler(DWORD dwCtrlCode) {
     switch (dwCtrlCode) {
         case SERVICE_CONTROL_INTERROGATE:
             reportServiceStatus(_service_status.dwCurrentState, _service_status.dwWin32ExitCode, _service_status.dwWaitHint);
@@ -863,19 +858,18 @@ perform_stop:
             apxLogWrite(APXLOG_MARK_INFO "Service SHUTDOWN signalled");
             serviceShutdown();
             break;
-   }
+    }
 }
 
 /* Main service execution loop */
-void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
-{
+void WINAPI serviceMain(DWORD argc, LPTSTR *argv) {
     DWORD rc = 0;
-    _service_status.dwServiceType      = SERVICE_WIN32_OWN_PROCESS;
-    _service_status.dwCurrentState     = SERVICE_START_PENDING;
+    _service_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    _service_status.dwCurrentState = SERVICE_START_PENDING;
     _service_status.dwControlsAccepted = SERVICE_CONTROL_INTERROGATE;
-    _service_status.dwWin32ExitCode    = 0;
-    _service_status.dwCheckPoint       = 0;
-    _service_status.dwWaitHint         = 0;
+    _service_status.dwWin32ExitCode = 0;
+    _service_status.dwCheckPoint = 0;
+    _service_status.dwWaitHint = 0;
     _service_status.dwServiceSpecificExitCode = 0;
 
     apxLogWrite(APXLOG_MARK_DEBUG "Inside ServiceMain...");
@@ -891,7 +885,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
     const int result = serviceInit();
     if (result == 0) {
         apxLogWrite(APXLOG_MARK_DEBUG "Initialization service finished.");
-        
+
         if (_service_mode) {
             /* Register Service Control handler */
             _service_status_handle = RegisterServiceCtrlHandlerW(_service_name, service_ctrl_handler);
@@ -916,7 +910,7 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
                     else
                         en[i] = towupper(en[i]);
                 }
-                CleanNullACL((void *)sa);
+                CleanNullACL((void *) sa);
             }
             /* Service is started */
             reportServiceStatus(SERVICE_RUNNING, NO_ERROR, 0);
@@ -927,12 +921,11 @@ void WINAPI serviceMain(DWORD argc, LPTSTR *argv)
 }
 
 static
-BOOL docmdRunService(LPAPXCMDLINE lpCmdline)
-{
+BOOL docmdRunService(LPAPXCMDLINE lpCmdline) {
     BOOL rv;
     SERVICE_TABLE_ENTRYW dispatch_table[] = {
-        { lpCmdline->szApplication, (LPSERVICE_MAIN_FUNCTIONW)serviceMain },
-        { NULL, NULL }
+        { lpCmdline->szApplication, (LPSERVICE_MAIN_FUNCTIONW) serviceMain},
+        { NULL, NULL}
     };
     _service_mode = TRUE;
     _service_name = lpCmdline->szApplication;
@@ -940,10 +933,9 @@ BOOL docmdRunService(LPAPXCMDLINE lpCmdline)
     if (StartServiceCtrlDispatcherW(dispatch_table)) {
         apxLogWrite(APXLOG_MARK_INFO "Run service finished.");
         rv = TRUE;
-    }
-    else {
+    } else {
         apxLogWrite(APXLOG_MARK_ERROR "StartServiceCtrlDispatcher for '%S' failed",
-                    lpCmdline->szApplication);
+                lpCmdline->szApplication);
         rv = FALSE;
     }
     return rv;
@@ -959,16 +951,15 @@ static const char *gSzProc[] = {
     NULL
 };
 
-void __cdecl main(int argc, char **argv)
-{
+void __cdecl main(int argc, char **argv) {
     UINT rv = 0;
 
     LPAPXCMDLINE lpCmdline;
-    
+
     apxHandleManagerInitialize();
     /* Create the main Pool */
     gPool = apxPoolCreate(NULL, 0);
-    
+
     /* Parse the command line */
     if ((lpCmdline = apxCmdlineParse(gPool, _options, _commands)) == NULL) {
         apxLogWrite(APXLOG_MARK_ERROR "Invalid command line arguments");
@@ -979,7 +970,7 @@ void __cdecl main(int argc, char **argv)
 
     if (lpCmdline->dwCmdIndex < 5 && lpCmdline->dwCmdIndex != 3) {
         if (!loadConfiguration(lpCmdline) &&
-            lpCmdline->dwCmdIndex < 2) {
+                lpCmdline->dwCmdIndex < 2) {
             apxLogWrite(APXLOG_MARK_ERROR "Load configuration failed");
             rv = 2;
             goto cleanup;
@@ -993,9 +984,9 @@ void __cdecl main(int argc, char **argv)
         apxLogWrite(APXLOG_MARK_DEBUG "Log will rotate each %d seconds.", SO_LOGROTATE);
 
     apxLogWrite(APXLOG_MARK_INFO "Phobos (%u.%u.%u %d-bit) started",
-                PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
+            PRG_VERSION_MAJOR, PRG_VERSION_MINOR, PRG_VERSION_PATCH, PRG_BITS);
 
-    memset(&gStdwrap, 0, sizeof(APX_STDWRAP));
+    memset(&gStdwrap, 0, sizeof (APX_STDWRAP));
     gStartPath = lpCmdline->szExePath;
     gStdwrap.szLogPath = SO_LOGPATH;
     gStdwrap.szStdOutFilename = SO_STDOUTPUT;
@@ -1003,45 +994,46 @@ void __cdecl main(int argc, char **argv)
     redirectStdStreams(&gStdwrap, lpCmdline);
 
     switch (lpCmdline->dwCmdIndex) {
-        case 1: {/* Run Service */
+        case 1:
+        {/* Run Service */
             SYSTEMTIME t;
             GetLocalTime(&t);
             fprintf(stdout, "\n%d-%02d-%02d %02d:%02d:%02d "
-                            "Phobos stdout initialized\n",
-                            t.wYear, t.wMonth, t.wDay,
-                            t.wHour, t.wMinute, t.wSecond);
+                    "Phobos stdout initialized\n",
+                    t.wYear, t.wMonth, t.wDay,
+                    t.wHour, t.wMinute, t.wSecond);
             fprintf(stderr, "\n%d-%02d-%02d %02d:%02d:%02d "
-                            "Phobos stderr initialized\n",
-                            t.wYear, t.wMonth, t.wDay,
-                            t.wHour, t.wMinute, t.wSecond);
+                    "Phobos stderr initialized\n",
+                    t.wYear, t.wMonth, t.wDay,
+                    t.wHour, t.wMinute, t.wSecond);
             if (!docmdRunService(lpCmdline))
                 rv = 2;
         }
-        break;
+            break;
         case 2: /* Update Service parameters */
             if (!docmdUpdateService(lpCmdline))
                 rv = 3;
-        break;
+            break;
         case 3: /* Install Service */
             if (!docmdInstallService(lpCmdline))
                 rv = 4;
-        break;
+            break;
         case 4: /* Delete Service */
             if (!docmdDeleteService(lpCmdline))
                 rv = 5;
-        break;
+            break;
         case 5: /* Print Usage and exit */
             printUsage(lpCmdline, TRUE);
-        break;
+            break;
         case 6: /* Print version and exit */
             printVersion();
-        break;
+            break;
         default:
             /* Unknown command option */
             apxLogWrite(APXLOG_MARK_ERROR "Unknown command line option");
             printUsage(lpCmdline, FALSE);
             rv = 99;
-        break;
+            break;
     }
 
 cleanup:
@@ -1050,14 +1042,13 @@ cleanup:
         if (rv > 0 && rv < 10)
             ix = rv;
         apxLogWrite(APXLOG_MARK_ERROR "Phobos failed "
-                                      "with exit value: %d (Failed to %s)",
-                                      rv, gSzProc[ix]);
+                "with exit value: %d (Failed to %s)",
+                rv, gSzProc[ix]);
         if (ix > 2 && !_service_mode) {
             /* Print something to the user console */
             apxDisplayError(FALSE, NULL, 0, "Failed to %s", gSzProc[ix]);
         }
-    }
-    else
+    } else
         apxLogWrite(APXLOG_MARK_INFO "Phobos finished");
     if (lpCmdline)
         apxCmdlineFree(lpCmdline);

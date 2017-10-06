@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package java.daemon;
+package javax.daemon;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -36,7 +36,7 @@ public final class BackgroundExceptionTest {
         final BackgroundException exception = new BackgroundException("test");
         assertEquals("test", exception.getMessageWithCause());
     }
-    
+
     @Test
     public void getMessageWithCause() {
         final BackgroundException exception = new BackgroundException("test", new IllegalArgumentException("A test"));

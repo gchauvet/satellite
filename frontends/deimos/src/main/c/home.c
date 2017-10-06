@@ -17,8 +17,7 @@
 #include "deimos.h"
 
 /* Check if a path is a directory */
-static bool checkdir(char *path)
-{
+static bool checkdir(char *path) {
     struct stat home;
 
     if (path == NULL)
@@ -31,8 +30,7 @@ static bool checkdir(char *path)
 }
 
 /* Check if a path is a file */
-static bool checkfile(char *path)
-{
+static bool checkfile(char *path) {
     struct stat home;
 
     if (path == NULL)
@@ -45,8 +43,7 @@ static bool checkfile(char *path)
 }
 
 /* Parse a VM configuration file */
-static bool parse(home_data *data)
-{
+static bool parse(home_data *data) {
     FILE *cfgf = fopen(data->cfgf, "r");
     char *ret = NULL, *sp;
     char buf[1024];
@@ -56,7 +53,7 @@ static bool parse(home_data *data)
         return (false);
     }
 
-    data->jvms = (home_jvm **)malloc(256 * sizeof(home_jvm *));
+    data->jvms = (home_jvm **) malloc(256 * sizeof (home_jvm *));
 
     while ((ret = fgets(buf, 1024, cfgf)) != NULL) {
         char *tmp = strchr(ret, '#');
@@ -72,10 +69,9 @@ static bool parse(home_data *data)
         pos = strlen(ret);
         while (pos >= 0) {
             if ((ret[pos] == '\r') || (ret[pos] == '\n') || (ret[pos] == '\t')
-                || (ret[pos] == '\0') || (ret[pos] == ' ')) {
+                    || (ret[pos] == '\0') || (ret[pos] == ' ')) {
                 ret[pos--] = '\0';
-            }
-            else
+            } else
                 break;
         }
         /* Format changed for 1.4 JVMs */
@@ -90,9 +86,8 @@ static bool parse(home_data *data)
             log_debug("Checking library %s", libf);
             if (libf == NULL || !checkfile(libf)) {
                 log_debug("Cannot locate library for VM %s (skipping)", libf);
-            }
-            else {
-                data->jvms[data->jnum] = (home_jvm *)malloc(sizeof(home_jvm));
+            } else {
+                data->jvms[data->jnum] = (home_jvm *) malloc(sizeof (home_jvm));
                 data->jvms[data->jnum]->name = strdup(ret);
                 data->jvms[data->jnum]->libr = libf;
                 data->jnum++;
@@ -104,8 +99,7 @@ static bool parse(home_data *data)
 }
 
 /* Build a Java Home structure for a path */
-static home_data *build(char *path)
-{
+static home_data *build(char *path) {
     home_data *data = NULL;
     char *cfgf = NULL;
 
@@ -124,12 +118,12 @@ static home_data *build(char *path)
         log_debug("Found VM configuration file at %s", cfgf);
     }
 
-    data = (home_data *)malloc(sizeof(home_data));
+    data = (home_data *) malloc(sizeof (home_data));
     data->path = strdup(path);
     data->cfgf = cfgf;
     data->jvms = NULL;
     data->jnum = 0;
-    
+
     /* We don't have a jvm.cfg configuration file, so all we have to do is
        trying to locate the "default" Java Virtual Machine library */
     if (cfgf == NULL) {
@@ -137,8 +131,8 @@ static home_data *build(char *path)
         log_debug("Attempting to locate VM library...");
         cfgf = find_location_jvm_default(path);
         if (checkfile(cfgf) == true) {
-            data->jvms = (home_jvm **)malloc(2 * sizeof(home_jvm *));
-            data->jvms[0] = (home_jvm *)malloc(sizeof(home_jvm));
+            data->jvms = (home_jvm **) malloc(2 * sizeof (home_jvm *));
+            data->jvms[0] = (home_jvm *) malloc(sizeof (home_jvm));
             data->jvms[0]->name = NULL;
             data->jvms[0]->libr = cfgf;
             data->jvms[1] = NULL;
@@ -157,8 +151,7 @@ static home_data *build(char *path)
 }
 
 /* Find the Java Home */
-static home_data *find(char *path)
-{
+static home_data *find(char *path) {
     home_data *data = NULL;
 
     if (path == NULL || *path == '\0' || strcmp(path, "/") == 0) {
@@ -180,8 +173,7 @@ static home_data *find(char *path)
 }
 
 /* Main entry point: locate home and dump structure */
-home_data *home(char *path)
-{
+home_data *home(char *path) {
     home_data *data = find(path);
     int x = 0;
 

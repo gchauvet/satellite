@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package java.daemon.sample;
+package javax.daemon.sample;
 
 import fi.iki.elonen.NanoHTTPD;
 import static fi.iki.elonen.NanoHTTPD.*;
-import java.daemon.*;
+import javax.daemon.*;
 import java.util.Map;
 
 @BackgroundProcessDescription(name = "Foo", description = "A background process sample")

@@ -30,7 +30,7 @@ Writing an independent OS background process become pretty simple. The first ste
 This is the facade of your service. Attention : calls on these methods are synchronous.
 
 ```java
-import java.daemon.*;
+import javax.daemon.*;
 
 @BackgroundProcessDescription(name = "Foo", description = "A background process sample")
 public final class FooBackgroundProcess implements BackgroundProcess {

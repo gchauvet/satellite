@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef _APXWIN_H_INCLUDED_
 #define _APXWIN_H_INCLUDED_
 
@@ -101,97 +101,97 @@
 __APXBEGIN_DECLS
 
 typedef enum {
-        APX_WINVER_UNK =       0,
-        APX_WINVER_UNSUP =     1,
-        APX_WINVER_95 =       10,
-        APX_WINVER_95_B =     11,
-        APX_WINVER_95_OSR2 =  12,
-        APX_WINVER_98 =       14,
-        APX_WINVER_98_SE =    16,
-        APX_WINVER_ME =       18,
+    APX_WINVER_UNK = 0,
+    APX_WINVER_UNSUP = 1,
+    APX_WINVER_95 = 10,
+    APX_WINVER_95_B = 11,
+    APX_WINVER_95_OSR2 = 12,
+    APX_WINVER_98 = 14,
+    APX_WINVER_98_SE = 16,
+    APX_WINVER_ME = 18,
 
-        APX_WINVER_UNICODE =  20, /* Prior versions support only narrow chars */
+    APX_WINVER_UNICODE = 20, /* Prior versions support only narrow chars */
 
-        APX_WINVER_CE_3 =     23, /* CE is an odd beast, not supporting */
-                               /* some pre-NT features, such as the    */
-        APX_WINVER_NT =       30, /* narrow charset APIs (fooA fns), while  */
-        APX_WINVER_NT_3_5 =   35, /* not supporting some NT-family features.  */
-        APX_WINVER_NT_3_51 =  36,
+    APX_WINVER_CE_3 = 23, /* CE is an odd beast, not supporting */
+    /* some pre-NT features, such as the    */
+    APX_WINVER_NT = 30, /* narrow charset APIs (fooA fns), while  */
+    APX_WINVER_NT_3_5 = 35, /* not supporting some NT-family features.  */
+    APX_WINVER_NT_3_51 = 36,
 
-        APX_WINVER_NT_4 =     40,
-        APX_WINVER_NT_4_SP2 = 42,
-        APX_WINVER_NT_4_SP3 = 43,
-        APX_WINVER_NT_4_SP4 = 44,
-        APX_WINVER_NT_4_SP5 = 45,
-        APX_WINVER_NT_4_SP6 = 46,
+    APX_WINVER_NT_4 = 40,
+    APX_WINVER_NT_4_SP2 = 42,
+    APX_WINVER_NT_4_SP3 = 43,
+    APX_WINVER_NT_4_SP4 = 44,
+    APX_WINVER_NT_4_SP5 = 45,
+    APX_WINVER_NT_4_SP6 = 46,
 
-        APX_WINVER_2000 =     50,
-        APX_WINVER_2000_SP1 = 51,
-        APX_WINVER_2000_SP2 = 52,
-        APX_WINVER_XP =       60
+    APX_WINVER_2000 = 50,
+    APX_WINVER_2000_SP1 = 51,
+    APX_WINVER_2000_SP2 = 52,
+    APX_WINVER_XP = 60
 } APX_OSLEVEL;
 
 extern APX_OSLEVEL apxGetOsLevel();
-extern LPWSTR      AsciiToWide(LPCSTR s, LPWSTR ws);
-extern LPSTR       WideToAscii(LPCWSTR ws, LPSTR s);
-extern LPSTR       WideToANSI(LPCWSTR ws);
-extern LPSTR       MzWideToANSI(LPCWSTR ws);
+extern LPWSTR AsciiToWide(LPCSTR s, LPWSTR ws);
+extern LPSTR WideToAscii(LPCWSTR ws, LPSTR s);
+extern LPSTR WideToANSI(LPCWSTR ws);
+extern LPSTR MzWideToANSI(LPCWSTR ws);
 
 typedef struct APXMULTISZ APXMULTISZ;
-typedef APXMULTISZ*       LPAPXMULTISZ;
+typedef APXMULTISZ* LPAPXMULTISZ;
 
-extern DWORD   apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray);
-extern DWORD   apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray);
-extern LPWSTR  apxMultiSzCombine(APXHANDLE hPool, LPCWSTR lpStrA, LPCWSTR lpStrB,
-                          LPDWORD lpdwLength);
+extern DWORD apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray);
+extern DWORD apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray);
+extern LPWSTR apxMultiSzCombine(APXHANDLE hPool, LPCWSTR lpStrA, LPCWSTR lpStrB,
+        LPDWORD lpdwLength);
 
-extern LPAPXMULTISZ    apxMultiSzStrdup(LPCTSTR szSrc);
-extern LPTSTR          apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc);
-extern LPCTSTR         apxMultiSzGet(LPAPXMULTISZ lpmSz);
+extern LPAPXMULTISZ apxMultiSzStrdup(LPCTSTR szSrc);
+extern LPTSTR apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc);
+extern LPCTSTR apxMultiSzGet(LPAPXMULTISZ lpmSz);
 /** Remove the specified character from the string
  * Replacement is done in-place.
  */
-extern LPTSTR          apxStrCharRemove(LPTSTR szString, TCHAR chSkip);
-extern DWORD           apxStrUnQuoteInplaceA(LPSTR szString);
-extern DWORD           apxStrUnQuoteInplaceW(LPWSTR szString);
+extern LPTSTR apxStrCharRemove(LPTSTR szString, TCHAR chSkip);
+extern DWORD apxStrUnQuoteInplaceA(LPSTR szString);
+extern DWORD apxStrUnQuoteInplaceW(LPWSTR szString);
 
-extern BOOL            apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength);
-extern BOOL            apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength);
-extern ULONG           apxStrToul(LPCTSTR szNum);
-extern ULONG           apxStrToulW(LPCWSTR szNum);
-extern ULONG           apxAtoulW(LPCWSTR szNum);
+extern BOOL apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength);
+extern BOOL apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength);
+extern ULONG apxStrToul(LPCTSTR szNum);
+extern ULONG apxStrToulW(LPCWSTR szNum);
+extern ULONG apxAtoulW(LPCWSTR szNum);
 
-extern BOOL            apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff,
-                                    DWORD dwBuffLength);
+extern BOOL apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff,
+        DWORD dwBuffLength);
 
-extern INT             apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase);
-extern INT             apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase);
-extern INT             apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
-                                  WCHAR chSeparator, BOOL bIgnoreCase);
-extern LPSTR           apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs);
-extern void            apxStrQuoteInplaceW(LPWSTR szString);
-extern LPWSTR          apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr);
-extern LPWSTR          apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes);
-extern LPSTR           apxExpandStrA(APXHANDLE hPool, LPCSTR szString);
-extern LPWSTR          apxExpandStrW(APXHANDLE hPool, LPCWSTR szString);
-extern void            apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith);
-extern void            apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith);
-extern BOOL            apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd);
+extern INT apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase);
+extern INT apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase);
+extern INT apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
+        WCHAR chSeparator, BOOL bIgnoreCase);
+extern LPSTR apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs);
+extern void apxStrQuoteInplaceW(LPWSTR szString);
+extern LPWSTR apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr);
+extern LPWSTR apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes);
+extern LPSTR apxExpandStrA(APXHANDLE hPool, LPCSTR szString);
+extern LPWSTR apxExpandStrW(APXHANDLE hPool, LPCWSTR szString);
+extern void apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith);
+extern void apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith);
+extern BOOL apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd);
 
 /*
  * Find the first occurrence of lpFind in lpMem.
  * dwLen:   The length of lpFind
  * dwSize:  The length of lpMem
  */
-extern LPBYTE  ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize);
-extern LPSTR   AplRindexA(LPCSTR lpStr, int ch);
+extern LPBYTE ApcMemSearch(LPCVOID lpMem, LPCVOID lpFind, SIZE_T dwLen, SIZE_T dwSize);
+extern LPSTR AplRindexA(LPCSTR lpStr, int ch);
 
 #define AplMoveMemory   memcpy
 
 extern PSECURITY_ATTRIBUTES GetNullACL();
 extern void CleanNullACL(void *sa);
 
-__APXEND_DECLS  
+__APXEND_DECLS
 
 #endif /* _APXWIN_H_INCLUDED_ */
 

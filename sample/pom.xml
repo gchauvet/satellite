@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.jcp</groupId>
+    <groupId>javax.daemon</groupId>
     <artifactId>jsr-96-sample</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -34,7 +34,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.jcp</includeGroupIds>
+                            <includeGroupIds>javax.daemon</includeGroupIds>
                             <artifactId>jsr-96-frontends</artifactId>
                             <outputDirectory>target</outputDirectory>
                         </configuration>
@@ -60,7 +60,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.jcp</groupId>
+            <groupId>javax.daemon</groupId>
             <artifactId>jsr-96-api</artifactId>
             <version>1.0.1-SNAPSHOT</version>
             <scope>provided</scope>
@@ -75,7 +75,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <daemon.entrypoint>org.jcp.sample.FooDaemon</daemon.entrypoint>
+        <daemon.entrypoint>javax.daemon.sample.FooDaemon</daemon.entrypoint>
     </properties>
     <profiles>
         <profile>
@@ -88,14 +88,14 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>org.jcp</groupId>
+                    <groupId>javax.daemon</groupId>
                     <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.jcp</groupId>
+                    <groupId>javax.daemon</groupId>
                     <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86</classifier>
@@ -113,14 +113,14 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>org.jcp</groupId>
+                    <groupId>javax.daemon</groupId>
                     <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>
                     <type>exe</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.jcp</groupId>
+                    <groupId>javax.daemon</groupId>
                     <artifactId>javad</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <classifier>x86_64</classifier>

@@ -15,90 +15,85 @@
  * 
  * Contributed by Guillaume Chauvet <gchauvet@zatarox.com> 08 Apr 2017
  */
- 
+
 #include "apxwin.h"
 #include "private.h"
 
-typedef struct APXPOOL      APXPOOL;
-typedef APXPOOL*            LPAPXPOOL;
+typedef struct APXPOOL APXPOOL;
+typedef APXPOOL* LPAPXPOOL;
 
 typedef struct ALLOCBLOCK {
-    DWORD       dwSize;
-    APXHANDLE   lpPool;
-    APXMEMWORD  lpAlign;
+    DWORD dwSize;
+    APXHANDLE lpPool;
+    APXMEMWORD lpAlign;
 } ALLOCBLOCK, *LPALLOCBLOCK;
 
 struct APXPOOL {
     TAILQ_HEAD(_lHandles, stAPXHANDLE) lHandles;
-    TAILQ_HEAD(_lPools, stAPXHANDLE)   lPools;
+    TAILQ_HEAD(_lPools, stAPXHANDLE) lPools;
 };
 
-static SYSTEM_INFO      _st_sys_info;
-static APXHANDLE        _st_sys_pool  = NULL;
-static int              _st_sys_init  = 0;
-static LPVOID           _st_sys_page  = NULL;
-LPWSTR                  *_st_sys_argvw = NULL;
-int                     _st_sys_argc  = 0;
+static SYSTEM_INFO _st_sys_info;
+static APXHANDLE _st_sys_pool = NULL;
+static int _st_sys_init = 0;
+static LPVOID _st_sys_page = NULL;
+LPWSTR *_st_sys_argvw = NULL;
+int _st_sys_argc = 0;
 
-static LPVOID __apxPoolAllocCore(APXHANDLE hPool, 
-                                 DWORD dwSize, DWORD dwOptions)
-{
+static LPVOID __apxPoolAllocCore(APXHANDLE hPool,
+        DWORD dwSize, DWORD dwOptions) {
     DWORD dwPhysicalSize;
     LPALLOCBLOCK lpBlock;
-    
+
     if (!hPool)
         hPool = _st_sys_pool;
-    dwPhysicalSize = APX_ALIGN_DEFAULT(dwSize + sizeof(ALLOCBLOCK));
+    dwPhysicalSize = APX_ALIGN_DEFAULT(dwSize + sizeof (ALLOCBLOCK));
     lpBlock = HeapALLOC(hPool->hHeap, dwOptions, dwPhysicalSize);
     lpBlock->dwSize = dwPhysicalSize;
     lpBlock->lpPool = hPool;
 
-    return ((char *)lpBlock + sizeof(ALLOCBLOCK));
+    return ((char *) lpBlock + sizeof (ALLOCBLOCK));
 }
 
 static LPVOID __apxPoolReallocCore(APXHANDLE hPool, LPVOID lpMem,
-                                   DWORD dwSize, DWORD dwOptions)
-{
+        DWORD dwSize, DWORD dwOptions) {
     DWORD dwPhysicalSize;
     LPALLOCBLOCK lpBlock;
     LPALLOCBLOCK lpOrg;
-    
+
     if (!lpMem)
         return __apxPoolAllocCore(hPool, dwSize, dwOptions);
-    lpOrg = (LPALLOCBLOCK)((char *)lpMem - sizeof(ALLOCBLOCK));
+    lpOrg = (LPALLOCBLOCK) ((char *) lpMem - sizeof (ALLOCBLOCK));
     if (!hPool)
         hPool = _st_sys_pool;
     /* Trying to realloc something that isn't valid */
     if (lpOrg->lpPool == APXHANDLE_INVALID ||
-        lpOrg->lpPool != hPool)
+            lpOrg->lpPool != hPool)
         return NULL;
-    dwPhysicalSize = APX_ALIGN_DEFAULT(dwSize + sizeof(ALLOCBLOCK));
+    dwPhysicalSize = APX_ALIGN_DEFAULT(dwSize + sizeof (ALLOCBLOCK));
     lpBlock = HeapREALLOC(hPool->hHeap, dwOptions, lpOrg, dwPhysicalSize);
     lpBlock->dwSize = dwPhysicalSize;
     lpBlock->lpPool = hPool;
 
-    return ((char *)lpBlock + sizeof(ALLOCBLOCK));
+    return ((char *) lpBlock + sizeof (ALLOCBLOCK));
 }
 
-static void __apxPoolFreeCore(LPVOID lpMem)
-{
+static void __apxPoolFreeCore(LPVOID lpMem) {
     APXHANDLE hPool;
-    LPALLOCBLOCK lpBlock = (LPALLOCBLOCK)((char *)lpMem - sizeof(ALLOCBLOCK));
-    
+    LPALLOCBLOCK lpBlock = (LPALLOCBLOCK) ((char *) lpMem - sizeof (ALLOCBLOCK));
+
     if (lpBlock->lpPool != APXHANDLE_INVALID) {
         hPool = lpBlock->lpPool;
         lpBlock->lpPool = APXHANDLE_INVALID;
-    }
-    else
+    } else
         return;
     HeapFREE(hPool->hHeap, 0, lpBlock);
 }
 
 static BOOL __apxPoolCallback(APXHANDLE hObject, UINT uMsg,
-                              WPARAM wParam, LPARAM lParam)
-{
-    LPAPXPOOL  lpPool;
-    APXHANDLE   hCur;
+        WPARAM wParam, LPARAM lParam) {
+    LPAPXPOOL lpPool;
+    APXHANDLE hCur;
     if (hObject->dwType != APXHANDLE_TYPE_POOL)
         return FALSE;
     lpPool = APXHANDLE_DATA(hObject);
@@ -107,10 +102,10 @@ static BOOL __apxPoolCallback(APXHANDLE hObject, UINT uMsg,
     TAILQ_FOREACH(hCur, &lpPool->lPools, queue) {
         __apxPoolCallback(hCur, uMsg, 0, 0);
     }
-    /* call the handles callback */        
-    for(hCur = TAILQ_FIRST(&lpPool->lHandles) ;
-        hCur != NULL ;
-        hCur = TAILQ_FIRST(&lpPool->lHandles)) {
+    /* call the handles callback */
+    for (hCur = TAILQ_FIRST(&lpPool->lHandles);
+            hCur != NULL;
+            hCur = TAILQ_FIRST(&lpPool->lHandles)) {
         apxCloseHandle(hCur);
     }
     /* if we are closing this pool destroy the private Heap */
@@ -118,24 +113,22 @@ static BOOL __apxPoolCallback(APXHANDLE hObject, UINT uMsg,
         if (hObject->dwFlags & APXHANDLE_HAS_HEAP)
             HeapDESTROY(hObject->hHeap);
         hObject->dwSize = 0;
-    }
-    else if (uMsg == WM_CLEAR)
+    } else if (uMsg == WM_CLEAR)
         hObject->dwSize = 0;
 
     return TRUE;
 }
 
 static BOOL __apxHandleCallback(APXHANDLE hObject, UINT uMsg,
-                                WPARAM wParam, LPARAM lParam)
-{
+        WPARAM wParam, LPARAM lParam) {
     BOOL rv = FALSE;
     if (hObject->dwType == APXHANDLE_TYPE_INVALID)
         return FALSE;
     /* Default handler handles only close event */
     if (uMsg != WM_CLOSE)
         return FALSE;
-    if (hObject->dwType == APXHANDLE_TYPE_WINHANDLE && 
-        !(IS_INVALID_HANDLE(hObject->uData.hWinHandle))) {
+    if (hObject->dwType == APXHANDLE_TYPE_WINHANDLE &&
+            !(IS_INVALID_HANDLE(hObject->uData.hWinHandle))) {
         rv = CloseHandle(hObject->uData.hWinHandle);
         hObject->uData.hWinHandle = NULL;
     }
@@ -144,24 +137,23 @@ static BOOL __apxHandleCallback(APXHANDLE hObject, UINT uMsg,
     return rv;
 }
 
-static BOOL __apxCreateSystemPool()
-{
+static BOOL __apxCreateSystemPool() {
     LPAPXPOOL lpPool;
-    HANDLE    hHeap;
+    HANDLE hHeap;
 
     GetSystemInfo(&_st_sys_info);
     /* First create the shared data segment */
     _st_sys_page = VirtualAlloc(NULL, _st_sys_info.dwAllocationGranularity,
-                                MEM_RESERVE, PAGE_NOACCESS);
+            MEM_RESERVE, PAGE_NOACCESS);
     if (!_st_sys_page)
         return FALSE;
     _st_sys_page = VirtualAlloc(_st_sys_page, _st_sys_info.dwAllocationGranularity,
-                                MEM_COMMIT, PAGE_READWRITE);     
+            MEM_COMMIT, PAGE_READWRITE);
 
     /* Create the main Heap */
     hHeap = HeapCREATE(0, _st_sys_info.dwAllocationGranularity, 0);
-    _st_sys_pool = HeapALLOC(hHeap, HEAP_ZERO_MEMORY, 
-                             APX_ALIGN_DEFAULT(APXHANDLE_SZ + sizeof(APXPOOL)));
+    _st_sys_pool = HeapALLOC(hHeap, HEAP_ZERO_MEMORY,
+            APX_ALIGN_DEFAULT(APXHANDLE_SZ + sizeof (APXPOOL)));
     _st_sys_pool->hHeap = hHeap;
     _st_sys_pool->dwType = APXHANDLE_TYPE_INVALID;
     if (IS_INVALID_HANDLE(_st_sys_pool->hHeap))
@@ -171,8 +163,8 @@ static BOOL __apxCreateSystemPool()
     /* Initialize the pool and object lists */
     TAILQ_INIT(&lpPool->lHandles);
     TAILQ_INIT(&lpPool->lPools);
-    _st_sys_pool->dwType  = APXHANDLE_TYPE_POOL;
-    
+    _st_sys_pool->dwType = APXHANDLE_TYPE_POOL;
+
     /** TODO: For each unsupported function make a surrogate */
     _st_sys_argvw = CommandLineToArgvW(GetCommandLineW(), &_st_sys_argc);
 
@@ -180,8 +172,7 @@ static BOOL __apxCreateSystemPool()
 }
 
 BOOL
-apxHandleManagerInitialize()
-{
+apxHandleManagerInitialize() {
     BOOL rv;
     if (_st_sys_init++)
         return TRUE;
@@ -191,8 +182,7 @@ apxHandleManagerInitialize()
 }
 
 BOOL
-apxHandleManagerDestroy()
-{
+apxHandleManagerDestroy() {
     HANDLE hHeap;
 
     if (--_st_sys_init == 0) {
@@ -204,41 +194,39 @@ apxHandleManagerDestroy()
         VirtualFree(_st_sys_page, 0, MEM_RELEASE);
         GlobalFree(_st_sys_argvw);
         _st_sys_argvw = NULL;
-        _st_sys_argc  = 0;
+        _st_sys_argc = 0;
         return TRUE;
     }
-    
+
     return FALSE;
 }
 
 APXHANDLE
-apxPoolCreate(APXHANDLE hParent, DWORD dwOptions)
-{
-    APXHANDLE   hHandle; 
-    LPAPXPOOL   lpPool;
-    HANDLE      hHeap;
+apxPoolCreate(APXHANDLE hParent, DWORD dwOptions) {
+    APXHANDLE hHandle;
+    LPAPXPOOL lpPool;
+    HANDLE hHeap;
 
     if (IS_INVALID_HANDLE(hParent))
         hParent = _st_sys_pool;
     if (hParent->dwType != APXHANDLE_TYPE_POOL) {
         apxLogWrite(APXLOG_MARK_ERROR "Parent Handle type is not POOL %d",
-                    hParent->dwType);
+                hParent->dwType);
         return INVALID_HANDLE_VALUE;
     }
     /* Allocate the handle from the parent */
-    hHandle = __apxPoolAllocCore(hParent, APXHANDLE_SZ + sizeof(APXPOOL),
-                                 HEAP_ZERO_MEMORY);
+    hHandle = __apxPoolAllocCore(hParent, APXHANDLE_SZ + sizeof (APXPOOL),
+            HEAP_ZERO_MEMORY);
 
     if (dwOptions & APXHANDLE_HAS_HEAP) {
         /* Create the private Heap */
         hHeap = HeapCREATE(0, _st_sys_info.dwAllocationGranularity, 0);
         hHandle->dwFlags |= APXHANDLE_HAS_HEAP;
-    }
-    else
+    } else
         hHeap = hParent->hHeap;
     hHandle->hHeap = hHeap;
     hHandle->dwType = APXHANDLE_TYPE_POOL;
-    hHandle->hPool  = hParent;
+    hHandle->hPool = hParent;
     hHandle->fnCallback = __apxPoolCallback;
     lpPool = APXHANDLE_DATA(hHandle);
     TAILQ_INIT(&lpPool->lHandles);
@@ -255,128 +243,111 @@ apxPoolCreate(APXHANDLE hParent, DWORD dwOptions)
 }
 
 LPVOID
-apxPoolAlloc(APXHANDLE hPool, DWORD dwSize)
-{
+apxPoolAlloc(APXHANDLE hPool, DWORD dwSize) {
     if (IS_INVALID_HANDLE(hPool) ||
-        (hPool->dwType != APXHANDLE_TYPE_POOL))
+            (hPool->dwType != APXHANDLE_TYPE_POOL))
         hPool = _st_sys_pool;
     return __apxPoolAllocCore(hPool, dwSize, 0);
 }
 
 LPVOID
-apxPoolCalloc(APXHANDLE hPool, DWORD dwSize)
-{
+apxPoolCalloc(APXHANDLE hPool, DWORD dwSize) {
     if (IS_INVALID_HANDLE(hPool) ||
-        (hPool->dwType != APXHANDLE_TYPE_POOL))
+            (hPool->dwType != APXHANDLE_TYPE_POOL))
         hPool = _st_sys_pool;
     return __apxPoolAllocCore(hPool, dwSize, HEAP_ZERO_MEMORY);
 }
 
 LPVOID
-apxPoolRealloc(APXHANDLE hPool, LPVOID lpMem, DWORD dwNewSize)
-{
+apxPoolRealloc(APXHANDLE hPool, LPVOID lpMem, DWORD dwNewSize) {
     if (IS_INVALID_HANDLE(hPool) ||
-        (hPool->dwType != APXHANDLE_TYPE_POOL))
+            (hPool->dwType != APXHANDLE_TYPE_POOL))
         hPool = _st_sys_pool;
     return __apxPoolReallocCore(hPool, lpMem, dwNewSize, HEAP_ZERO_MEMORY);
 }
 
 LPVOID
-apxAlloc(DWORD dwSize)
-{
+apxAlloc(DWORD dwSize) {
     return __apxPoolAllocCore(_st_sys_pool, dwSize, 0);
 }
 
 LPVOID
-apxCalloc(DWORD dwSize)
-{
+apxCalloc(DWORD dwSize) {
     return __apxPoolAllocCore(_st_sys_pool, dwSize, HEAP_ZERO_MEMORY);
 }
 
 LPVOID
-apxRealloc(LPVOID lpMem, DWORD dwNewSize)
-{
+apxRealloc(LPVOID lpMem, DWORD dwNewSize) {
     return __apxPoolReallocCore(_st_sys_pool, lpMem, dwNewSize, HEAP_ZERO_MEMORY);
 }
 
 VOID
-apxFree(LPVOID lpMem)
-{
+apxFree(LPVOID lpMem) {
     if (lpMem)
         __apxPoolFreeCore(lpMem);
 
 }
 
 LPWSTR
-apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource)
-{
+apxPoolWStrdupA(APXHANDLE hPool, LPCSTR szSource) {
     if (szSource) {
         LPWSTR szDest;
         int cch = MultiByteToWideChar(CP_UTF8, 0, szSource, -1, NULL, 0);
-        szDest = (LPWSTR)apxPoolAlloc(hPool, cch * sizeof(WCHAR));
+        szDest = (LPWSTR) apxPoolAlloc(hPool, cch * sizeof (WCHAR));
         if (!MultiByteToWideChar(CP_UTF8, 0, szSource, -1, szDest, cch)) {
             apxFree(szDest);
             return NULL;
         }
         return szDest;
-    }
-    else
+    } else
         return NULL;
 }
 
-LPWSTR apxWStrdupA(LPCSTR szSource)
-{
+LPWSTR apxWStrdupA(LPCSTR szSource) {
     return apxPoolWStrdupA(_st_sys_pool, szSource);
 }
 
 LPSTR
-apxPoolStrdupA(APXHANDLE hPool, LPCSTR szSource)
-{
+apxPoolStrdupA(APXHANDLE hPool, LPCSTR szSource) {
     if (szSource) {
         LPSTR szDest;
         DWORD l = lstrlenA(szSource);
         szDest = apxPoolAlloc(hPool, l + 1);
         lstrcpyA(szDest, szSource);
         return szDest;
-    }
-    else
+    } else
         return NULL;
 }
 
 LPWSTR
-apxPoolStrdupW(APXHANDLE hPool, LPCWSTR szSource)
-{
+apxPoolStrdupW(APXHANDLE hPool, LPCWSTR szSource) {
     if (szSource) {
         LPWSTR szDest;
         DWORD l = lstrlenW(szSource);
-        szDest = apxPoolAlloc(hPool, (l + 1) * sizeof(WCHAR));
+        szDest = apxPoolAlloc(hPool, (l + 1) * sizeof (WCHAR));
         lstrcpyW(szDest, szSource);
         return szDest;
-    }
-    else
+    } else
         return NULL;
 }
 
 LPSTR
-apxStrdupA(LPCSTR szSource)
-{
+apxStrdupA(LPCSTR szSource) {
     return apxPoolStrdupA(_st_sys_pool, szSource);
 }
 
 LPWSTR
-apxStrdupW(LPCWSTR szSource)
-{
+apxStrdupW(LPCWSTR szSource) {
     return apxPoolStrdupW(_st_sys_pool, szSource);
 }
 
 APXHANDLE
-apxHandleCreate(APXHANDLE hPool, DWORD dwFlags, 
-                LPVOID lpData, DWORD  dwDataSize,
-                LPAPXFNCALLBACK fnCallback)
-{
-    APXHANDLE   hHandle; 
-    LPAPXPOOL   lpPool;
-    
+apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
+        LPVOID lpData, DWORD dwDataSize,
+        LPAPXFNCALLBACK fnCallback) {
+    APXHANDLE hHandle;
+    LPAPXPOOL lpPool;
+
     if (IS_INVALID_HANDLE(hPool))
         hPool = _st_sys_pool;
     if (hPool->dwType != APXHANDLE_TYPE_POOL) {
@@ -384,8 +355,8 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
         return INVALID_HANDLE_VALUE;
     }
     hHandle = __apxPoolAllocCore(hPool, APXHANDLE_SZ + dwDataSize, HEAP_ZERO_MEMORY);
-    
-    hHandle->hPool             = hPool;
+
+    hHandle->hPool = hPool;
     if (fnCallback)
         hHandle->fnCallback = fnCallback;
     else
@@ -395,13 +366,11 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
         hHandle->dwFlags |= APXHANDLE_HAS_USERDATA;
         hHandle->dwFlags |= APXHANDLE_TYPE_WINHANDLE;
         hHandle->uData.hWinHandle = lpData;
-    }
-    else if (dwFlags & APXHANDLE_TYPE_LPTR) {
+    } else if (dwFlags & APXHANDLE_TYPE_LPTR) {
         hHandle->dwFlags |= APXHANDLE_HAS_USERDATA;
         hHandle->dwFlags |= APXHANDLE_TYPE_LPTR;
         hHandle->uData.lpPtr = lpData;
-    }
-    else if (dwDataSize && lpData) {
+    } else if (dwDataSize && lpData) {
         hHandle->dwFlags |= APXHANDLE_HAS_USERDATA;
         memcpy(APXHANDLE_DATA(hHandle), lpData, dwDataSize);
         hHandle->dwSize = dwDataSize;
@@ -419,15 +388,15 @@ apxHandleCreate(APXHANDLE hPool, DWORD dwFlags,
 }
 
 BOOL
-apxCloseHandle(APXHANDLE hObject)
-{
-    LPAPXPOOL   lpPool;
+apxCloseHandle(APXHANDLE hObject) {
+    LPAPXPOOL lpPool;
     APXCALLHOOK *lpCall;
-    
+
     if (IS_INVALID_HANDLE(hObject) || hObject->dwType == APXHANDLE_TYPE_INVALID)
         return FALSE;
     /* Call the user callback first */
     (*hObject->fnCallback)(hObject, WM_CLOSE, 0, 0);
+
     /* Now go through the callback chain */
     TAILQ_FOREACH(lpCall, &hObject->lCallbacks, queue) {
         (*lpCall->fnCallback)(hObject, WM_CLOSE, 0, 0);

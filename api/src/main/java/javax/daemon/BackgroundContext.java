@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package java.daemon;
+package javax.daemon;
 
 /**
- * Defines a set of methods that a BackgroundProcess instance can use to communicate with
- * the container.
+ * Defines a set of methods that a BackgroundProcess instance can use to
+ * communicate with the container.
  */
 public interface BackgroundContext {
 
     /**
-     * @return <code>BackgroundController</code> object that can be used to control
-     * the instance that this <code>BackgroundContext</code> is
-     * passed to.
+     * @return <code>BackgroundController</code> object that can be used to
+     * control the instance that this <code>BackgroundContext</code> is passed
+     * to.
      */
     public BackgroundController getController();
 

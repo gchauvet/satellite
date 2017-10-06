@@ -20,25 +20,23 @@
 APX_OSLEVEL _st_apx_oslevel = APX_WINVER_UNK;
 
 /* Apache's APR stripped Os level detection */
-APX_OSLEVEL apxGetOsLevel()
-{
+APX_OSLEVEL apxGetOsLevel() {
     if (_st_apx_oslevel == APX_WINVER_UNK) {
         static OSVERSIONINFO oslev;
-        oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+        oslev.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
         GetVersionEx(&oslev);
 
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
             if (oslev.dwMajorVersion < 4)
                 _st_apx_oslevel = APX_WINVER_UNSUP;
             else if (oslev.dwMajorVersion == 4)
-               _st_apx_oslevel = APX_WINVER_NT_4;
+                _st_apx_oslevel = APX_WINVER_NT_4;
             else if (oslev.dwMajorVersion == 5) {
                 if (oslev.dwMinorVersion == 0)
                     _st_apx_oslevel = APX_WINVER_2000;
                 else
                     _st_apx_oslevel = APX_WINVER_XP;
-            }
-            else
+            } else
                 _st_apx_oslevel = APX_WINVER_XP;
         }
 #ifndef WINNT
@@ -69,16 +67,15 @@ APX_OSLEVEL apxGetOsLevel()
         return _st_apx_oslevel;
 }
 
-LPWSTR __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName)
-{
+LPWSTR __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName) {
     LPWSTR wsRet;
-    DWORD  rc;
+    DWORD rc;
 
     rc = GetEnvironmentVariableW(wsName, NULL, 0);
     if (rc == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
         return NULL;
 
-    if (!(wsRet = apxPoolAlloc(hPool, (rc + 1) * sizeof(WCHAR))))
+    if (!(wsRet = apxPoolAlloc(hPool, (rc + 1) * sizeof (WCHAR))))
         return NULL;
     if (!GetEnvironmentVariableW(wsName, wsRet, rc)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
@@ -88,8 +85,7 @@ LPWSTR __apxGetEnvironmentVariableW(APXHANDLE hPool, LPCWSTR wsName)
     return wsRet;
 }
 
-LPSTR __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName)
-{
+LPSTR __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName) {
     LPSTR szRet;
     DWORD rc;
 
@@ -107,21 +103,20 @@ LPSTR __apxGetEnvironmentVariableA(APXHANDLE hPool, LPCSTR szName)
     return szRet;
 }
 
-BOOL apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd)
-{
+BOOL apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd) {
     LPWSTR wsAdd;
-    DWORD  rc;
-    DWORD  al;
-    
+    DWORD rc;
+    DWORD al;
+
     rc = GetEnvironmentVariableW(L"PATH", NULL, 0);
     if (rc == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
         return FALSE;
     al = lstrlenW(szAdd) + 6;
-    if (!(wsAdd = apxPoolAlloc(hPool, (al + rc + 1) * sizeof(WCHAR))))
+    if (!(wsAdd = apxPoolAlloc(hPool, (al + rc + 1) * sizeof (WCHAR))))
         return FALSE;
-    lstrcpyW(wsAdd, L"PATH=");        
-    lstrcatW(wsAdd, szAdd);        
-    lstrcatW(wsAdd, L";");        
+    lstrcpyW(wsAdd, L"PATH=");
+    lstrcatW(wsAdd, szAdd);
+    lstrcatW(wsAdd, L";");
     if (!GetEnvironmentVariableW(L"PATH", wsAdd + al, rc - al)) {
         apxLogWrite(APXLOG_MARK_SYSERR);
         apxFree(wsAdd);
@@ -133,8 +128,7 @@ BOOL apxAddToPathW(APXHANDLE hPool, LPCWSTR szAdd)
     return TRUE;
 }
 
-LPWSTR AsciiToWide(LPCSTR s, LPWSTR ws)
-{
+LPWSTR AsciiToWide(LPCSTR s, LPWSTR ws) {
     LPWSTR pszSave = ws;
 
     if (!s) {
@@ -142,17 +136,16 @@ LPWSTR AsciiToWide(LPCSTR s, LPWSTR ws)
         return pszSave;
     }
     do {
-        *ws++ = (WCHAR)*s;
+        *ws++ = (WCHAR) * s;
     } while (*s++);
     return pszSave;
 }
 
-LPSTR WideToANSI(LPCWSTR ws)
-{
+LPSTR WideToANSI(LPCWSTR ws) {
 
     LPSTR s;
     int cch = WideCharToMultiByte(CP_ACP, 0, ws, -1, NULL, 0, NULL, NULL);
-    s = (LPSTR)apxAlloc(cch);
+    s = (LPSTR) apxAlloc(cch);
     if (!WideCharToMultiByte(CP_ACP, 0, ws, -1, s, cch, NULL, NULL)) {
         apxFree(s);
         return NULL;
@@ -160,12 +153,11 @@ LPSTR WideToANSI(LPCWSTR ws)
     return s;
 }
 
-LPWSTR ANSIToWide(LPCSTR cs)
-{
+LPWSTR ANSIToWide(LPCSTR cs) {
 
     LPWSTR s;
     int cch = MultiByteToWideChar(CP_ACP, 0, cs, -1, NULL, 0);
-    s = (LPWSTR)apxAlloc(cch * sizeof(WCHAR));
+    s = (LPWSTR) apxAlloc(cch * sizeof (WCHAR));
     if (!MultiByteToWideChar(CP_ACP, 0, cs, -1, s, cch)) {
         apxFree(s);
         return NULL;
@@ -173,41 +165,39 @@ LPWSTR ANSIToWide(LPCSTR cs)
     return s;
 }
 
-LPSTR MzWideToAscii(LPCWSTR ws, LPSTR s)
-{
+LPSTR MzWideToAscii(LPCWSTR ws, LPSTR s) {
     LPSTR pszSave = s;
 
     if (ws) {
         do {
-            *s++ = (CHAR)*ws;
+            *s++ = (CHAR) * ws;
             ws++;
-        } while( *ws || *(ws + 1));
+        } while (*ws || *(ws + 1));
     }
     /* double terminate */
     *s++ = '\0';
-    *s   = '\0';
+    *s = '\0';
     return pszSave;
 }
 
-LPSTR MzWideToANSI(LPCWSTR ws)
-{
+LPSTR MzWideToANSI(LPCWSTR ws) {
     LPSTR str;
     LPSTR s;
     LPCWSTR p = ws;
     int cch = 0;
 
-    for ( ; p && *p; p++) {
+    for (; p && *p; p++) {
         int len = WideCharToMultiByte(CP_ACP, 0, p, -1, NULL, 0, NULL, NULL);
         if (len > 0)
             cch += len;
         while (*p)
             p++;
     }
-    cch ++;
-    str = s = (LPSTR)apxAlloc(cch + 1);
+    cch++;
+    str = s = (LPSTR) apxAlloc(cch + 1);
 
     p = ws;
-    for ( ; p && *p; p++) {
+    for (; p && *p; p++) {
         int len = WideCharToMultiByte(CP_ACP, 0, p, -1, s, cch, NULL, NULL);
         if (len > 0) {
             s = s + len;
@@ -221,22 +211,20 @@ LPSTR MzWideToANSI(LPCWSTR ws)
     return str;
 }
 
-DWORD __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount)
-{
+DWORD __apxGetMultiSzLengthA(LPCSTR lpStr, LPDWORD lpdwCount) {
     LPCSTR p = lpStr;
     if (lpdwCount)
         *lpdwCount = 0;
-    for ( ; p && *p; p++) {
+    for (; p && *p; p++) {
         if (lpdwCount)
             *lpdwCount += 1;
         while (*p)
             p++;
     }
-    return (DWORD)(p - lpStr);
+    return (DWORD) (p - lpStr);
 }
 
-DWORD __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount)
-{
+DWORD __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount) {
     LPCWSTR p;
     if (lpdwCount)
         *lpdwCount = 0;
@@ -246,37 +234,35 @@ DWORD __apxGetMultiSzLengthW(LPCWSTR lpStr, LPDWORD lpdwCount)
         while (*p)
             p++;
     }
-    return (DWORD)((p - lpStr));
+    return (DWORD) ((p - lpStr));
 }
 
 LPWSTR apxMultiSzCombine(APXHANDLE hPool, LPCWSTR lpStrA, LPCWSTR lpStrB,
-                         LPDWORD lpdwLength)
-{
+        LPDWORD lpdwLength) {
     LPWSTR rv;
-    DWORD  la = 0, lb = 0;
+    DWORD la = 0, lb = 0;
     if (!lpStrA && !lpStrB)
-        return NULL;    /* Nothing to do if both are NULL */
+        return NULL; /* Nothing to do if both are NULL */
 
     la = __apxGetMultiSzLengthW(lpStrA, NULL);
     lb = __apxGetMultiSzLengthW(lpStrB, NULL);
 
-    rv = apxPoolCalloc(hPool, (la + lb + 1) * sizeof(WCHAR));
+    rv = apxPoolCalloc(hPool, (la + lb + 1) * sizeof (WCHAR));
     if (la) {
-        AplMoveMemory(rv, lpStrA, la * sizeof(WCHAR));
+        AplMoveMemory(rv, lpStrA, la * sizeof (WCHAR));
     }
     if (lb) {
-        AplMoveMemory(&rv[la], lpStrB, lb * sizeof(WCHAR));
+        AplMoveMemory(&rv[la], lpStrB, lb * sizeof (WCHAR));
     }
     if (lpdwLength)
-        *lpdwLength = (la + lb + 1) * sizeof(WCHAR);
+        *lpdwLength = (la + lb + 1) * sizeof (WCHAR);
     return rv;
 }
 
 BOOL
 apxSetEnvironmentVariable(APXHANDLE hPool, LPCTSTR szName, LPCTSTR szValue,
-                          BOOL bAppend)
-{
-    LPTSTR szNew = (LPTSTR)szValue;
+        BOOL bAppend) {
+    LPTSTR szNew = (LPTSTR) szValue;
 
     if (bAppend) {
         DWORD l = GetEnvironmentVariable(szName, NULL, 0);
@@ -297,13 +283,11 @@ apxSetEnvironmentVariable(APXHANDLE hPool, LPCTSTR szName, LPCTSTR szValue,
     return SetEnvironmentVariable(szName, szNew);
 }
 
-
 /** Convert null separated double null terminated string to LPTSTR array)
  * returns array size
  */
 DWORD
-apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray)
-{
+apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray) {
     DWORD i, n, l;
     char *buff;
     LPWSTR p;
@@ -312,13 +296,13 @@ apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray)
     if (!n || !l)
         return 0;
     if (IS_INVALID_HANDLE(hPool))
-        buff = apxPoolAlloc(hPool, (n + 2) * sizeof(LPWSTR) + (l + 1) * sizeof(WCHAR));
+        buff = apxPoolAlloc(hPool, (n + 2) * sizeof (LPWSTR) + (l + 1) * sizeof (WCHAR));
     else
-        buff = apxAlloc((n + 2) * sizeof(LPWSTR) + (l + 1) * sizeof(WCHAR));
+        buff = apxAlloc((n + 2) * sizeof (LPWSTR) + (l + 1) * sizeof (WCHAR));
 
-    *lppArray = (LPWSTR *)buff;
-    p = (LPWSTR)(buff + (n + 2) * sizeof(LPWSTR));
-    memcpy(p, lpString, (l + 1) * sizeof(WCHAR));
+    *lppArray = (LPWSTR *) buff;
+    p = (LPWSTR) (buff + (n + 2) * sizeof (LPWSTR));
+    memcpy(p, lpString, (l + 1) * sizeof (WCHAR));
 
     for (i = 0; i < n; i++) {
         (*lppArray)[i] = p;
@@ -332,8 +316,7 @@ apxMultiSzToArrayW(APXHANDLE hPool, LPCWSTR lpString, LPWSTR **lppArray)
 }
 
 DWORD
-apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray)
-{
+apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray) {
     DWORD i, n, l;
     char *buff;
     LPSTR p;
@@ -342,13 +325,13 @@ apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray)
     if (!n || !l)
         return 0;
     if (IS_INVALID_HANDLE(hPool))
-        buff = apxPoolAlloc(hPool, (n + 2) * sizeof(LPTSTR) + (l + 1));
+        buff = apxPoolAlloc(hPool, (n + 2) * sizeof (LPTSTR) + (l + 1));
     else
-        buff = apxAlloc((n + 2) * sizeof(LPSTR) + (l + 1) * sizeof(CHAR));
+        buff = apxAlloc((n + 2) * sizeof (LPSTR) + (l + 1) * sizeof (CHAR));
 
-    *lppArray = (LPSTR *)buff;
-    p = (LPSTR)(buff + (n + 2) * sizeof(LPSTR));
-    memcpy(p, lpString, (l + 1) * sizeof(CHAR));
+    *lppArray = (LPSTR *) buff;
+    p = (LPSTR) (buff + (n + 2) * sizeof (LPSTR));
+    memcpy(p, lpString, (l + 1) * sizeof (CHAR));
     for (i = 0; i < n; i++) {
         (*lppArray)[i] = p;
         while (*p)
@@ -370,147 +353,138 @@ apxMultiSzToArrayA(APXHANDLE hPool, LPCSTR lpString, LPSTR **lppArray)
 #define QSTR_DATA(q)    ((char *)(q) + sizeof(APXMULTISZ))
 
 #if 0
-LPAPXMULTISZ apxMultiSzStrdup(LPCTSTR szSrc)
-{
+
+LPAPXMULTISZ apxMultiSzStrdup(LPCTSTR szSrc) {
     LPAPXMULTISZ q;
 
     if (szSrc) {
         DWORD l = lstrlen(szSrc);
-        q = (LPAPXMULTISZ)apxAlloc(QSTR_ALIGN(l));
+        q = (LPAPXMULTISZ) apxAlloc(QSTR_ALIGN(l));
         q->dwAllocated = QSTR_SIZE(l);
-        q->dwInsert    = l + 1;
+        q->dwInsert = l + 1;
         AplMoveMemory(QSTR_DATA(q), szSrc, l);
         RtlZeroMemory(QSTR_DATA(q) + l, q->dwAllocated - l);
-    }
-    else {
-        q = (LPAPXMULTISZ)apxCalloc(QSTR_ALIGN(0));
+    } else {
+        q = (LPAPXMULTISZ) apxCalloc(QSTR_ALIGN(0));
         q->dwAllocated = QSTR_SIZE(0);
     }
 
     return q;
 }
 
-LPTSTR  apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc)
-{
+LPTSTR apxMultiSzStrcat(LPAPXMULTISZ lpmSz, LPCTSTR szSrc) {
     DWORD l = lstrlen(szSrc);
     LPTSTR p;
 
     if (lpmSz->dwInsert + l + 2 > lpmSz->dwAllocated) {
-        if ((lpmSz = (LPAPXMULTISZ )apxRealloc(lpmSz, QSTR_ALIGN(lpmSz->dwInsert + l))) == NULL)
+        if ((lpmSz = (LPAPXMULTISZ) apxRealloc(lpmSz, QSTR_ALIGN(lpmSz->dwInsert + l))) == NULL)
             return NULL;
 
         lpmSz->dwAllocated = QSTR_SIZE(lpmSz->dwInsert + l);
         memset(QSTR_DATA(lpmSz) + lpmSz->dwInsert + l, 0,
-                   lpmSz->dwAllocated - (lpmSz->dwInsert + l));
+                lpmSz->dwAllocated - (lpmSz->dwInsert + l));
     }
-    p = (LPTSTR)QSTR_DATA(lpmSz) + lpmSz->dwInsert;
+    p = (LPTSTR) QSTR_DATA(lpmSz) + lpmSz->dwInsert;
     AplMoveMemory(p, szSrc, l);
 
     lpmSz->dwInsert += (l + 1);
     return p;
 }
 
-DWORD apxMultiSzLen(LPAPXMULTISZ lpmSz)
-{
+DWORD apxMultiSzLen(LPAPXMULTISZ lpmSz) {
     if (lpmSz->dwInsert)
         return lpmSz->dwInsert - 1;
     else
         return 0;
 }
 
-LPCTSTR apxMultiSzGet(LPAPXMULTISZ lpmSz)
-{
-    return (LPCTSTR)QSTR_DATA(lpmSz);
+LPCTSTR apxMultiSzGet(LPAPXMULTISZ lpmSz) {
+    return (LPCTSTR) QSTR_DATA(lpmSz);
 }
 #endif
 
-LPTSTR apxStrCharRemove(LPTSTR szString, TCHAR chSkip)
-{
-  LPTSTR p = szString;
-  LPTSTR q = szString;
-  if (IS_EMPTY_STRING(szString))
+LPTSTR apxStrCharRemove(LPTSTR szString, TCHAR chSkip) {
+    LPTSTR p = szString;
+    LPTSTR q = szString;
+    if (IS_EMPTY_STRING(szString))
+        return szString;
+    while (*p) {
+        if (*p != chSkip)
+            *q++ = *p;
+        ++p;
+    }
+    *q = TEXT('\0');
+
     return szString;
-  while (*p) {
-    if(*p != chSkip)
-      *q++ = *p;
-    ++p;
-  }
-  *q = TEXT('\0');
-
-  return szString;
 }
 
-DWORD apxStrCharRemoveA(LPSTR szString, CHAR chSkip)
-{
-  LPSTR p = szString;
-  LPSTR q = szString;
-  DWORD c = 0;
-  if (IS_EMPTY_STRING(szString))
-    return c;
-  while (*p) {
-    if(*p != chSkip)
-      *q++ = *p;
-    else
-        ++c;
-    ++p;
-  }
-  *q = '\0';
+DWORD apxStrCharRemoveA(LPSTR szString, CHAR chSkip) {
+    LPSTR p = szString;
+    LPSTR q = szString;
+    DWORD c = 0;
+    if (IS_EMPTY_STRING(szString))
+        return c;
+    while (*p) {
+        if (*p != chSkip)
+            *q++ = *p;
+        else
+            ++c;
+        ++p;
+    }
+    *q = '\0';
 
-  return c;
+    return c;
 }
 
-DWORD apxStrCharRemoveW(LPWSTR szString, WCHAR chSkip)
-{
-  LPWSTR p = szString;
-  LPWSTR q = szString;
-  DWORD  c = 0;
-  if (IS_EMPTY_STRING(szString))
-    return c;
-  while (*p) {
-    if(*p != chSkip)
-      *q++ = *p;
-    else
-        ++c;
-    ++p;
-  }
-  *q = L'\0';
+DWORD apxStrCharRemoveW(LPWSTR szString, WCHAR chSkip) {
+    LPWSTR p = szString;
+    LPWSTR q = szString;
+    DWORD c = 0;
+    if (IS_EMPTY_STRING(szString))
+        return c;
+    while (*p) {
+        if (*p != chSkip)
+            *q++ = *p;
+        else
+            ++c;
+        ++p;
+    }
+    *q = L'\0';
 
-  return c;
+    return c;
 }
 
 void
-apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith)
-{
-  LPSTR p = szString;
-  LPSTR q = szString;
-  
-  if (IS_EMPTY_STRING(szString))
-    return;
-  while (*p) {
-    if(*p == chReplace)
-      *q++ = chReplaceWith;
-    else
-      *q++ = *p;
-    ++p;
-  }
-  *q = '\0';
+apxStrCharReplaceA(LPSTR szString, CHAR chReplace, CHAR chReplaceWith) {
+    LPSTR p = szString;
+    LPSTR q = szString;
+
+    if (IS_EMPTY_STRING(szString))
+        return;
+    while (*p) {
+        if (*p == chReplace)
+            *q++ = chReplaceWith;
+        else
+            *q++ = *p;
+        ++p;
+    }
+    *q = '\0';
 }
 
 void
-apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith)
-{
-  LPWSTR p = szString;
-  LPWSTR q = szString;
-  if (IS_EMPTY_STRING(szString))
-    return;
-  while (*p) {
-    if(*p == chReplace)
-      *q++ = chReplaceWith;
-    else
-      *q++ = *p;
-    ++p;
-  }
-  *q = L'\0';
+apxStrCharReplaceW(LPWSTR szString, WCHAR chReplace, WCHAR chReplaceWith) {
+    LPWSTR p = szString;
+    LPWSTR q = szString;
+    if (IS_EMPTY_STRING(szString))
+        return;
+    while (*p) {
+        if (*p == chReplace)
+            *q++ = chReplaceWith;
+        else
+            *q++ = *p;
+        ++p;
+    }
+    *q = L'\0';
 }
 
 static const LPCTSTR _st_hex = TEXT("0123456789abcdef");
@@ -518,16 +492,15 @@ static const LPCTSTR _st_hex = TEXT("0123456789abcdef");
 #define UTOABUFFER_SIZE (sizeof(ULONG_PTR) * 2 + 2)
 #define LO_NIBLE(x)     ((BYTE)((x) & 0x0000000F))
 
-BOOL apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength)
-{
+BOOL apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength) {
     LPTSTR p;
-    DWORD  i;
+    DWORD i;
     *lpBuff = 0;
     if (dwBuffLength < XTOABUFFER_SIZE)
         return FALSE;
     p = lpBuff + XTOABUFFER_SIZE;
     *p-- = 0;
-    for (i = 0; i < sizeof(ULONG) * 2; i++) {
+    for (i = 0; i < sizeof (ULONG) * 2; i++) {
         *p-- = _st_hex[LO_NIBLE(n)];
         n = n >> 4;
     }
@@ -536,16 +509,15 @@ BOOL apxUltohex(ULONG n, LPTSTR lpBuff, DWORD dwBuffLength)
     return TRUE;
 }
 
-BOOL apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength)
-{
+BOOL apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength) {
     LPTSTR p;
-    DWORD  i;
+    DWORD i;
     *lpBuff = 0;
     if (dwBuffLength < UTOABUFFER_SIZE)
         return FALSE;
     p = lpBuff + UTOABUFFER_SIZE;
     *p-- = 0;
-    for (i = 0; i < sizeof(ULONG_PTR) * 2; i++) {
+    for (i = 0; i < sizeof (ULONG_PTR) * 2; i++) {
         *p-- = _st_hex[LO_NIBLE(n)];
         n = n >> 4;
     }
@@ -554,8 +526,7 @@ BOOL apxUptohex(ULONG_PTR n, LPTSTR lpBuff, DWORD dwBuffLength)
     return TRUE;
 }
 
-ULONG apxStrToul(LPCTSTR szNum)
-{
+ULONG apxStrToul(LPCTSTR szNum) {
     ULONG rv = 0;
     DWORD sh = 0;
     LPCTSTR p = szNum;
@@ -571,25 +542,41 @@ ULONG apxStrToul(LPCTSTR szNum)
     while (*p != TEXT('x')) {
         ULONG v = 0;
         switch (*p--) {
-            case TEXT('0'): v = 0UL; break;
-            case TEXT('1'): v = 1UL; break;
-            case TEXT('2'): v = 2UL; break;
-            case TEXT('3'): v = 3UL; break;
-            case TEXT('4'): v = 4UL; break;
-            case TEXT('5'): v = 5UL; break;
-            case TEXT('6'): v = 6UL; break;
-            case TEXT('7'): v = 7UL; break;
-            case TEXT('8'): v = 8UL; break;
-            case TEXT('9'): v = 9UL; break;
-            case TEXT('a'): case TEXT('A'): v = 10UL; break;
-            case TEXT('b'): case TEXT('B'): v = 11UL; break;
-            case TEXT('c'): case TEXT('C'): v = 12UL; break;
-            case TEXT('d'): case TEXT('D'): v = 13UL; break;
-            case TEXT('e'): case TEXT('E'): v = 14UL; break;
-            case TEXT('f'): case TEXT('F'): v = 15UL; break;
+            case TEXT('0'): v = 0UL;
+                break;
+            case TEXT('1'): v = 1UL;
+                break;
+            case TEXT('2'): v = 2UL;
+                break;
+            case TEXT('3'): v = 3UL;
+                break;
+            case TEXT('4'): v = 4UL;
+                break;
+            case TEXT('5'): v = 5UL;
+                break;
+            case TEXT('6'): v = 6UL;
+                break;
+            case TEXT('7'): v = 7UL;
+                break;
+            case TEXT('8'): v = 8UL;
+                break;
+            case TEXT('9'): v = 9UL;
+                break;
+            case TEXT('a'): case TEXT('A'): v = 10UL;
+                break;
+            case TEXT('b'): case TEXT('B'): v = 11UL;
+                break;
+            case TEXT('c'): case TEXT('C'): v = 12UL;
+                break;
+            case TEXT('d'): case TEXT('D'): v = 13UL;
+                break;
+            case TEXT('e'): case TEXT('E'): v = 14UL;
+                break;
+            case TEXT('f'): case TEXT('F'): v = 15UL;
+                break;
             default:
                 return 0;
-            break;
+                break;
         }
         rv |= rv + (v << sh);
         sh += 4;
@@ -597,8 +584,7 @@ ULONG apxStrToul(LPCTSTR szNum)
     return rv;
 }
 
-ULONG apxStrToulW(LPCWSTR szNum)
-{
+ULONG apxStrToulW(LPCWSTR szNum) {
     ULONG rv = 0;
     DWORD sh = 0;
     LPCWSTR p = szNum;
@@ -614,25 +600,41 @@ ULONG apxStrToulW(LPCWSTR szNum)
     while (*p != L'x') {
         ULONG v = 0;
         switch (*p--) {
-            case L'0': v = 0UL; break;
-            case L'1': v = 1UL; break;
-            case L'2': v = 2UL; break;
-            case L'3': v = 3UL; break;
-            case L'4': v = 4UL; break;
-            case L'5': v = 5UL; break;
-            case L'6': v = 6UL; break;
-            case L'7': v = 7UL; break;
-            case L'8': v = 8UL; break;
-            case L'9': v = 9UL; break;
-            case L'a': case L'A': v = 10UL; break;
-            case L'b': case L'B': v = 11UL; break;
-            case L'c': case L'C': v = 12UL; break;
-            case L'd': case L'D': v = 13UL; break;
-            case L'e': case L'E': v = 14UL; break;
-            case L'f': case L'F': v = 15UL; break;
+            case L'0': v = 0UL;
+                break;
+            case L'1': v = 1UL;
+                break;
+            case L'2': v = 2UL;
+                break;
+            case L'3': v = 3UL;
+                break;
+            case L'4': v = 4UL;
+                break;
+            case L'5': v = 5UL;
+                break;
+            case L'6': v = 6UL;
+                break;
+            case L'7': v = 7UL;
+                break;
+            case L'8': v = 8UL;
+                break;
+            case L'9': v = 9UL;
+                break;
+            case L'a': case L'A': v = 10UL;
+                break;
+            case L'b': case L'B': v = 11UL;
+                break;
+            case L'c': case L'C': v = 12UL;
+                break;
+            case L'd': case L'D': v = 13UL;
+                break;
+            case L'e': case L'E': v = 14UL;
+                break;
+            case L'f': case L'F': v = 15UL;
+                break;
             default:
                 return 0;
-            break;
+                break;
         }
         rv |= rv + (v << sh);
         sh += 4;
@@ -640,11 +642,10 @@ ULONG apxStrToulW(LPCWSTR szNum)
     return rv;
 }
 
-ULONG apxAtoulW(LPCWSTR szNum)
-{
+ULONG apxAtoulW(LPCWSTR szNum) {
     ULONG rv = 0;
     DWORD sh = 1;
-    int   s  = 1;
+    int s = 1;
     LPCWSTR p = szNum;
 
     /* go to the last digit */
@@ -660,19 +661,29 @@ ULONG apxAtoulW(LPCWSTR szNum)
     while (p >= szNum) {
         ULONG v = 0;
         switch (*p--) {
-            case L'0': v = 0UL; break;
-            case L'1': v = 1UL; break;
-            case L'2': v = 2UL; break;
-            case L'3': v = 3UL; break;
-            case L'4': v = 4UL; break;
-            case L'5': v = 5UL; break;
-            case L'6': v = 6UL; break;
-            case L'7': v = 7UL; break;
-            case L'8': v = 8UL; break;
-            case L'9': v = 9UL; break;
+            case L'0': v = 0UL;
+                break;
+            case L'1': v = 1UL;
+                break;
+            case L'2': v = 2UL;
+                break;
+            case L'3': v = 3UL;
+                break;
+            case L'4': v = 4UL;
+                break;
+            case L'5': v = 5UL;
+                break;
+            case L'6': v = 6UL;
+                break;
+            case L'7': v = 7UL;
+                break;
+            case L'8': v = 8UL;
+                break;
+            case L'9': v = 9UL;
+                break;
             default:
                 return rv * s;
-            break;
+                break;
         }
         rv = rv + (v * sh);
         sh = sh * 10;
@@ -684,20 +695,19 @@ ULONG apxAtoulW(LPCWSTR szNum)
  *
  */
 BOOL
-apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff, DWORD dwBuffLength)
-{
+apxMakeResourceName(LPCTSTR szPrefix, LPTSTR lpBuff, DWORD dwBuffLength) {
     DWORD pl = lstrlen(szPrefix);
     if (dwBuffLength < (pl + 11))
         return FALSE;
     lstrcpy(lpBuff, szPrefix);
     return apxUltohex(GetCurrentProcessId(), lpBuff + pl, dwBuffLength - pl);
 }
+
 /** apxStrMatchA ANSI string pattern matching
  * Match = 0, NoMatch = 1, Abort = -1
  * Based loosely on sections of wildmat.c by Rich Salz
  */
-INT apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase)
-{
+INT apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase) {
     int x, y;
 
     for (x = 0, y = 0; szPattern[y]; ++y, ++x) {
@@ -710,18 +720,16 @@ INT apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase)
             while (szString[x]) {
                 INT rc;
                 if ((rc = apxStrMatchA(&szString[x++], &szPattern[y],
-                                       bIgnoreCase)) != 1)
+                        bIgnoreCase)) != 1)
                     return rc;
             }
             return -1;
-        }
-        else if (szPattern[y] != '?') {
+        } else if (szPattern[y] != '?') {
             if (bIgnoreCase) {
-                if (CharLowerA((LPSTR)((SIZE_T)szString[x])) !=
-                    CharLowerA((LPSTR)((SIZE_T)szPattern[y])))
+                if (CharLowerA((LPSTR) ((SIZE_T) szString[x])) !=
+                        CharLowerA((LPSTR) ((SIZE_T) szPattern[y])))
                     return 1;
-            }
-            else {
+            } else {
                 if (szString[x] != szPattern[y])
                     return 1;
             }
@@ -730,8 +738,7 @@ INT apxStrMatchA(LPCSTR szString, LPCSTR szPattern, BOOL bIgnoreCase)
     return (szString[x] != '\0');
 }
 
-INT apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase)
-{
+INT apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase) {
     int x, y;
 
     for (x = 0, y = 0; szPattern[y]; ++y, ++x) {
@@ -744,18 +751,16 @@ INT apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase)
             while (szString[x]) {
                 INT rc;
                 if ((rc = apxStrMatchW(&szString[x++], &szPattern[y],
-                                       bIgnoreCase)) != 1)
+                        bIgnoreCase)) != 1)
                     return rc;
             }
             return -1;
-        }
-        else if (szPattern[y] != L'?') {
+        } else if (szPattern[y] != L'?') {
             if (bIgnoreCase) {
-                if (CharLowerW((LPWSTR)((SIZE_T)szString[x])) !=
-                    CharLowerW((LPWSTR)((SIZE_T)szPattern[y])))
+                if (CharLowerW((LPWSTR) ((SIZE_T) szString[x])) !=
+                        CharLowerW((LPWSTR) ((SIZE_T) szPattern[y])))
                     return 1;
-            }
-            else {
+            } else {
                 if (szString[x] != szPattern[y])
                     return 1;
             }
@@ -765,12 +770,11 @@ INT apxStrMatchW(LPCWSTR szString, LPCWSTR szPattern, BOOL bIgnoreCase)
 }
 
 INT apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
-                      WCHAR chSeparator, BOOL bIgnoreCase)
-{
+        WCHAR chSeparator, BOOL bIgnoreCase) {
     WCHAR szM[SIZ_HUGLEN];
     DWORD i = 0;
     LPCWSTR p = szPattern;
-    INT   m = -1;
+    INT m = -1;
 
     if (chSeparator == 0)
         return apxStrMatchW(szString, szPattern, bIgnoreCase);
@@ -782,8 +786,7 @@ INT apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
             p++;
             i = 0;
             szM[0] = L'\0';
-        }
-        else {
+        } else {
             if (i < SIZ_HUGMAX)
                 szM[i++] = *p++;
             else
@@ -797,9 +800,8 @@ INT apxMultiStrMatchW(LPCWSTR szString, LPCWSTR szPattern,
         return m;
 }
 
-LPSTR apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs)
-{
-    DWORD  i, l = 0;
+LPSTR apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs) {
+    DWORD i, l = 0;
     LPSTR lpSz, p;
     if (!nArgs)
         return NULL;
@@ -807,7 +809,7 @@ LPSTR apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs)
         l += lstrlenA(lpArgs[i]);
     l += (nArgs + 2);
 
-    p = lpSz = (LPSTR)apxPoolAlloc(hPool, l);
+    p = lpSz = (LPSTR) apxPoolAlloc(hPool, l);
     for (i = 0; i < nArgs; i++) {
         lstrcpyA(p, lpArgs[i]);
         p += lstrlenA(lpArgs[i]);
@@ -818,8 +820,7 @@ LPSTR apxArrayToMultiSzA(APXHANDLE hPool, DWORD nArgs, LPCSTR *lpArgs)
     return lpSz;
 }
 
-void apxStrQuoteInplaceW(LPWSTR szString)
-{
+void apxStrQuoteInplaceW(LPWSTR szString) {
     LPWSTR p = szString;
     BOOL needsQuote = FALSE;
     while (*p) {
@@ -830,15 +831,14 @@ void apxStrQuoteInplaceW(LPWSTR szString)
     }
     if (needsQuote) {
         DWORD l = lstrlenW(szString);
-        AplMoveMemory(&szString[1], szString, l  * sizeof(WCHAR));
-        szString[0]   = L'"';
+        AplMoveMemory(&szString[1], szString, l * sizeof (WCHAR));
+        szString[0] = L'"';
         szString[++l] = L'"';
         szString[++l] = L'\0';
     }
 }
 
-DWORD apxStrUnQuoteInplaceA(LPSTR szString)
-{
+DWORD apxStrUnQuoteInplaceA(LPSTR szString) {
     LPSTR p = szString;
     BOOL needsQuote = FALSE;
     BOOL inQuote = FALSE;
@@ -848,8 +848,7 @@ DWORD apxStrUnQuoteInplaceA(LPSTR szString)
                 break;
             else
                 inQuote = TRUE;
-        }
-        else if (*p == ' ') {
+        } else if (*p == ' ') {
             if (inQuote) {
                 needsQuote = TRUE;
                 break;
@@ -863,8 +862,7 @@ DWORD apxStrUnQuoteInplaceA(LPSTR szString)
         return 0;
 }
 
-DWORD apxStrUnQuoteInplaceW(LPWSTR szString)
-{
+DWORD apxStrUnQuoteInplaceW(LPWSTR szString) {
     LPWSTR p = szString;
     BOOL needsQuote = FALSE;
     BOOL inQuote = FALSE;
@@ -874,8 +872,7 @@ DWORD apxStrUnQuoteInplaceW(LPWSTR szString)
                 break;
             else
                 inQuote = TRUE;
-        }
-        else if (*p == L' ') {
+        } else if (*p == L' ') {
             if (inQuote) {
                 needsQuote = TRUE;
                 break;
@@ -890,14 +887,13 @@ DWORD apxStrUnQuoteInplaceW(LPWSTR szString)
 }
 
 LPWSTR
-apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr)
-{
+apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr) {
     DWORD l, c;
     LPWSTR rv, b;
     LPCWSTR p = szStr;
 
     l = __apxGetMultiSzLengthW(szStr, &c);
-    b = rv = apxPoolCalloc(hPool, (l + c + 2) * sizeof(WCHAR));
+    b = rv = apxPoolCalloc(hPool, (l + c + 2) * sizeof (WCHAR));
 
     while (c > 0) {
         if (*p)
@@ -913,31 +909,28 @@ apxMszToCRLFW(APXHANDLE hPool, LPCWSTR szStr)
 }
 
 LPWSTR
-apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes)
-{
+apxCRLFToMszW(APXHANDLE hPool, LPCWSTR szStr, LPDWORD lpdwBytes) {
     DWORD l, c, n = 0;
     LPWSTR rv, b;
 
     l = lstrlenW(szStr);
-    b = rv = apxPoolCalloc(hPool, (l + 2) * sizeof(WCHAR));
+    b = rv = apxPoolCalloc(hPool, (l + 2) * sizeof (WCHAR));
     for (c = 0; c < l; c++) {
         if (szStr[c] == L'\r') {
             *b++ = '\0';
             n++;
-        }
-        else if (szStr[c] != L'\n') {
+        } else if (szStr[c] != L'\n') {
             *b++ = szStr[c];
             n++;
         }
     }
     if (lpdwBytes)
-        *lpdwBytes = (n + 2) * sizeof(WCHAR);
+        *lpdwBytes = (n + 2) * sizeof (WCHAR);
     return rv;
 }
 
 LPSTR
-apxExpandStrA(APXHANDLE hPool, LPCSTR szString)
-{
+apxExpandStrA(APXHANDLE hPool, LPCSTR szString) {
     LPCSTR p = szString;
     while (*p) {
         if (*p == '%') {
@@ -959,15 +952,13 @@ apxExpandStrA(APXHANDLE hPool, LPCSTR szString)
                 apxFree(rv);
                 return NULL;
             }
-        }
-        else
+        } else
             return NULL;
     }
 }
 
 LPWSTR
-apxExpandStrW(APXHANDLE hPool, LPCWSTR szString)
-{
+apxExpandStrW(APXHANDLE hPool, LPCWSTR szString) {
     LPCWSTR p = szString;
     while (*p) {
         if (*p == L'%') {
@@ -981,7 +972,7 @@ apxExpandStrW(APXHANDLE hPool, LPCWSTR szString)
     else {
         DWORD l = ExpandEnvironmentStringsW(szString, NULL, 0);
         if (l) {
-            LPWSTR rv = apxPoolAlloc(hPool, l * sizeof(WCHAR));
+            LPWSTR rv = apxPoolAlloc(hPool, l * sizeof (WCHAR));
             l = ExpandEnvironmentStringsW(szString, rv, l);
             if (l)
                 return rv;
@@ -989,8 +980,7 @@ apxExpandStrW(APXHANDLE hPool, LPCWSTR szString)
                 apxFree(rv);
                 return NULL;
             }
-        }
-        else
+        } else
             return NULL;
     }
 }
@@ -998,13 +988,12 @@ apxExpandStrW(APXHANDLE hPool, LPCWSTR szString)
 /* To share the semaphores with other processes, we need a NULL ACL
  * Code from MS KB Q106387
  */
-PSECURITY_ATTRIBUTES GetNullACL()
-{
+PSECURITY_ATTRIBUTES GetNullACL() {
     PSECURITY_DESCRIPTOR pSD;
     PSECURITY_ATTRIBUTES sa;
 
-    sa  = (PSECURITY_ATTRIBUTES) LocalAlloc(LPTR, sizeof(SECURITY_ATTRIBUTES));
-    sa->nLength = sizeof(sizeof(SECURITY_ATTRIBUTES));
+    sa = (PSECURITY_ATTRIBUTES) LocalAlloc(LPTR, sizeof (SECURITY_ATTRIBUTES));
+    sa->nLength = sizeof (sizeof (SECURITY_ATTRIBUTES));
 
     pSD = (PSECURITY_DESCRIPTOR) LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
     sa->lpSecurityDescriptor = pSD;
@@ -1014,15 +1003,15 @@ PSECURITY_ATTRIBUTES GetNullACL()
     }
     SetLastError(0);
     if (!InitializeSecurityDescriptor(pSD, SECURITY_DESCRIPTOR_REVISION)
-    || GetLastError()) {
-        LocalFree( pSD );
-        LocalFree( sa );
+            || GetLastError()) {
+        LocalFree(pSD);
+        LocalFree(sa);
         return NULL;
     }
     if (!SetSecurityDescriptorDacl(pSD, TRUE, (PACL) NULL, FALSE)
-    || GetLastError()) {
-        LocalFree( pSD );
-        LocalFree( sa );
+            || GetLastError()) {
+        LocalFree(pSD);
+        LocalFree(sa);
         return NULL;
     }
 
@@ -1030,11 +1019,9 @@ PSECURITY_ATTRIBUTES GetNullACL()
     return sa;
 }
 
-
-void CleanNullACL(void *sa)
-{
+void CleanNullACL(void *sa) {
     if (sa) {
-        LocalFree(((PSECURITY_ATTRIBUTES)sa)->lpSecurityDescriptor);
+        LocalFree(((PSECURITY_ATTRIBUTES) sa)->lpSecurityDescriptor);
         LocalFree(sa);
     }
 }
