@@ -107,7 +107,7 @@
             <id>build-process</id>
             <activation>
                 <property>
-                    <name>program.arch</name>
+                    <name>javad.arch</name>
                 </property>
             </activation>
             <modules>
@@ -122,7 +122,7 @@
     <dependencies>
         <dependency>
             <groupId>javax.daemon</groupId>
-            <artifactId>program-impl</artifactId>
+            <artifactId>jsr-96-impl</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

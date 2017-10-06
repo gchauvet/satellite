@@ -27,7 +27,7 @@
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>javad</artifactId>
+    <artifactId>deimos</artifactId>
     <packaging>pom</packaging>
     <name>JSR :: Daemon :: Frontends :: Deimos</name>
     <description>JSR-96 Unix-like native frontend program</description>
@@ -50,7 +50,7 @@
                                 <argument>-G</argument>
                                 <argument>${cmake.generator}</argument>
                                 <argument>-DCMAKE_C_FLAGS=${compiler.flags}</argument>
-                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${program.arch}.cmake</argument>
+                                <argument>-DCMAKE_TOOLCHAIN_FILE=${cmake.toolchain.path}/${javad.arch}.cmake</argument>
                                 <argument>-DCMAKE_INSTALL_PREFIX:PATH=${basedir}/..</argument>
                                 <argument>-DCMAKE_BUILD_TYPE=MINSIZEREL</argument>
                                 <argument>-DPRG_VERSION_MAJOR=${parsedVersion.majorVersion}</argument>
@@ -86,7 +86,7 @@
             <id>x86</id>
             <activation>
                 <property>
-                    <name>program.arch</name>
+                    <name>javad.arch</name>
                     <value>x86</value>
                 </property>
             </activation>
@@ -98,7 +98,7 @@
             <id>x86_64</id>
             <activation>
                 <property>
-                    <name>program.arch</name>
+                    <name>javad.arch</name>
                     <value>x86_64</value>
                 </property>
             </activation>
