@@ -36,7 +36,7 @@ import javax.daemon.*;
 public final class FooBackgroundProcess implements BackgroundProcess {
 
     @Override
-    public void initialize(BackgroundContext dc) throws BackgroundException, Exception {
+    public void initialize(BackgroundContext dc) throws BackgroundProcessException, Exception {
         System.err.println("Initialized");
     }
 

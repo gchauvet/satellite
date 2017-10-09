@@ -32,7 +32,7 @@ public final class FooDaemon implements BackgroundProcess {
     private NanoHTTPD instance;
 
     @Override
-    public void initialize(BackgroundContext dc) throws BackgroundException, Exception {
+    public void initialize(BackgroundContext dc) throws BackgroundProcessException, Exception {
         instance = new NanoHTTPD(8085) {
             @Override
             public Response serve(IHTTPSession session) {

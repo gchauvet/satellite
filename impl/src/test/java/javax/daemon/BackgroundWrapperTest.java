@@ -111,9 +111,9 @@ public final class BackgroundWrapperTest {
     public static final class FakeBackgroundProcessImpl implements BackgroundProcess {
 
         @Override
-        public void initialize(BackgroundContext context) throws BackgroundException, Exception {
+        public void initialize(BackgroundContext context) throws BackgroundProcessException, Exception {
             if (raiseException) {
-                throw new BackgroundException("Test", new IllegalArgumentException("tester"));
+                throw new BackgroundProcessException("Test", new IllegalArgumentException("tester"));
             }
         }
 

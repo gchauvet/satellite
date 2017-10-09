@@ -55,12 +55,12 @@ public interface BackgroundProcess {
      *
      * @param context A <code>BackgroundContext</code> object used to
      * communicate with the container.
-     * @throws BackgroundException An exception that prevented initialization
+     * @throws BackgroundProcessException An exception that prevented initialization
      * where you want to display a nice message to the user, rather than a stack
      * trace.
      * @throws Exception Any exception preventing a successful initialization.
      */
-    public void initialize(BackgroundContext context) throws BackgroundException, Exception;
+    public void initialize(BackgroundContext context) throws BackgroundProcessException, Exception;
 
     /**
      * Starts the operation of this <code>BackgroundProcess</code> instance.

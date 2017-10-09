@@ -28,18 +28,18 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(BackgroundException.class)
+@PrepareForTest(BackgroundProcessException.class)
 public final class BackgroundExceptionTest {
 
     @Test
     public void createSimpleException() {
-        final BackgroundException exception = new BackgroundException("test");
+        final BackgroundProcessException exception = new BackgroundProcessException("test");
         assertEquals("test", exception.getMessageWithCause());
     }
 
     @Test
     public void getMessageWithCause() {
-        final BackgroundException exception = new BackgroundException("test", new IllegalArgumentException("A test"));
+        final BackgroundProcessException exception = new BackgroundProcessException("test", new IllegalArgumentException("A test"));
         assertTrue(exception.getMessageWithCause().startsWith("test: java.lang.IllegalArgumentException: A test"));
     }
 

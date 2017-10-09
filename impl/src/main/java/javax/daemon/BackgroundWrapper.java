@@ -110,8 +110,8 @@ final class BackgroundWrapper {
         } catch (InvocationTargetException e) {
             final Throwable thrown = e.getTargetException();
             /* BackgroundExceptions can fail with a nicer message */
-            if (thrown instanceof BackgroundException) {
-                failed(((BackgroundException) thrown).getMessageWithCause());
+            if (thrown instanceof BackgroundProcessException) {
+                failed(((BackgroundProcessException) thrown).getMessageWithCause());
             } else {
                 controller.fail(e);
             }
@@ -232,7 +232,7 @@ final class BackgroundWrapper {
 
         public synchronized void fail(String message, Throwable exception) {
             this.setAvailable(false);
-            BackgroundWrapper.this.failed(new BackgroundException(message, exception).getMessageWithCause());
+            BackgroundWrapper.this.failed(new BackgroundProcessException(message, exception).getMessageWithCause());
         }
 
     }

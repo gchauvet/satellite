@@ -22,13 +22,13 @@ import java.io.*;
  * reason. Using this exception will cause the exception's message to come out
  * on stdout, rather than a dirty great stacktrace.
  */
-public final class BackgroundException extends Exception {
+public final class BackgroundProcessException extends Exception {
 
-    public BackgroundException(String message) {
+    public BackgroundProcessException(String message) {
         super(message);
     }
 
-    public BackgroundException(String message, Throwable cause) {
+    public BackgroundProcessException(String message, Throwable cause) {
         super(message, cause);
     }
 

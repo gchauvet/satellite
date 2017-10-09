@@ -23,8 +23,7 @@ public interface BackgroundController {
     /**
      * Shuts down the background process.
      */
-    public void shutdown()
-            throws IllegalStateException;
+    public void shutdown() throws IllegalStateException;
 
     /**
      * Reloads the background process
@@ -38,16 +37,20 @@ public interface BackgroundController {
 
     /**
      * Shuts down the background process and logs failed message.
+     * @param message The message
      */
     public void fail(String message) throws IllegalStateException;
 
     /**
      * Shuts down the background process and logs failed message.
+     * @param exception The exception
      */
     public void fail(Throwable exception) throws IllegalStateException;
 
     /**
      * Shuts down the background process and logs failed message.
+     * @param message The message
+     * @param exception exception
      */
     public void fail(String message, Throwable exception) throws IllegalStateException;
 
