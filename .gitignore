@@ -1,5 +1,8 @@
 /**/nb-configuration.xml
-/**/target/
 **/nbactions.xml
 /settings.xml
 /frontends/bin/
+/**/build/
+/**/.gradle/
+/**/gradle/
+/**/.nb-gradle/

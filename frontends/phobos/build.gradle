@@ -1,0 +1,36 @@
+description = 'Satellite :: Frontends :: Phobos'
+apply plugin: 'windows-resources'
+
+model {
+  
+    platforms {
+        x86 {
+            architecture "x86"
+            operatingSystem "windows"
+        }
+        x64 {
+            architecture "x86_64"
+            operatingSystem "windows"
+        }
+    }
+    
+    components {
+        phobos(NativeExecutableSpec) {
+            binaries {
+                all {
+                    cCompiler.define "_UNICODE"
+                    cCompiler.define "UNICODE"
+                    
+                    cCompiler.define "PRG_VERSION_MAJOR=${rootProject.major}"
+                    cCompiler.define "PRG_VERSION_MINOR=${rootProject.minor}"
+                    cCompiler.define "PRG_VERSION_PATCH=${rootProject.patch}"
+            
+                    rcCompiler.define "PRG_VERSION_MAJOR=${rootProject.ext.major}"
+                    rcCompiler.define "PRG_VERSION_MINOR=${rootProject.ext.minor}"
+                    rcCompiler.define "PRG_VERSION_PATCH=${rootProject.ext.patch}"
+                }
+            }
+        }
+    }
+}
+

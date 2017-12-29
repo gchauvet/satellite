@@ -1,0 +1,23 @@
+description = 'Satellite :: Frontends'
+
+subprojects {
+    apply plugin: 'c'
+    
+    model {
+        toolChains {
+            clang(Clang) {
+                eachPlatform {
+                    cCompiler.withArguments { args ->
+                        args << "-I$System.env.JAVA_HOME/include"
+                        args << "-I$System.env.JAVA_HOME/include/win32"
+                        args << "-I$System.env.JAVA_HOME/include/linux"
+                    }
+                }
+            }
+        }
+            
+        buildTypes {
+            release
+        }
+    }
+}

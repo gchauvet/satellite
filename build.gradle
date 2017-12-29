@@ -1,0 +1,47 @@
+project.ext {
+    major = 1
+    minor = 0
+    patch = 1
+}
+
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies { classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2" }
+}
+
+allprojects  {
+    group = 'io.zatarox.satellite'
+    version = "${major}.${minor}.${patch}-SNAPSHOT"
+    
+    repositories {
+        mavenLocal()
+    
+        maven { url "http://repo.maven.apache.org/maven2" }
+        maven { url "https://oss.sonatype.org/content/repositories/staging" }
+    }
+}
+
+configure(subprojects.findAll {it.name != 'frontends'}) {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'com.github.kt3k.coveralls'
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+    tasks.withType(JavaCompile) {
+  	options.encoding = 'UTF-8'
+    }
+
+    task packageSources(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+    
+    artifacts.archives packageSources
+
+    dependencies {
+        testCompile group: 'org.powermock', name: 'powermock-api-mockito', version:'1.6.6'
+        testCompile group: 'org.powermock', name: 'powermock-module-junit4', version:'1.6.6'
+    }
+}

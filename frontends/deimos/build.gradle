@@ -1,0 +1,27 @@
+description = 'Satellite :: Frontends :: Deimos'
+
+model {
+    platforms {
+        x86 {
+            architecture "x86"
+            operatingSystem "linux"
+        }
+        x64 {
+            architecture "x86_64"
+            operatingSystem "linux"
+        }
+    }
+    
+    components {
+        deimos(NativeExecutableSpec) {
+            binaries {
+                all {
+                    cCompiler.define "_UNICODE"
+                    cCompiler.define "UNICODE"
+                    cCompiler.define "SO_DLFCN"
+                }
+            }
+        }
+    }
+    
+}

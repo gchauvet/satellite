@@ -1,0 +1,6 @@
+description = 'Satellite :: Implementation'
+dependencies {
+  compile project(':api')
+    testCompile group: 'org.apache.commons', name: 'commons-compress', version:'1.13'
+    testCompile group: 'commons-io', name: 'commons-io', version:'2.5'
+}

@@ -24,6 +24,7 @@ package io.zatarox.satellite.sample;
 import fi.iki.elonen.NanoHTTPD;
 import static fi.iki.elonen.NanoHTTPD.*;
 import io.zatarox.satellite.*;
+import java.util.List;
 import java.util.Map;
 
 public final class FooDaemon implements BackgroundProcess {
@@ -36,11 +37,11 @@ public final class FooDaemon implements BackgroundProcess {
             @Override
             public Response serve(IHTTPSession session) {
                 String msg = "<html><body><h1>Hello server</h1>\n";
-                final Map<String, String> parms = session.getParms();
+                final Map<String, List<String>> parms = session.getParameters();
                 if (parms.get("username") == null) {
                     msg += "<form action='?' method='get'>\n  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n";
                 } else {
-                    msg += "<p>Hello, " + parms.get("username") + "!</p>";
+                    msg += "<p>Hello, " + parms.get("username").get(0) + "!</p>";
                 }
                 return newFixedLengthResponse(msg + "</body></html>\n");
             }

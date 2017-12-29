@@ -13,12 +13,10 @@ Commonly known as 'daemon' processes in Unix terminology, on Windows they are ca
 ## Requirements
 Compilation process is performed under Linux. Cross-compilation fanboy :-)
 
-* Maven 3.x
-* CMake 3.x
+* Gradle 4.4.x
 * Java Development Kit >= 7
-* gcc 5.x
-* gcc-mingw-w64-x86-64 (gcc 5.x)
-* gcc-mingw-w64 (gcc 5.x)
+* Clang 5.x
+* mingw-w64-x86-64-dev (gcc 5.x)
 * libc6-dev-i386
 
 ## Satellite in action
@@ -28,7 +26,7 @@ Writing an independent OS background process become pretty simple. The first ste
 </p>
 
 ### Dependency
-In your Maven POM project, add the Satellite API dependency (check latest version):
+In your project, add the Satellite API dependency (Maven POM):
 
 ```xml
 <dependency>
@@ -88,7 +86,7 @@ Finally, add a manifest entry in your main jar (and dependency jars OFC).
 ```
 
 ### Sample
-To a look to the sample project submodule to see how to get binary frontends from Maven
+To a look to the sample project submodule to see how to get binary frontends from Gradle
 
 ## Inspiration
 This project is based on Apache Commons Daemon.
