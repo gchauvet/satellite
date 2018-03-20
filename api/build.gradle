@@ -1,1 +1,16 @@
 description = 'Satellite :: API'
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'com.github.kt3k.coveralls'
+
+task packageSources(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts.archives packageSources
+
+configurations {
+    jar.baseName 'satellite-api'
+}

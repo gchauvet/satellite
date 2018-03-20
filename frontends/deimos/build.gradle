@@ -23,5 +23,8 @@ model {
             }
         }
     }
-    
+}
+
+dependencies {
+    //compile project(":impl")
 }
