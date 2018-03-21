@@ -17,6 +17,7 @@ configurations {
 
 repositories {
      mavenLocal()
+     maven { url "http://repo.maven.apache.org/maven2" }
 }
 dependencies {
     compile group: 'org.nanohttpd', name: 'nanohttpd', version:'2.3.1'

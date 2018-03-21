@@ -4,5 +4,4 @@
 /frontends/bin/
 /**/build/
 /**/.gradle/
-/**/gradle/
 /**/.nb-gradle/
