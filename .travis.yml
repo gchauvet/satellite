@@ -3,9 +3,8 @@ language: java
 addons:
   apt:
     packages:
-      - clang
       - mingw-w64-x86-64-dev
       - libc6-dev-i386
 
 script:
-    - gradlew test jacocoTestReport coveralls
+    - ./gradlew test jacocoTestReport coveralls
